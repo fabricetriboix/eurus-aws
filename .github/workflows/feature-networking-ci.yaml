@@ -1,4 +1,4 @@
-name: OpenTofu CI
+name: OpenTofu CI - features/networking
 
 on:
   pull_request:
@@ -10,12 +10,17 @@ on:
     - main
     paths:
     - features/networking/**
+    - .github/workflows/feature-networking-ci.yaml
+    - .github/actions/tf-ci/**
 
 jobs:
   ci:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout the code
+      uses: actions/checkout@v5
+
     - name: Run CI
       uses: ./github/actions/tf-ci
       with:

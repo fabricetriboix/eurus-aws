@@ -13,9 +13,6 @@ inputs:
 runs:
   using: composite
   steps:
-  - name: Checkout the code
-    uses: actions/checkout@v5
-
   - name: Install OpenTofu
     uses: opentofu/setup-opentofu@v1
 
