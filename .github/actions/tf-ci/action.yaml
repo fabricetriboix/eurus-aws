@@ -15,6 +15,7 @@ runs:
     uses: opentofu/setup-opentofu@v1
 
   - name: Ensure TF cache folder exists
+    shell: bash
     run: mkdir -p "$HOME/.terraform.d/plugin-cache"
 
   - name: Restore or create the TF cache
