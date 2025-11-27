@@ -8,11 +8,10 @@ inputs:
     description: "Name of the component to run CI on, eg: `networking`"
     required: true
 
-env:
-  TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
-
 runs:
   using: composite
+  env:
+    TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
   steps:
   - name: Install OpenTofu
     uses: opentofu/setup-opentofu@v1
