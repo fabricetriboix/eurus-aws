@@ -1,0 +1,29 @@
+name: OpenTofu CI - features/networking
+
+on:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    branches:
+    - main
+    paths:
+    - features/networking/**
+    - .github/workflows/feature-networking-ci.yaml
+    - .github/actions/tf-ci/**
+    - Makefile
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v5
+
+    - name: Run CI
+      uses: ./.github/actions/tf-ci
+      with:
+        component-type: feature
+        component-name: networking

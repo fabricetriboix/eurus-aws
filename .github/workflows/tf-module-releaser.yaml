@@ -1,0 +1,45 @@
+name: Terraform Module Releaser
+
+on:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    - closed # Closed required
+    branches:
+    - main
+    paths:
+    - features/**
+    - .github/**
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Terraform Module Releaser
+        uses: techpivot/terraform-module-releaser@v1
+        id: release
+        with:
+          major-keywords: breaking change
+          minor-keywords: feat
+          patch-keywords: fix,chore,docs
+          default-first-tag: v0.1.0
+
+      - id: debug
+        name: Debug
+        run: |
+          echo '${{ toJSON(steps.release.outputs) }}'
+          echo ${{ steps.release.outputs.changed-module-names }}
+          echo ${{ steps.release.outputs.changed-module-paths }}
+          echo ${{ steps.release.outputs.changed-modules-map }}
+          echo ${{ steps.release.outputs.all-module-names }}
+          echo ${{ steps.release.outputs.all-module-paths }}
+          echo ${{ steps.release.outputs.all-modules-map }}
