@@ -66,3 +66,4 @@ variable "internal_subnet_bits" {
     error_message = "The number of bits for internal subnet CIDRs must be at least 1."
   }
 }
+
