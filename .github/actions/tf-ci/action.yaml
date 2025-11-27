@@ -10,6 +10,7 @@ inputs:
 
 runs:
   using: composite
+  shell: /bin/bash
   steps:
   - name: Install OpenTofu
     uses: opentofu/setup-opentofu@v1
