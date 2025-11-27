@@ -14,6 +14,21 @@ runs:
   - name: Install OpenTofu
     uses: opentofu/setup-opentofu@v1
 
+  - name: Ensure TF cache folder exists
+    run: mkdir -p "$HOME/.terraform.d/plugin-cache"
+
+  - name: Restore or create the TF cache
+    uses: actions/cache@v4
+    with:
+      path: ~/.terraform.d/plugin-cache
+      key: ${{ runner.os }}-tf-${{ inputs.component-type }}-${{ inputs.component-name }}
+      restore-keys: |
+        ${{ runner.os }}-tf-${{ inputs.component-type }}
+        ${{ runner.os }}-tf-
+
   - name: Run CI job
     shell: bash
-    run: make ci-${{ inputs.component-type }}-${{ inputs.component-name }}
+    env:
+      TF_PLUGIN_CACHE_DIR: $HOME/.terraform.d/plugin-cache
+    run: |
+      make ci-${{ inputs.component-type }}-${{ inputs.component-name }}
