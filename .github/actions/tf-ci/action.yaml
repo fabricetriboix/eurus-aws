@@ -1,4 +1,5 @@
 name: OpenTofu CI
+description: Run TF checks
 
 inputs:
   component-type:

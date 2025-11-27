@@ -12,6 +12,7 @@ on:
     - features/networking/**
     - .github/workflows/feature-networking-ci.yaml
     - .github/actions/tf-ci/**
+    - Makefile
 
 jobs:
   ci:

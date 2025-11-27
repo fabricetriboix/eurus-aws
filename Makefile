@@ -2,14 +2,24 @@ SHELL := /bin/bash
 
 FEATURES := networking
 
+## This help screen
 help:
-	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$|(^#--)' $(MAKEFILE_LIST) \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m %-20s\033[0m %s\n", $$1, $$2}' \
-		| sed -e 's/\[32m #-- /[33m/'
+	@printf "Available targets:\n\n"
+	@awk '/^[a-zA-Z\-\_0-9%:\\]+/ { \
+		helpMessage = match(lastLine, /^## (.*)/); \
+		if (helpMessage) { \
+			helpCommand = $$1; \
+			helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
+			gsub("\\\\", "", helpCommand); \
+			gsub(":+$$", "", helpCommand); \
+			printf "  \x1b[32;01m%-20s\x1b[0m %s\n", helpCommand, helpMessage; \
+		} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
+	@printf "\n"
 
-#-- Continuous integration
-
-ci: $(foreach f,$(FEATURES),ci-feature-$(f)) ## Run all CI jobs
+## Run all CI jobs
+ci: $(foreach f,$(FEATURES),ci-feature-$(f))
 
 ci-feature-%:
 	@cd features/$* && \
