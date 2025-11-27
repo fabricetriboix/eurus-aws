@@ -21,7 +21,7 @@ runs:
   - name: Restore or create the TF cache
     uses: actions/cache@v4
     with:
-      path: ~/.terraform.d/plugin-cache
+      path: ${{ env.HOME }}/.terraform.d/plugin-cache
       key: ${{ runner.os }}-tf-${{ inputs.component-type }}-${{ inputs.component-name }}
       restore-keys: |
         ${{ runner.os }}-tf-${{ inputs.component-type }}
@@ -30,6 +30,6 @@ runs:
   - name: Run CI job
     shell: bash
     env:
-      TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+      TF_PLUGIN_CACHE_DIR: ${{ env.HOME }}/.terraform.d/plugin-cache
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }}
