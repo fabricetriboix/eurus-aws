@@ -30,6 +30,6 @@ runs:
   - name: Run CI job
     shell: bash
     env:
-      TF_PLUGIN_CACHE_DIR: $HOME/.terraform.d/plugin-cache
+      TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }}
