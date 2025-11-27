@@ -2,13 +2,11 @@ name: OpenTofu CI
 
 inputs:
   component-type:
-    description: Type of component to run CI on, eg: feature
+    description: Type of component to run CI on, eg: `feature`
     required: true
-    type: string
   component-name:
-    description: Name of the component to run CI on, eg: networking
+    description: Name of the component to run CI on, eg: `networking`
     required: true
-    type: string
 
 runs:
   using: composite
