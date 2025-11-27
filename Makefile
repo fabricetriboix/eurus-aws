@@ -13,6 +13,6 @@ ci: $(foreach f,$(FEATURES),ci-feature-$(f)) ## Run all CI jobs
 
 ci-feature-%:
 	@cd features/$* && \
-		tofu fmt -check -recursive . && \
-		tofu init -upgrade && \
-		tofu validate
+		time tofu fmt -check -recursive . && \
+		time tofu init -upgrade && \
+		time tofu validate
