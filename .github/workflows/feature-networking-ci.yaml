@@ -1,0 +1,23 @@
+name: OpenTofu CI
+
+on:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    branches:
+    - main
+    paths:
+    - features/networking/**
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Run CI
+      uses: ./github/actions/tf-ci
+      with:
+        component-type: feature
+        component-name: networking

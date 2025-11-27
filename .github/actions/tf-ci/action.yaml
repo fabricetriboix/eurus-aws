@@ -1,0 +1,23 @@
+name: OpenTofu CI
+
+inputs:
+  component-type:
+    description: Type of component to run CI on (eg: `feature`)
+    required: true
+    type: string
+  component-name:
+    description: Name of the component to run CI on (eg: `networking`)
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+  - name: Checkout the code
+    uses: actions/checkout@v5
+
+  - name: Install OpenTofu
+    uses: opentofu/setup-opentofu@v1
+
+  - name: Run CI job
+    run: make ci-${{ inputs.component-type }}-${{ inputs.component-name }}
