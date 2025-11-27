@@ -15,5 +15,5 @@ runs:
     uses: opentofu/setup-opentofu@v1
 
   - name: Run CI job
-    shell: /bin/bash
+    shell: bash
     run: make ci-${{ inputs.component-type }}-${{ inputs.component-name }}
