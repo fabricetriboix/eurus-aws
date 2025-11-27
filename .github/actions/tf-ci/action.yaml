@@ -10,10 +10,10 @@ inputs:
 
 runs:
   using: composite
-  shell: /bin/bash
   steps:
   - name: Install OpenTofu
     uses: opentofu/setup-opentofu@v1
 
   - name: Run CI job
+    shell: /bin/bash
     run: make ci-${{ inputs.component-type }}-${{ inputs.component-name }}
