@@ -12,9 +12,6 @@ help:
 ci: $(foreach f,$(FEATURES),ci-feature-$(f)) ## Run all CI jobs
 
 ci-feature-%:
-	echo XXX && \
-		ls -al "$$TF_PLUGIN_CACHE_DIR" || true && \
-		echo XXX
 	@cd features/$* && \
 		time tofu fmt -check -recursive . && \
 		time tofu init -upgrade && \
