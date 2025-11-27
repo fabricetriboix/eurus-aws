@@ -10,15 +10,13 @@ inputs:
 
 runs:
   using: composite
-  env:
-    TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
   steps:
   - name: Install OpenTofu
     uses: opentofu/setup-opentofu@v1
 
   - name: Ensure TF cache folder exists
     shell: bash
-    run: mkdir -p "$TF_PLUGIN_CACHE_DIR" && echo "Created TF cache directory $TF_PLUGIN_CACHE_DIR"
+    run: mkdir -p /tmp/tf-cache
 
   - name: Restore or create the TF cache
     uses: actions/cache@v4
@@ -31,5 +29,7 @@ runs:
 
   - name: Run CI job
     shell: bash
+    env:
+      TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }}
