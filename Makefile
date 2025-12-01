@@ -25,4 +25,5 @@ ci-feature-%:
 	@cd features/$* && \
 		time tofu fmt -check -recursive . && \
 		time tofu init -upgrade && \
-		time tofu validate
+		time tofu validate && \
+		time checkov -d .
