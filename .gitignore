@@ -39,6 +39,7 @@ terraform.rc
 # Others
 .*.swp
 todo.md
+TODO.md
 *.lock.hcl
 
 # Python stuff
