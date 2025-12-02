@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 locals {
   public_subnets = [
     for i in var.availability_zones :
@@ -41,3 +42,48 @@ module "vpc" {
   enable_ipv6                  = false
   create_database_subnet_group = true
 }
+||||||| c0b02d5
+=======
+locals {
+  public_subnets = [
+    for i in var.availability_zones :
+    cidrsubnet(var.cidr, var.public_subnet_bits, i)
+  ]
+
+  private_subnets = [
+    for i in var.availability_zones :
+    cidrsubnet(var.cidr, var.private_subnet_bits, i + 8)
+  ]
+
+  db_subnets = [
+    for i in var.availability_zones :
+    cidrsubnet(var.cidr, var.db_subnet_bits, i + 16)
+  ]
+
+  internal_subnets = [
+    for i in var.availability_zones :
+    cidrsubnet(var.cidr, var.internal_subnet_bits, i + 24)
+  ]
+}
+
+module "vpc" {
+  source = "git::https://github.com/fabricetriboix/terraform-aws-vpc.git?ref=master"
+
+  name             = var.env
+  cidr             = var.cidr
+  azs              = var.availability_zones
+  public_subnets   = local.public_subnets
+  private_subnets  = local.private_subnets
+  database_subnets = local.db_subnets
+  intra_subnets    = local.internal_subnets
+
+  create_igw         = true
+  enable_nat_gateway = true
+
+  enable_dns_hostnames         = true
+  enable_dns_support           = true
+  enable_flow_log              = false
+  enable_ipv6                  = false
+  create_database_subnet_group = true
+}
+>>>>>>> main
