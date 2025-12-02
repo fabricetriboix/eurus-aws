@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 
+CHECKOV ?= 1
 FEATURES := networking
 
 ## This help screen
@@ -25,4 +26,5 @@ ci-feature-%:
 	@cd features/$* && \
 		time tofu fmt -check -recursive . && \
 		time tofu init -upgrade && \
-		time tofu validate
+		time tofu validate && \
+		if [ $(CHECKOV) -eq 1 ]; then time checkov -d .; fi

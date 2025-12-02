@@ -21,6 +21,7 @@ locals {
 }
 
 module "vpc" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:No tags yet in `terraform-aws-vpc`
   source = "git::https://github.com/fabricetriboix/terraform-aws-vpc.git?ref=master"
 
   name             = var.env
