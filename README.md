@@ -1,11 +1,10 @@
 # eurus-aws
 
-## How to use
-
 Multi-tenant platform built using AWS managed services.
 
-TODO: Once the first version is out of the door, provide explanations
-on how to use it.
+## How to use
+
+Please refer to [the "How to use" document](docs/How to use.md).
 
 ## Specifications
 
