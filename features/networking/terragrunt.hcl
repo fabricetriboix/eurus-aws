@@ -1,7 +1,11 @@
+include "global_vars" {
+  path   = find_in_parent_folders("global-vars.hcl")
+  expose = true
+}
+
 locals {
-  global_vars = read_terragrunt_config(find_in_parent_folders("global-vars.hcl"))
-  github_org  = local.global_vars.locals.github_org
-  github_repo = local.global_vars.locals.github_repo
+  github_org  = include.global_vars.locals.github_org
+  github_repo = include.global_vars.locals.github_repo
 }
 
 include "backend" {
@@ -9,5 +13,5 @@ include "backend" {
 }
 
 terraform {
-  source = "github.com/${local.github_org}/${local.github_repo}?ref=v0.1.0"
+  source = "github.com/${local.github_org}/${local.github_repo}?ref=features/networking/v0.2.0"
 }
