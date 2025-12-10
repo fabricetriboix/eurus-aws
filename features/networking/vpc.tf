@@ -14,6 +14,7 @@ locals {
     cidrsubnet(var.cidr, var.db_subnet_bits, i + 16)
   ]
 
+  # "Internal subnets" don't have any routes to go outside
   internal_subnets = [
     for i in var.availability_zones :
     cidrsubnet(var.cidr, var.internal_subnet_bits, i + 24)
