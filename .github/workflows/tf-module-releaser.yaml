@@ -32,6 +32,7 @@ jobs:
           minor-keywords: feat
           patch-keywords: fix,chore,docs
           default-first-tag: v0.1.0
+          tag-directory-separator: -
 
       - id: debug
         name: Debug
