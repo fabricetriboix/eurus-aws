@@ -6,3 +6,11 @@ terraform {
     }
   }
 }
+
+provider "aws" {
+  default_tags {
+    tags = {
+      Realm = "nonprod"
+    }
+  }
+}

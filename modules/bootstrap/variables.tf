@@ -18,22 +18,12 @@ variable "project" {
   }
 }
 
-variable "region" {
-  description = "The AWS region where to deploy the bootstrap"
-  type        = string
-}
-
 variable "realm" {
-  description = "In which realm to deploy this bootstrap module"
+  description = "In which realm to deploy this bootstrap module (typically nonprod or prod)"
   type        = string
 
   validation {
     condition     = length(var.realm) > 1
     error_message = "The `realm` must be set."
   }
-}
-
-variable "common_tags" {
-  description = "Tags to apply to all AWS resources"
-  type        = map(string)
 }
