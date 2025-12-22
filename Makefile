@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 CHECKOV ?= 1
+MODULES := bootstrap
 FEATURES := networking
 
 ## This help screen
@@ -20,7 +21,12 @@ help:
 	@printf "\n"
 
 ## Run all CI jobs
-ci: $(foreach f,$(FEATURES),ci-feature-$(f))
+ci: $(foreach f,$(MODULES),ci-module-$(f)) $(foreach f,$(FEATURES),ci-feature-$(f))
+
+ci-module-%:
+	@cd modules/$* && \
+		time tofu fmt -check -recursive . && \
+		if [ $(CHECKOV) -eq 1 ]; then time checkov -d .; fi
 
 ci-feature-%:
 	@cd features/$* && \
