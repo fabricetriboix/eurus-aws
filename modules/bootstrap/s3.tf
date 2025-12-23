@@ -4,8 +4,7 @@ locals {
 }
 
 module "tf_bucket" {
-  # checkov:skip=CKV_TF_1,CKV_TF_2:No tags yet in `terraform-aws-s3-bucket`
-  source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=master"
+  source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
 
   bucket              = local.tf_bucket_name
   allowed_kms_key_arn = module.key.arn
