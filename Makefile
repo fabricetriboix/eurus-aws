@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 CHECKOV ?= 1
+CHECKOV_QUIET ?= 1
 MODULES := bootstrap
 FEATURES := networking
 
@@ -24,13 +25,17 @@ help:
 ci: $(foreach f,$(MODULES),ci-module-$(f)) $(foreach f,$(FEATURES),ci-feature-$(f))
 
 ci-module-%:
-	@cd modules/$* && \
-		time tofu fmt -check -recursive . && \
-		if [ $(CHECKOV) -eq 1 ]; then time checkov -d .; fi
+	@set -euxo pipefail && \
+		cd modules/$* && \
+		tofu fmt -check -recursive . && \
+		[ $(CHECKOV_QUIET) -eq 1 ] && checkov_args=--quiet || checkov_args= && \
+		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
 
 ci-feature-%:
-	@cd features/$* && \
-		time tofu fmt -check -recursive . && \
-		time tofu init -upgrade && \
-		time tofu validate && \
-		if [ $(CHECKOV) -eq 1 ]; then time checkov -d .; fi
+	@set -euxo pipefail && \
+		cd features/$* && \
+		tofu fmt -check -recursive . && \
+		tofu init -upgrade && \
+		tofu validate && \
+		[ $(CHECKOV_QUIET) -eq 1 ] && checkov_args=--quiet || checkov_args= && \
+		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
