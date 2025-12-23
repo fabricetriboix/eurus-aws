@@ -50,10 +50,10 @@ module "tf_bucket" {
     status = "Enabled"
   }
 
-  tags = {
+  tags = merge(local.tags, {
     Name    = local.tf_bucket_name
     Purpose = "Store OpenTofu states for the ${var.realm} realm"
-  }
+  })
 }
 
 module "logs_bucket" {
@@ -91,8 +91,8 @@ module "logs_bucket" {
   access_log_delivery_policy_source_buckets = module.tf_bucket.arn
   attach_access_log_delivery_policy         = true
 
-  tags = {
+  tags = merge(local.tags, {
     Name    = local.logs_bucket_name
     Purpose = "Store access logs from the OpenTofu states bucket for the ${var.realm} realm"
-  }
+  })
 }

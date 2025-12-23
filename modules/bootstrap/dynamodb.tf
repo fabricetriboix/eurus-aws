@@ -22,8 +22,8 @@ resource "aws_dynamodb_table" "tf_locks" {
     kms_key_arn = module.key.arn
   }
 
-  tags = {
+  tags = merge(local.tags, {
     Name    = local.table_name
     Purpose = "Store OpenTofu state locks for the ${var.realm} realm"
-  }
+  })
 }

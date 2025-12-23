@@ -7,7 +7,7 @@ module "key" {
   deletion_windows_in_days = 7
   rotation_period_in_days  = 30
 
-  tags = {
+  tags = merge(local.tags, {
     Name = "alias/tf"
-  }
+  })
 }
