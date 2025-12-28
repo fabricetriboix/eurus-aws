@@ -75,7 +75,7 @@ module "tf_bucket" {
   ]
 
   logging = {
-    target_bucket = module.logs_bucket.name
+    target_bucket = module.logs_bucket.s3_bucket_id
     target_prefix = "tf-logs/"
 
     target_object_key_format = {

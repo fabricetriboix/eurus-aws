@@ -19,7 +19,7 @@ resource "aws_dynamodb_table" "tf_locks" {
   # checkov:skip=CKV_AWS_119:False positive
   server_side_encryption {
     enable      = true
-    kms_key_arn = module.key.arn
+    kms_key_arn = module.key.key_arn
   }
 
   tags = merge(local.tags, {
