@@ -10,6 +10,8 @@ on:
     - main
     paths:
     - features/**
+    - modules/**
+    - bootstrap/**
     - .github/**
 
 permissions:
