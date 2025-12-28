@@ -41,6 +41,7 @@ terraform.rc
 todo.md
 TODO.md
 *.lock.hcl
+.terragrunt-cache
 
 # Python stuff
 venv
