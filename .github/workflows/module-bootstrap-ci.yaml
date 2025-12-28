@@ -9,7 +9,7 @@ on:
     branches:
     - main
     paths:
-    - modules/bootstrap/**
+    - module/bootstrap/**
     - .github/workflows/module-bootstrap-ci.yaml
     - .github/actions/tf-ci/**
     - Makefile

@@ -1,4 +1,4 @@
-name: OpenTofu CI - features/networking
+name: OpenTofu CI - feature/networking
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
     branches:
     - main
     paths:
-    - features/networking/**
+    - feature/networking/**
     - .github/workflows/feature-networking-ci.yaml
     - .github/actions/tf-ci/**
     - Makefile
