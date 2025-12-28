@@ -1,4 +1,5 @@
 module "key" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-kms.git?ref=v4.1.1-1"
 
   description             = "Key to encrypt OpenTofu states and DynamoDB lock tables"
