@@ -14,6 +14,6 @@ output "lock_table" {
 }
 
 output "kms_alias" {
-  description = "Alias of the KMS key used to encrypt the S3 buckets and DynamoDB table"
+  description = "Alias of the KMS key used to encrypt the S3 buckets and the DynamoDB table"
   value       = local.kms_alias
 }
