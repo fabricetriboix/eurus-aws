@@ -5,8 +5,7 @@ on:
     types:
     - opened
     - reopened
-    #- synchronize
-    - closed # Closed required
+    - closed
     branches:
     - main
     paths:
