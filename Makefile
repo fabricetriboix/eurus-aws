@@ -4,6 +4,7 @@ CHECKOV ?= 1
 CHECKOV_QUIET ?= 1
 MODULES := bootstrap
 FEATURES := networking
+BOOTSTRAPS := nonprod
 
 ## This help screen
 help:
@@ -22,13 +23,13 @@ help:
 	@printf "\n"
 
 ## Run all CI jobs
-ci: $(foreach f,$(MODULES),ci-module-$(f)) $(foreach f,$(FEATURES),ci-feature-$(f))
+ci: $(foreach f,$(MODULES),ci-module-$(f)) $(foreach f,$(FEATURES),ci-feature-$(f)) $(foreach f,$(BOOTSTRAPS),ci-bootstrap-$(f))
 
 ci-module-%:
 	@set -euxo pipefail && \
 		cd modules/$* && \
 		tofu fmt -check -recursive . && \
-		[ $(CHECKOV_QUIET) -eq 1 ] && checkov_args=--quiet || checkov_args= && \
+		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
 		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
 
 ci-feature-%:
@@ -37,5 +38,14 @@ ci-feature-%:
 		tofu fmt -check -recursive . && \
 		tofu init -upgrade && \
 		tofu validate && \
-		[ $(CHECKOV_QUIET) -eq 1 ] && checkov_args=--quiet || checkov_args= && \
+		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
+		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
+
+ci-bootstrap-%:
+	@set -euxo pipefail && \
+		cd bootstrap/$* && \
+		tofu fmt -check -recursive . && \
+		tofu init -upgrade && \
+		tofu validate && \
+		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
 		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
