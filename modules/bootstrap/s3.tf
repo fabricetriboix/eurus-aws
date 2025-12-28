@@ -1,13 +1,53 @@
 locals {
-  tf_bucket_name   = "${var.org}-${var.project}-${var.realm}-tf-${var.region}"
-  logs_bucket_name = "${bucket_name}-logs"
+  tf_bucket_name   = "${var.org}-${var.project}-${var.realm}-tf-${local.region}"
+  logs_bucket_name = "${local.tf_bucket_name}-logs"
+}
+
+module "logs_bucket" {
+  source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
+
+  bucket              = local.logs_bucket_name
+  allowed_kms_key_arn = module.key.key_arn
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm            = "aws:kms"
+        kms_master_key_id        = module.key.aliases[0].name
+        bucket_key_enabled       = true
+        blocked_encryption_types = ["SSE-C"]
+      }
+    }
+  }
+
+  lifecycle_rule = [
+    {
+      id     = "cleanup"
+      status = "Enabled"
+
+      // Matches all objects in this bucket
+      filter = {}
+
+      expiration = {
+        days = 365
+      }
+    }
+  ]
+
+  access_log_delivery_policy_source_buckets = module.tf_bucket.s3_bucket_arn
+  attach_access_log_delivery_policy         = true
+
+  tags = merge(local.tags, {
+    Name    = local.logs_bucket_name
+    Purpose = "Store access logs from the OpenTofu states bucket for the ${var.realm} realm"
+  })
 }
 
 module "tf_bucket" {
   source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
 
   bucket              = local.tf_bucket_name
-  allowed_kms_key_arn = module.key.arn
+  allowed_kms_key_arn = module.key.key_arn
 
   server_side_encryption_configuration = {
     rule = {
@@ -35,7 +75,7 @@ module "tf_bucket" {
   ]
 
   logging = {
-    target_bucket = aws_s3_bucket.logs_bucket.name
+    target_bucket = module.logs_bucket.name
     target_prefix = "tf-logs/"
 
     target_object_key_format = {
@@ -52,45 +92,5 @@ module "tf_bucket" {
   tags = merge(local.tags, {
     Name    = local.tf_bucket_name
     Purpose = "Store OpenTofu states for the ${var.realm} realm"
-  })
-}
-
-module "logs_bucket" {
-  source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
-
-  bucket              = local.logs_bucket_name
-  allowed_kms_key_arn = module.key.arn
-
-  server_side_encryption_configuration = {
-    rule = {
-      apply_server_side_encryption_by_default = {
-        sse_algorithm            = "aws:kms"
-        kms_master_key_id        = module.key.aliases[0].name
-        bucket_key_enabled       = true
-        blocked_encryption_types = ["SSE-C"]
-      }
-    }
-  }
-
-  lifecycle_rule = [
-    {
-      id     = "cleanup"
-      status = "Enabled"
-
-      // Matches all objects in this bucket
-      filter = {}
-
-      expiration = {
-        days = 365
-      }
-    }
-  ]
-
-  access_log_delivery_policy_source_buckets = module.tf_bucket.arn
-  attach_access_log_delivery_policy         = true
-
-  tags = merge(local.tags, {
-    Name    = local.logs_bucket_name
-    Purpose = "Store access logs from the OpenTofu states bucket for the ${var.realm} realm"
   })
 }
