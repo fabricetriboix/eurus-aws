@@ -3,14 +3,13 @@ name: Terraform Module Releaser
 on:
   pull_request:
     types:
-    - opened
-    - reopened
-    #- synchronize
-    - closed # Closed required
+    - closed
     branches:
     - main
     paths:
     - features/**
+    - modules/**
+    - bootstrap/**
     - .github/**
 
 permissions:
