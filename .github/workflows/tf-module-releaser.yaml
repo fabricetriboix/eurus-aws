@@ -7,8 +7,8 @@ on:
     branches:
     - main
     paths:
-    - features/**
-    - modules/**
+    - feature/**
+    - module/**
     - bootstrap/**
     - .github/**
 

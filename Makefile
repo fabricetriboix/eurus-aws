@@ -27,14 +27,14 @@ ci: $(foreach f,$(MODULES),ci-module-$(f)) $(foreach f,$(FEATURES),ci-feature-$(
 
 ci-module-%:
 	@set -euxo pipefail && \
-		cd modules/$* && \
+		cd module/$* && \
 		tofu fmt -check -recursive . && \
 		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
 		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
 
 ci-feature-%:
 	@set -euxo pipefail && \
-		cd features/$* && \
+		cd feature/$* && \
 		tofu fmt -check -recursive . && \
 		tofu init -upgrade && \
 		tofu validate && \
