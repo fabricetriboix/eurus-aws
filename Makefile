@@ -45,7 +45,7 @@ ci-bootstrap-%:
 	@set -euxo pipefail && \
 		cd bootstrap/$* && \
 		tofu fmt -check -recursive . && \
-		tofu init -upgrade && \
-		tofu validate && \
+		terragrunt init -upgrade && \
+		terragrunt validate && \
 		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
 		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
