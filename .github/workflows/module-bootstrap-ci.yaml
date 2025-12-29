@@ -1,4 +1,4 @@
-name: OpenTofu CI - feature/networking
+name: OpenTofu CI - module/bootstrap
 
 on:
   pull_request:
@@ -9,8 +9,8 @@ on:
     branches:
     - main
     paths:
-    - feature/networking/**
-    - .github/workflows/feature-networking-ci.yaml
+    - module/bootstrap/**
+    - .github/workflows/module-bootstrap-ci.yaml
     - .github/actions/tf-ci/**
     - Makefile
 
@@ -28,5 +28,5 @@ jobs:
     - name: Run CI
       uses: ./.github/actions/tf-ci
       with:
-        component-type: feature
-        component-name: networking
+        component-type: module
+        component-name: bootstrap

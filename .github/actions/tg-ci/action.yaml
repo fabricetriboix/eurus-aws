@@ -1,19 +1,19 @@
-name: OpenTofu CI
-description: Run TF checks
+name: Terragrunt CI
+description: Run TG checks
 
 inputs:
   component-type:
-    description: "Type of component to run CI on, eg: `feature`"
+    description: "Type of component to run CI on, eg: `bootstrap`"
     required: true
   component-name:
-    description: "Name of the component to run CI on, eg: `networking`"
+    description: "Name of the component to run CI on, eg: `nonprod`"
     required: true
 
 runs:
   using: composite
   steps:
-  - name: Install OpenTofu
-    uses: opentofu/setup-opentofu@v1
+  - name: Install OpenTofu and Terragrunt
+    uses: gruntwork-io/terragrunt-action@v3
 
   - name: Ensure TF cache folder exists
     shell: bash

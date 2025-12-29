@@ -49,5 +49,5 @@ Must exists prior:
     * one account per environment
     * one account for non-prod common services
     * one account for prod common services
-  - An IAM role with enough permissions to deploy everything in these
-    stacks using OpenTofu
+  - One or more IAM users/roles with enough permissions to deploy
+    everything in these stacks using OpenTofu and Terragrunt.
