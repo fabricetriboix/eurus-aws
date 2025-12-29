@@ -35,7 +35,7 @@ module "logs_bucket" {
     }
   ]
 
-  access_log_delivery_policy_source_buckets = module.tf_bucket.s3_bucket_arn
+  access_log_delivery_policy_source_buckets = [module.tf_bucket.s3_bucket_arn]
   attach_access_log_delivery_policy         = true
 
   tags = merge(local.tags, {
