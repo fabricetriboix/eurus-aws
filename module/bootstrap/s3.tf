@@ -14,7 +14,7 @@ module "logs_bucket" {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm            = "aws:kms"
-        kms_master_key_id        = module.key.aliases[0].name
+        kms_master_key_id        = "alias/tf"
         bucket_key_enabled       = true
         blocked_encryption_types = ["SSE-C"]
       }
@@ -55,7 +55,7 @@ module "tf_bucket" {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm            = "aws:kms"
-        kms_master_key_id        = module.key.aliases[0].name
+        kms_master_key_id        = "alias/tf"
         bucket_key_enabled       = true
         blocked_encryption_types = ["SSE-C"]
       }
