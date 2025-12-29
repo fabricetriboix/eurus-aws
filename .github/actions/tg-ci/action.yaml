@@ -1,0 +1,55 @@
+name: Terragrunt CI
+description: Run TG checks
+
+inputs:
+  component-type:
+    description: "Type of component to run CI on, eg: `feature`"
+    required: true
+  component-name:
+    description: "Name of the component to run CI on, eg: `networking`"
+    required: true
+
+runs:
+  using: composite
+  steps:
+  - name: Install OpenTofu and Terragrunt
+    uses: gruntwork-io/terragrunt-action@v3
+
+  - name: Ensure TF cache folder exists
+    shell: bash
+    run: mkdir -p /tmp/tf-cache
+
+  - name: Restore or create the TF cache
+    uses: actions/cache@v4
+    with:
+      path: /tmp/tf-cache
+      key: ${{ runner.os }}-tf-${{ inputs.component-type }}-${{ inputs.component-name }}
+      restore-keys: |
+        ${{ runner.os }}-tf-${{ inputs.component-type }}
+        ${{ runner.os }}-tf-
+
+  - name: Run CI job
+    shell: bash
+    env:
+      TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
+    run: |
+      make ci-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0
+
+  - name: Run Checkov
+    uses: bridgecrewio/checkov-action@v12
+    with:
+      directory: ./${{ inputs.component-type }}/${{ inputs.component-name }}
+      quiet: true
+      output_format: cli,sarif
+      output_file_path: console,results.sarif
+
+  - name: Upload Checkov SARIF file
+    uses: github/codeql-action/upload-sarif@v4
+    # Results are generated only on a success or failure
+    # this is required since GitHub by default won't run the next step
+    # when the previous one has failed. Security checks that do not pass will 'fail'.
+    # An alternative is to add `continue-on-error: true` to the previous step
+    # Or 'soft_fail: true' to checkov.
+    if: success() || failure()
+    with:
+      sarif_file: results.sarif
