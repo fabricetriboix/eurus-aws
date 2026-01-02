@@ -1,7 +1,6 @@
 module "bootstrap" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v0.1.3"
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//module/bootstrap?ref=fix-bootstrap-version"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v0.1.4"
 
   org       = "myorg"
   project   = "myproject"
