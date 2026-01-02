@@ -9,11 +9,11 @@ terraform {
 
 provider "aws" {
   default_tags {
-    tags = merge(local.default_tags, {
+    tags = {
       Realm      = "nonprod"
       Source     = "bootstrap/nonprod"
       Tenant     = "Platform"
       CostCenter = "1001"
-    })
+    }
   }
 }
