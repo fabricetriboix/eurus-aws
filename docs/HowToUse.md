@@ -27,7 +27,7 @@ like this:
 ```sh
 $ creds=$(aws sts assume-role \
   --role-arn arn:aws:iam::<CHILD_ACCOUNT_ID>:role/<ROLE_NAME> \
-  --role-session-name terraform \
+  --role-session-name tf \
   --output json)
 $ export AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r .Credentials.AccessKeyId)
 $ export AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r .Credentials.SecretAccessKey)

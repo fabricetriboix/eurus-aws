@@ -30,5 +30,5 @@ variable "realm" {
 
 variable "is_common" {
   description = "Whether the target bootstrap is a 'common' account or not"
-  type        = boolean
+  type        = bool
 }
