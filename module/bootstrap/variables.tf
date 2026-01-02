@@ -27,3 +27,8 @@ variable "realm" {
     error_message = "The `realm` must be set."
   }
 }
+
+variable "is_common" {
+  description = "Whether the target bootstrap is a 'common' account or not"
+  type        = bool
+}

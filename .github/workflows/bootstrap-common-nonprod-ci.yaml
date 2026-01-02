@@ -1,4 +1,4 @@
-name: OpenTofu CI - bootstrap/nonprod
+name: OpenTofu CI - bootstrap/common-nonprod
 
 on:
   pull_request:
@@ -9,8 +9,8 @@ on:
     branches:
     - main
     paths:
-    - bootstrap/nonprod/**
-    - .github/workflows/bootstrap-nonprod-ci.yaml
+    - bootstrap/common-nonprod/**
+    - .github/workflows/bootstrap-common-nonprod-ci.yaml
     - .github/actions/tg-ci/**
     - Makefile
 
@@ -29,4 +29,4 @@ jobs:
       uses: ./.github/actions/tg-ci
       with:
         component-type: bootstrap
-        component-name: nonprod
+        component-name: common-nonprod
