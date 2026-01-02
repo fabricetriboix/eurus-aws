@@ -11,7 +11,7 @@ provider "aws" {
   default_tags {
     tags = {
       Realm      = "nonprod"
-      Source     = "bootstrap/nonprod"
+      Source     = "bootstrap/common-nonprod"
       Tenant     = "Platform"
       CostCenter = "1001"
     }
