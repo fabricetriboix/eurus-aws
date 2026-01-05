@@ -8,6 +8,6 @@ module "key" {
   rotation_period_in_days = 90
 
   tags = merge(local.tags, {
-    Name = "alias/tf"
+    Name = "alias/${local.kms_alias}"
   })
 }

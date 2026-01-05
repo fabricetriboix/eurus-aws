@@ -1,5 +1,5 @@
 locals {
-  table_name = "${var.org}-${var.project}-${var.realm}-tf-locks-${local.region}"
+  table_name = "${var.org}-${var.project}-${local.account_type}-${var.realm}-tf-locks"
 }
 
 resource "aws_dynamodb_table" "tf_locks" {
