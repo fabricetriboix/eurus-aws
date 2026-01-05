@@ -11,7 +11,20 @@ I obviously can't cover all specific circumstances, so I will detail
 here how `eurus-aws` can be used in exactly the same manner it is used
 here.
 
-Obviously, you will need to fork the repo or copy the code somehow.
+## Prerequisites
+
+Fork the [eurus-aws](https://github.com/fabricetriboix/eurus-aws)
+repo. Instructions are
+[here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
+It seems tags are not copied anymore, so here is how to get the tags
+(this is necessary, otherwise nothing will work):
+
+```bash
+$ git remote add upstream https://github.com/fabricetriboix/eurus-aws
+$ git fetch --tags upstream
+$ git push --tags
+```
+
 You will also need to have fulfilled all the prerequisistes listed
 in the top-level [README](../README.md) file.
 
