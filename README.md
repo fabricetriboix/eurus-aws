@@ -5,6 +5,12 @@ Multi-tenant platform built using AWS managed services.
 See [docs/HowToUse.md](docs/HowToUse.md) for details on how to use
 `eurus-aws`.
 
+Important note: One of the main drag on Platform Engineer productivity
+is waiting for CI/CD pipelines to complete. So I am trying my best to
+make sure those pipelines are fast, and that an engineer would be able
+to stare at the screen while the pipeline is executing rather than
+switching context (which is very bad for productivity).
+
 ## Specifications
 
 This platform uses only AWS services. Tenant apps are run in ECS using
