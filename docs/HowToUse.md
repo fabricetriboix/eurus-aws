@@ -2,9 +2,9 @@
 
 Your circumstances are probably such that `eurus-aws` can't be
 directly used within your organisation because it won't be compliant
-with your compliance policies, or the way you do things in your
-organisation. For example, you might use GitLab instead of GitHub,
-or the security is not tight enough, etc. This all means that you will
+with your compliance policies, or the way things are done in your
+organisation. For example, you might use GitLab instead of GitHub, or
+the security is not tight enough, etc. This all means that you will
 likely need to take the code and adapt it to your situation.
 
 I obviously can't cover all specific circumstances, so I will detail
@@ -31,7 +31,8 @@ in the top-level [README](../README.md) file.
 ## Bootstrap
 
 The first step is to create backends (S3 and DynamoDB table) for the
-Terraform states. This has to be done manually.
+Terraform states. This has to be done manually. There will be one
+bucket and one DynamoDB table per AWS account.
 
 If the account where you want to deploy is different from the account
 from where you have credentials, you might first need to run something
@@ -49,7 +50,8 @@ $ aws sts get-caller-identity
 ```
 
 NB: There are more elegant ways to achieve the same result using AWS
-Identity Center, but this is outside the scope of this project.
+Identity Center, or even in `~/.aws/config`, but this is outside the
+scope of this project.
 
 Example commands for the common-nonprod backend:
 
