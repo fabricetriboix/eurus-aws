@@ -1,9 +1,9 @@
-locals {
-  account_type = values.account_type
-  realm        = values.realm
-  env          = values.env
-  unit_name    = "feature-networking"
-}
+#locals {
+#  account_type = values.account_type
+#  realm        = values.realm
+#  env          = values.env
+#  unit_name    = "feature-networking"
+#}
 
 include "global" {
   # NB: This also defines the backend
@@ -16,7 +16,10 @@ terraform {
 }
 
 inputs = {
+  account_type       = values.account_type
+  realm              = values.realm
   env                = values.env
+  unit_name          = "feature-networking"
   cidr               = values.cidr
   availability_zones = values.availability_zones
   public_subnets     = values.public_subnets
