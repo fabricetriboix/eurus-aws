@@ -7,11 +7,11 @@ terraform {
 }
 
 inputs = {
-  env                  = values.env
-  cidr                 = values.cidr
-  availability_zones   = values.availability_zones
-  public_subnet_bits   = values.public_subnet_bits
-  private_subnet_bits  = values.private_subnet_bits
-  db_subnet_bits       = values.db_subnet_bits
-  internal_subnet_bits = values.internal_subnet_bits
+  env                = values.env
+  cidr               = values.cidr
+  availability_zones = values.availability_zones
+  public_subnets     = values.public_subnets
+  private_subnets    = values.private_subnets
+  db_subnets         = values.db_subnets
+  internal_subnets   = values.internal_subnets
 }

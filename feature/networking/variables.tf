@@ -23,43 +23,28 @@ variable "availability_zones" {
   }
 }
 
-variable "public_subnet_bits" {
-  description = "Number of bits to use for the public subnet CIDRs"
-  type        = number
-  default     = 8
-
-  validation {
-    condition     = var.public_subnet_bits > 0
-    error_message = "The number of bits for public subnet CIDRs must be at least 1."
-  }
+variable "public_subnets" {
+  description = "CIDRs for public subnets (can receive internet traffic). This list must have the same number of items than `availability_zones`, or be null."
+  type        = list(string)
+  default     = null
 }
 
-variable "private_subnet_bits" {
-  description = "Number of bits to use for the private subnet CIDRs"
-  type        = number
-  default     = 8
-
-  validation {
-    condition     = var.private_subnet_bits > 0
-    error_message = "The number of bits for private subnet CIDRs must be at least 1."
-  }
+variable "private_subnets" {
+  description = "CIDRs for private subnets (can't receive internet traffic). This list must have the same number of items than `availability_zones`, or be null."
+  type        = list(string)
+  default     = null
 }
 
-variable "db_subnet_bits" {
-  description = "Number of bits to use for the database subnet CIDRs"
-  type        = number
-  default     = 8
-
-  validation {
-    condition     = var.db_subnet_bits > 0
-    error_message = "The number of bits for database subnet CIDRs must be at least 1."
-  }
+variable "db_subnets" {
+  description = "CIDRs for database subnets (used to host databases). This list must have the same number of items than `availability_zones`, or be null."
+  type        = list(string)
+  default     = null
 }
 
-variable "internal_subnet_bits" {
-  description = "Number of bits to use for the internal subnet CIDRs. Internal subnets are routable only within the VPC itself."
-  type        = number
-  default     = 8
+variable "internal_subnets" {
+  description = "CIDRs for internal subnets (no routing outside the VPC). This list must have the same number of items than `availability_zones`, or be null."
+  type        = list(string)
+  default     = null
 
   validation {
     condition     = var.internal_subnet_bits > 0
