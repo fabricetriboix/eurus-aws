@@ -8,12 +8,7 @@ output "logs_bucket" {
   value       = module.bootstrap.logs_bucket
 }
 
-output "lock_table" {
-  description = "Name of the DynamoDB table where TF locks are managed"
-  value       = module.bootstrap.lock_table
-}
-
 output "kms_alias" {
-  description = "Alias of the KMS key used to encrypt the S3 buckets and the DynamoDB table"
+  description = "Alias of the KMS key used to encrypt the S3 bucket"
   value       = module.bootstrap.kms_alias
 }
