@@ -45,9 +45,4 @@ variable "internal_subnets" {
   description = "CIDRs for internal subnets (no routing outside the VPC). This list must have the same number of items than `availability_zones`, or be null."
   type        = list(string)
   default     = null
-
-  validation {
-    condition     = var.internal_subnet_bits > 0
-    error_message = "The number of bits for internal subnet CIDRs must be at least 1."
-  }
 }
