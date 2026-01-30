@@ -36,6 +36,7 @@ generate "backend" {
       }
     }
 EOF
+}
 
 terraform {
   source = "."
