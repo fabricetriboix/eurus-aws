@@ -28,11 +28,11 @@ generate "backend" {
   contents  = <<EOF
     terraform {
       backend "s3" {
-        bucket         = "${local.org}-${local.project}-tf-${values.account_type}-${values.realm}"
-        key            = "${values.env}/${local.unit_name}/tofu.tfstate"
-        region         = "${local.region}"
-        encrypt        = true
-        dynamodb_table = "${local.org}-${local.project}-${var.account_type}-${var.realm}-tf-locks"
+        bucket       = "${local.org}-${local.project}-tf-${values.account_type}-${values.realm}"
+        key          = "${values.env}/${local.unit_name}/tofu.tfstate"
+        region       = "${local.region}"
+        encrypt      = true
+        use_lockfile = true
       }
     }
 EOF
