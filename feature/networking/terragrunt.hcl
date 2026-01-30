@@ -1,6 +1,14 @@
+locals {
+  account_type = values.account_type
+  realm        = values.realm
+  env          = values.env
+  unit_name    = "feature-networking"
+}
+
 include "global" {
   # NB: This also defines the backend
-  path = find_in_parent_folders("global.hcl")
+  path   = find_in_parent_folders("global.hcl")
+  expose = true
 }
 
 terraform {
