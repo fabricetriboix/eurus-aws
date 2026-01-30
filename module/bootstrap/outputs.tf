@@ -8,12 +8,7 @@ output "logs_bucket" {
   value       = module.logs_bucket.s3_bucket_id
 }
 
-output "lock_table" {
-  description = "Name of the DynamoDB table where TF locks are managed"
-  value       = aws_dynamodb_table.tf_locks.name
-}
-
 output "kms_alias" {
-  description = "Alias of the KMS key used to encrypt the S3 buckets and the DynamoDB table"
+  description = "Alias of the KMS key used to encrypt the S3 bucket"
   value       = "alias/${local.kms_alias}"
 }
