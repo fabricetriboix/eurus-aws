@@ -8,7 +8,7 @@ include "global" {
 }
 
 terraform {
-  source = "github.com/${include.globals.locals.github_org}/${include.globals.locals.github_repo}?ref=features/networking/v0.2.0"
+  source = "github.com/${include.global.locals.github_org}/${include.global.locals.github_repo}?ref=features/networking/v0.2.0"
 }
 
 inputs = {
