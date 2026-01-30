@@ -1,5 +1,6 @@
-include "backend" {
-  path = find_in_parent_folders("backend.hcl")
+include "global" {
+  # NB: This also defines the backend
+  path = find_in_parent_folders("global.hcl")
 }
 
 terraform {
