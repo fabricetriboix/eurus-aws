@@ -1,7 +1,9 @@
 locals {
-  region  = "eu-west-1"
-  org     = "myorg"
-  project = "myproject"
+  region      = "eu-west-1"
+  org         = "myorg"
+  project     = "myproject"
+  github_org  = "fabricetriboix"
+  github_repo = "eurus-aws"
 
   tf_bucket_prefix = "${local.org}-${local.project}-tf"
 
