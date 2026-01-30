@@ -16,10 +16,7 @@ include "global" {
 }
 
 locals {
-  cwd               = get_terragrunt_dir()
-  cwd_segments      = split("/", cwd)
-  last_two_segments = slice(local.cwd_segments, length(local.cwd_segments) - 2, length(local.cwd_segments))
-  unit_name         = join("-", local.last_two_segments)
+  unit_name = "feature-networking"
 }
 
 generate "backend" {
