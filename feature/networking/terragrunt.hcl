@@ -2,13 +2,8 @@ include "backend" {
   path = find_in_parent_folders("backend.hcl")
 }
 
-include "global" {
-  path   = find_in_parent_folders("global.hcl")
-  expose = true
-}
-
 terraform {
-  source = "github.com/${include.global.locals.github_org}/${include.global.locals.github_repo}?ref=features/networking/v0.2.0"
+  source = "."
 }
 
 inputs = {
