@@ -5,10 +5,10 @@ module "vpc" {
   name             = var.env
   cidr             = var.cidr
   azs              = var.availability_zones
-  public_subnets   = var.public_subnets
-  private_subnets  = var.private_subnets
-  database_subnets = var.db_subnets
-  intra_subnets    = var.internal_subnets
+  public_subnets   = coalesce(var.public_subnets, [])
+  private_subnets  = coalesce(var.private_subnets, [])
+  database_subnets = coalesce(var.db_subnets, [])
+  intra_subnets    = coalesce(var.internal_subnets, [])
 
   create_igw         = true
   enable_nat_gateway = true
