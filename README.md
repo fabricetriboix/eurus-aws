@@ -2,6 +2,14 @@
 
 Multi-tenant platform built using AWS managed services.
 
+**Important design decision**: The target for this platform are small
+and medium-sized businesses with light to medium requirements in terms
+of regulations and governance. In addition, such businesses are often
+cost-conscious and want to minimise their costs. Consequently,
+resources that can be shared between tenants will be shared. If
+increased tenant isolation is required, it is always possible to
+deploy more than one instance of the platform.
+
 See [docs/HowToUse.md](docs/HowToUse.md) for details on how to use
 `eurus-aws`.
 
@@ -9,7 +17,8 @@ Important note: One of the main drag on Platform Engineer productivity
 is waiting for CI/CD pipelines to complete. So I am trying my best to
 make sure those pipelines are fast, and that an engineer would be able
 to stare at the screen while the pipeline is executing rather than
-switching context (which is very bad for productivity).
+switching context (which is very bad for productivity). The trade-off
+is more complex pipelines.
 
 ## Specifications
 
@@ -56,3 +65,9 @@ Must exists prior:
     * one account for prod common services
   - One or more IAM users/roles with enough permissions to deploy
     everything in these stacks using OpenTofu and Terragrunt.
+
+## Additional documentation
+
+Here are links to documentations with more details:
+  - [How to use](docs/HowToUse.md)
+  - [Networking](docs/Networking.md)

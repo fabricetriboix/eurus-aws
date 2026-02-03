@@ -13,6 +13,48 @@ variable "cidr" {
   type        = string
 }
 
+variable "secondary_cidrs" {
+  description = "Secondary CIDRs for the VPC (typically allocated by the network team to allow access to on-prem services)"
+  type        = list(string)
+  default     = []
+}
+
+variable "enable_dhcp_options" {
+  description = "Whether to enable DHCP options for the VPC"
+  type        = bool
+  default     = false
+}
+
+variable "dhcp_options_domain_name" {
+  description = "Domain name for the DHCP options"
+  type        = string
+  default     = null
+}
+
+variable "dhcp_options_domain_name_servers" {
+  description = "Domain name servers for the DHCP options"
+  type        = list(string)
+  default     = null
+}
+
+variable "dhcp_options_ntp_servers" {
+  description = "NTP servers for the DHCP options"
+  type        = list(string)
+  default     = null
+}
+
+variable "dhcp_options_netbios_name_servers" {
+  description = "NetBIOS name servers for the DHCP options"
+  type        = list(string)
+  default     = null
+}
+
+variable "dhcp_options_netbios_node_type" {
+  description = "NetBIOS node type for the DHCP options"
+  type        = number
+  default     = null
+}
+
 variable "availability_zones" {
   description = "List of availability zones where to deploy the VPC"
   type        = list(string)
@@ -23,26 +65,21 @@ variable "availability_zones" {
   }
 }
 
-variable "public_subnets" {
-  description = "CIDRs for public subnets (can receive internet traffic). This list must have the same number of items than `availability_zones`, or be null."
+variable "workload_subnets" {
+  description = "CIDRs for workload subnets (host the workload). This list must have the same number of items as `availability_zones`, or be null."
   type        = list(string)
   default     = null
 }
 
-variable "private_subnets" {
-  description = "CIDRs for private subnets (can't receive internet traffic). This list must have the same number of items than `availability_zones`, or be null."
+variable "egress_subnets" {
+  description = "CIDRs for egress subnets (used to manage egress traffic). This list must have the same number of items as `availability_zones`, or be null."
   type        = list(string)
   default     = null
 }
 
 variable "db_subnets" {
-  description = "CIDRs for database subnets (used to host databases). This list must have the same number of items than `availability_zones`, or be null."
+  description = "CIDRs for database subnets (used to host databases). This list must have the same number of items as `availability_zones`, or be null."
   type        = list(string)
   default     = null
 }
 
-variable "internal_subnets" {
-  description = "CIDRs for internal subnets (no routing outside the VPC). This list must have the same number of items than `availability_zones`, or be null."
-  type        = list(string)
-  default     = null
-}
