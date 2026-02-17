@@ -16,6 +16,10 @@ resource "aws_vpc" "this" {
   }
 }
 
+resource "aws_default_security_group" "default" {
+  vpc_id = aws_vpc.this.id
+}
+
 resource "aws_vpc_ipv4_cidr_block_association" "this" {
   count = length(var.secondary_cidrs)
 
