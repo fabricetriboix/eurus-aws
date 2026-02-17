@@ -80,7 +80,7 @@ resource "aws_iam_role_policy_attachment" "flow_logs" {
   count = var.enable_flow_log ? 1 : 0
 
   role       = aws_iam_role.flow_log_role[0].name
-  policy_arn = aws_iam_role_policy.flow_logs[0].arn
+  policy_arn = aws_iam_policy.flow_logs[0].arn
 }
 
 resource "aws_flow_log" "this" {
