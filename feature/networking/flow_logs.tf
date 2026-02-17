@@ -17,8 +17,8 @@ module "key" {
 resource "aws_cloudwatch_log_group" "flow_logs" {
   count = var.enable_flow_log ? 1 : 0
 
-  name              = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
-  kms_key_id        = module.key[0].key_arn
+  name       = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
+  kms_key_id = module.key[0].key_arn
 
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
   retention_in_days = var.flow_log_retention_days
