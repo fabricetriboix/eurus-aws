@@ -1,3 +1,13 @@
+variable "org" {
+  description = "Name of the organization"
+  type        = string
+}
+
+variable "project" {
+  description = "Name of the project"
+  type        = string
+}
+
 variable "env" {
   description = "Name of the environment this VPC will be deployed to (eg: dev, stg, prd)"
   type        = string
@@ -69,4 +79,16 @@ variable "egress_subnets" {
   description = "CIDRs for egress subnets (used to manage egress traffic). This list must have the same number of items as `availability_zones`, or be null if no egress is needed."
   type        = list(string)
   default     = null
+}
+
+variable "enable_flow_log" {
+  description = "Whether to enable flow logs for the VPC"
+  type        = bool
+  default     = true
+}
+
+variable "flow_log_retention_days" {
+  description = "Retention days for flow logs"
+  type        = number
+  default     = 30
 }

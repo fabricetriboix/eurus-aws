@@ -1,9 +1,4 @@
-check "egress_length_matches_az_count" {
-  assert {
-    condition     = var.egress_subnets == null || (length(var.egress_subnets) == length(var.availability_zones))
-    error_message = "egress_subnets and availability_zones must have the same number of elements."
-  }
-}
+# VPC
 
 resource "aws_vpc" "this" {
   cidr_block                           = var.cidr
@@ -11,9 +6,9 @@ resource "aws_vpc" "this" {
   enable_dns_support                   = true
   enable_network_address_usage_metrics = true
 
-  tags = {
-    Name = "${var.env}"
-  }
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}"
+  })
 }
 
 resource "aws_default_security_group" "default" {
@@ -35,6 +30,10 @@ resource "aws_vpc_dhcp_options" "this" {
   ntp_servers          = var.dhcp_options_ntp_servers
   netbios_name_servers = var.dhcp_options_netbios_name_servers
   netbios_node_type    = var.dhcp_options_netbios_node_type
+
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}-dhcp-options"
+  })
 }
 
 resource "aws_vpc_dhcp_options_association" "this" {
@@ -44,6 +43,15 @@ resource "aws_vpc_dhcp_options_association" "this" {
   dhcp_options_id = aws_vpc_dhcp_options.this[0].id
 }
 
+# Subnets & routing tables
+
+check "egress_length_matches_az_count" {
+  assert {
+    condition     = var.egress_subnets == null || (length(var.egress_subnets) == length(var.availability_zones))
+    error_message = "egress_subnets and availability_zones must have the same number of elements."
+  }
+}
+
 resource "aws_subnet" "egress" {
   count = length(var.egress_subnets)
 
@@ -51,9 +59,9 @@ resource "aws_subnet" "egress" {
   cidr_block        = var.egress_subnets[count.index]
   availability_zone = var.availability_zones[count.index]
 
-  tags = {
-    Name = "${var.env}-egress-${var.availability_zones[count.index]}"
-  }
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
+  })
 }
 
 resource "aws_route_table" "egress" {
@@ -61,9 +69,9 @@ resource "aws_route_table" "egress" {
 
   vpc_id = aws_vpc.this.id
 
-  tags = {
-    Name = "${var.env}-egress-${var.availability_zones[count.index]}"
-  }
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
+  })
 }
 
 resource "aws_route_table_association" "egress" {
