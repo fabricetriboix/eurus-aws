@@ -65,21 +65,8 @@ variable "availability_zones" {
   }
 }
 
-variable "workload_subnets" {
-  description = "CIDRs for workload subnets (host the workload). This list must have the same number of items as `availability_zones`, or be null."
-  type        = list(string)
-  default     = null
-}
-
 variable "egress_subnets" {
-  description = "CIDRs for egress subnets (used to manage egress traffic). This list must have the same number of items as `availability_zones`, or be null."
+  description = "CIDRs for egress subnets (used to manage egress traffic). This list must have the same number of items as `availability_zones`, or be null if no egress is needed."
   type        = list(string)
   default     = null
 }
-
-variable "db_subnets" {
-  description = "CIDRs for database subnets (used to host databases). This list must have the same number of items as `availability_zones`, or be null."
-  type        = list(string)
-  default     = null
-}
-

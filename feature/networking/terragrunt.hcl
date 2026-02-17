@@ -4,11 +4,15 @@
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
 #     values.cidr: CIDR for the VPC
-#     values.availability_zones
-#     values.public_subnets
-#     values.private_subnets
-#     values.db_subnets
-#     values.internal_subnets
+#     values.secondary_cidrs: List of secondary CIDRs, if any
+#     values.enable_dhcp_options: Boolean
+#     values.dhcp_options_domain_name: Domain suffix for resolving non-FQDNs
+#     values.dhcp_options_domain_name_servers: List of name servers to configure via DHCP
+#     values.dhcp_options_ntp_servers: List of NTP servers to configure via DHCP
+#     values.dhcp_options_netbios_name_servers: List of NETBIOS name servers
+#     values.dhcp_options_netbios_node_type: The NetBIOS node type (1, 2, 4, or 8)
+#     values.availability_zones: List of availability zones (minimum 2)
+#     values.egress_subnets: List of CIDRs for the egress subnets
 
 include "global" {
   path   = find_in_parent_folders("global.hcl")
@@ -40,11 +44,15 @@ terraform {
 }
 
 inputs = {
-  env                = values.env
-  cidr               = values.cidr
-  availability_zones = values.availability_zones
-  public_subnets     = values.public_subnets
-  private_subnets    = values.private_subnets
-  db_subnets         = values.db_subnets
-  internal_subnets   = values.internal_subnets
+  env                               = values.env
+  cidr                              = values.cidr
+  secondary_cidrs                   = values.secondary_cidrs
+  enable_dhcp_options               = values.enable_dhcp_options
+  dhcp_options_domain_name          = values.dhcp_options_domain_name
+  dhcp_options_domain_name_servers  = values.dhcp_options_domain_name_servers
+  dhcp_options_ntp_servers          = values.dhcp_options_ntp_servers
+  dhcp_options_netbios_name_servers = values.dhcp_options_netbios_name_servers
+  dhcp_options_netbios_node_type    = values.dhcp_options_netbios_node_type
+  availability_zones                = values.availability_zones
+  egress_subnets                    = values.egress_subnets
 }
