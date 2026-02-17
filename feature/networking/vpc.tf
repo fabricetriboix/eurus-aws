@@ -1,4 +1,9 @@
-# VPC and subnets
+check "egress_length_matches_az_count" {
+  assert {
+    condition     = var.egress_subnets == null || (length(var.egress_subnets) == length(var.availability_zones))
+    error_message = "egress_subnets and availability_zones must have the same number of elements."
+  }
+}
 
 resource "aws_vpc" "this" {
   cidr_block                           = var.cidr
@@ -36,7 +41,7 @@ resource "aws_vpc_dhcp_options_association" "this" {
 }
 
 resource "aws_subnet" "egress" {
-  count = local.egress_subnet_count
+  count = length(var.egress_subnets)
 
   vpc_id            = aws_vpc.this.id
   cidr_block        = var.egress_subnets[count.index]
@@ -47,10 +52,8 @@ resource "aws_subnet" "egress" {
   }
 }
 
-// Route tables
-
 resource "aws_route_table" "egress" {
-  count = local.egress_subnet_count
+  count = length(var.egress_subnets)
 
   vpc_id = aws_vpc.this.id
 
@@ -60,7 +63,7 @@ resource "aws_route_table" "egress" {
 }
 
 resource "aws_route_table_association" "egress" {
-  count = local.egress_subnet_count
+  count = length(var.egress_subnets)
 
   subnet_id      = aws_subnet.egress[count.index].id
   route_table_id = aws_route_table.egress[count.index].id
