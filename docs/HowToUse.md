@@ -2,23 +2,37 @@
 
 Your circumstances are probably such that `eurus-aws` can't be
 directly used within your organisation because it won't be compliant
-with your compliance policies, or the way you do things in your
-organisation. For example, you might use GitLab instead of GitHub,
-or the security is not tight enough, etc. This all means that you will
+with your compliance policies, or the way things are done in your
+organisation. For example, you might use GitLab instead of GitHub, or
+the security is not tight enough, etc. This all means that you will
 likely need to take the code and adapt it to your situation.
 
 I obviously can't cover all specific circumstances, so I will detail
 here how `eurus-aws` can be used in exactly the same manner it is used
 here.
 
-Obviously, you will need to fork the repo or copy the code somehow.
+## Prerequisites
+
+Fork the [eurus-aws](https://github.com/fabricetriboix/eurus-aws)
+repo. Instructions are
+[here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
+It seems tags are not copied anymore, so here is how to get the tags
+(this is necessary, otherwise nothing will work):
+
+```bash
+$ git remote add upstream https://github.com/fabricetriboix/eurus-aws
+$ git fetch --tags upstream
+$ git push --tags
+```
+
 You will also need to have fulfilled all the prerequisistes listed
 in the top-level [README](../README.md) file.
 
 ## Bootstrap
 
 The first step is to create backends (S3 and DynamoDB table) for the
-Terraform states. This has to be done manually.
+Terraform states. This has to be done manually. There will be one
+bucket and one DynamoDB table per AWS account.
 
 If the account where you want to deploy is different from the account
 from where you have credentials, you might first need to run something
@@ -36,7 +50,8 @@ $ aws sts get-caller-identity
 ```
 
 NB: There are more elegant ways to achieve the same result using AWS
-Identity Center, but this is outside the scope of this project.
+Identity Center, or even in `~/.aws/config`, but this is outside the
+scope of this project.
 
 Example commands for the common-nonprod backend:
 
@@ -48,3 +63,21 @@ $ terragrunt apply
 ```
 
 You will then need to decide where to store the Terraform state file.
+
+## Create the infrastructure
+
+First, you will need to decide on your network topology and your
+CIDRs. You will also need to modify the code and add any necessary
+resources to access your on-prem services (if any). This typically
+takes the form of a Transit Gateway with VPNs, but every
+infrastructure is different and it's not possible for `eurus-aws` to
+cater for every possible scenario.
+
+Generally speaking, you should avoid any overlap in CIDRs. This is
+because you might want to create routes between VPCs and overlapping
+CIDRs will make this impossible.
+
+Every environment is described by a `config.yaml` file. As far as
+possible, every configuration parameter should go into this file in
+order to make it easy to review and modify the configuration of a
+given environment.

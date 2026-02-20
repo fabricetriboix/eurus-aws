@@ -1,3 +1,13 @@
+variable "org" {
+  description = "Name of the organization"
+  type        = string
+}
+
+variable "project" {
+  description = "Name of the project"
+  type        = string
+}
+
 variable "env" {
   description = "Name of the environment this VPC will be deployed to (eg: dev, stg, prd)"
   type        = string
@@ -13,6 +23,48 @@ variable "cidr" {
   type        = string
 }
 
+variable "secondary_cidrs" {
+  description = "Secondary CIDRs for the VPC (typically allocated by the network team to allow access to on-prem services)"
+  type        = list(string)
+  default     = []
+}
+
+variable "enable_dhcp_options" {
+  description = "Whether to enable DHCP options for the VPC"
+  type        = bool
+  default     = false
+}
+
+variable "dhcp_options_domain_name" {
+  description = "Domain name for the DHCP options"
+  type        = string
+  default     = null
+}
+
+variable "dhcp_options_domain_name_servers" {
+  description = "Domain name servers for the DHCP options"
+  type        = list(string)
+  default     = null
+}
+
+variable "dhcp_options_ntp_servers" {
+  description = "NTP servers for the DHCP options"
+  type        = list(string)
+  default     = null
+}
+
+variable "dhcp_options_netbios_name_servers" {
+  description = "NetBIOS name servers for the DHCP options"
+  type        = list(string)
+  default     = null
+}
+
+variable "dhcp_options_netbios_node_type" {
+  description = "NetBIOS node type for the DHCP options"
+  type        = number
+  default     = null
+}
+
 variable "availability_zones" {
   description = "List of availability zones where to deploy the VPC"
   type        = list(string)
@@ -23,46 +75,20 @@ variable "availability_zones" {
   }
 }
 
-variable "public_subnet_bits" {
-  description = "Number of bits to use for the public subnet CIDRs"
-  type        = number
-  default     = 8
-
-  validation {
-    condition     = var.public_subnet_bits > 0
-    error_message = "The number of bits for public subnet CIDRs must be at least 1."
-  }
+variable "egress_subnets" {
+  description = "CIDRs for egress subnets (used to manage egress traffic). This list must have the same number of items as `availability_zones`, or be null if no egress is needed."
+  type        = list(string)
+  default     = null
 }
 
-variable "private_subnet_bits" {
-  description = "Number of bits to use for the private subnet CIDRs"
-  type        = number
-  default     = 8
-
-  validation {
-    condition     = var.private_subnet_bits > 0
-    error_message = "The number of bits for private subnet CIDRs must be at least 1."
-  }
+variable "enable_flow_log" {
+  description = "Whether to enable flow logs for the VPC"
+  type        = bool
+  default     = true
 }
 
-variable "db_subnet_bits" {
-  description = "Number of bits to use for the database subnet CIDRs"
+variable "flow_log_retention_days" {
+  description = "Retention days for flow logs"
   type        = number
-  default     = 8
-
-  validation {
-    condition     = var.db_subnet_bits > 0
-    error_message = "The number of bits for database subnet CIDRs must be at least 1."
-  }
-}
-
-variable "internal_subnet_bits" {
-  description = "Number of bits to use for the internal subnet CIDRs. Internal subnets are routable only within the VPC itself."
-  type        = number
-  default     = 8
-
-  validation {
-    condition     = var.internal_subnet_bits > 0
-    error_message = "The number of bits for internal subnet CIDRs must be at least 1."
-  }
+  default     = 30
 }
