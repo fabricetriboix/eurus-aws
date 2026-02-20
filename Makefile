@@ -5,6 +5,7 @@ CHECKOV_QUIET ?= 1
 MODULES := bootstrap
 FEATURES := networking
 BOOTSTRAPS := common-nonprod
+ENVS := common-nonprod
 
 ## This help screen
 help:
@@ -47,5 +48,14 @@ ci-bootstrap-%:
 		tofu fmt -check -recursive . && \
 		terragrunt init -upgrade && \
 		terragrunt validate && \
+		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
+		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
+
+ci-env-%:
+	@set -euxo pipefail && \
+		cd env/$* && \
+		terragrunt stack generate && \
+		terragrunt stack run init && \
+		terragrunt stack run plan && \
 		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
 		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
