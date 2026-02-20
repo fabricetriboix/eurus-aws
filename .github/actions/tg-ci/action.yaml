@@ -35,21 +35,22 @@ runs:
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0
 
-  - name: Run Checkov
-    uses: bridgecrewio/checkov-action@v12
-    with:
-      directory: ./${{ inputs.component-type }}/${{ inputs.component-name }}
-      quiet: true
-      output_format: cli,sarif
-      output_file_path: console,results.sarif
+  # It seems Checkov doesn't do anything on Terragrunt stacks...
+  # - name: Run Checkov
+  #   uses: bridgecrewio/checkov-action@v12
+  #   with:
+  #     directory: ./${{ inputs.component-type }}/${{ inputs.component-name }}
+  #     quiet: true
+  #     output_format: cli,sarif
+  #     output_file_path: console,results.sarif
 
-  - name: Upload Checkov SARIF file
-    uses: github/codeql-action/upload-sarif@v4
-    # Results are generated only on a success or failure
-    # this is required since GitHub by default won't run the next step
-    # when the previous one has failed. Security checks that do not pass will 'fail'.
-    # An alternative is to add `continue-on-error: true` to the previous step
-    # Or 'soft_fail: true' to checkov.
-    if: success() || failure()
-    with:
-      sarif_file: results.sarif
+  # - name: Upload Checkov SARIF file
+  #   uses: github/codeql-action/upload-sarif@v4
+  #   # Results are generated only on a success or failure
+  #   # this is required since GitHub by default won't run the next step
+  #   # when the previous one has failed. Security checks that do not pass will 'fail'.
+  #   # An alternative is to add `continue-on-error: true` to the previous step
+  #   # Or 'soft_fail: true' to checkov.
+  #   if: success() || failure()
+  #   with:
+  #     sarif_file: results.sarif

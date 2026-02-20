@@ -1,4 +1,4 @@
-name: OpenTofu CI - env/common/nonprod
+name: OpenTofu CI - env/common-nonprod
 
 on:
   pull_request:
@@ -9,9 +9,9 @@ on:
     branches:
     - main
     paths:
-    - env/common/nonprod/**
+    - env/common-nonprod/**
     - .github/workflows/env-common-nonprod-ci.yaml
-    - .github/actions/tf-ci/**
+    - .github/actions/tg-ci/**
     - Makefile
 
 jobs:
