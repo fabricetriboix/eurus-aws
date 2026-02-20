@@ -15,6 +15,12 @@ runs:
   - name: Install OpenTofu and Terragrunt
     uses: gruntwork-io/terragrunt-action@v3
 
+  - name: Print Terragrunt and OpenTofu versions
+    shell: bash
+    run: |
+      echo "Terragrunt version: $(terragrunt version)"
+      echo "OpenTofu version: $(tofu version)"
+
   - name: Ensure TF cache folder exists
     shell: bash
     run: mkdir -p /tmp/tf-cache
