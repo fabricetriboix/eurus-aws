@@ -3,7 +3,7 @@
 This section explains how networking works for `eurus-aws`. Please
 note that only IPv4 is supported. There is no support for IPv6.
 
-![Networking](eurus-aws-networking.png)
+![Networking](assets/eurus-aws-networking.png)
 
 There is one VPC per environment. Each VPC has a primary CIDR
 associated with it. It is possible to associate secondary CIDR to the
