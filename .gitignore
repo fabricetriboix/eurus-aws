@@ -50,3 +50,4 @@ venv
 
 # Terragrunt
 .terragrunt-cache
+.terragrunt-stack

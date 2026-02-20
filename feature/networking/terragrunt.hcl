@@ -1,5 +1,6 @@
 # Required values:
 #
+#     values.enabled: Whether to enable or disable this feature
 #     values.account_type: Type of AWS account, either "common" or "app"
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
@@ -23,6 +24,12 @@ include "global" {
 
 locals {
   unit_name = "feature-networking"
+  enabled   = try(values.enabled, true)
+}
+
+exclude {
+  if     = !local.enabled
+  actions = ["all"]
 }
 
 generate "backend" {
@@ -59,6 +66,6 @@ inputs = {
   dhcp_options_netbios_node_type    = values.dhcp_options_netbios_node_type
   availability_zones                = values.availability_zones
   egress_subnets                    = values.egress_subnets
-  enable_flow_logs                  = values.egress.enable_flow_logs
+  enable_flow_logs                  = values.enable_flow_logs
   flow_log_retention_days           = values.flow_log_retention_days
 }
