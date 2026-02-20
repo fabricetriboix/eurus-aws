@@ -66,19 +66,18 @@ You will then need to decide where to store the Terraform state file.
 
 ## Create the infrastructure
 
-First, you will need to decide on your network topology. You have the
-option to use public subnets, but I do not recommend it and in most
-cases that should be useless because you will use some AWS services to
-front your workloads (CloudFront, load balancers, etc.)
-
-Database subnets will be used to host databases, of course.
-
-Internal subnets don't have any routing outside the VPC and are where
-your workloads should be placed.
-
-Private subnets have routing access but can't receive any internet
-traffic. These subnets would typically used to place egress gateways.
+First, you will need to decide on your network topology and your
+CIDRs. You will also need to modify the code and add any necessary
+resources to access your on-prem services (if any). This typically
+takes the form of a Transit Gateway with VPNs, but every
+infrastructure is different and it's not possible for `eurus-aws` to
+cater for every possible scenario.
 
 Generally speaking, you should avoid any overlap in CIDRs. This is
 because you might want to create routes between VPCs and overlapping
 CIDRs will make this impossible.
+
+Every environment is described by a `config.yaml` file. As far as
+possible, every configuration parameter should go into this file in
+order to make it easy to review and modify the configuration of a
+given environment.
