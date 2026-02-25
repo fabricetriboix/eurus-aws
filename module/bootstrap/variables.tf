@@ -28,7 +28,32 @@ variable "realm" {
   }
 }
 
-variable "is_common" {
-  description = "Whether the target bootstrap is a 'common' account or not"
-  type        = bool
+variable "account_id" {
+  description = "The account ID"
+  type        = string
+
+  validation {
+    condition     = length(var.account_id) > 1
+    error_message = "The `account_id` must be set."
+  }
+}
+
+variable "account_type" {
+  description = "The account type (common or app) "
+  type        = string
+
+  validation {
+    condition     = var.account_type == "common" || var.account_type == "app"
+    error_message = "The `account_type` must be either 'common' or 'app'."
+  }
+}
+
+variable "region" {
+  description = "The region to deploy the bootstrap module to"
+  type        = string
+
+  validation {
+    condition     = length(var.region) > 1
+    error_message = "The `region` must be set."
+  }
 }
