@@ -15,10 +15,32 @@ Obviously, you will need to fork the repo or copy the code somehow.
 You will also need to have fulfilled all the prerequisistes listed
 in the top-level [README](../README.md) file.
 
+## Allow GitHub workflows to call the AWS API
+
+You will need to figure out how the GitHub workflows will authenticate
+to AWS. This is highly dependent on your organisation, compliance
+aspect, security aspects, etc.
+
+In the case of this repo, I configured GitHub to be an identity
+provider in the AWS management account. I then created an IAM policy
+that allows assuming roles in the children accounts with necessary
+permissions to allow Terraform to do its job. Then I created an IAM
+role in the AWS management account and attached the above IAM policy.
+Then I created IAM roles in each of the children account to allow
+Terraform to do its job, and set their trust policies to allow the IAM
+role in the AWS management account to assume them. This is all done in
+the bootstrap (see next section).
+
+Finally I configured the GitHub workflows to assume this role.
+
 ## Bootstrap
 
 The first step is to create backends (S3 and DynamoDB table) for the
-Terraform states. This has to be done manually.
+Terraform states. This has to be done manually. There will be one
+bucket and one DynamoDB table per AWS account. This is done by the
+[bootstrap](../bootstrap) component. In addition, the bootstrap
+component will create IAM policies and roles to allow Terraform to do
+its job.
 
 If the account where you want to deploy is different from the account
 from where you have credentials, you might first need to run something

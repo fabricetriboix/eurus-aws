@@ -43,6 +43,7 @@ TODO.md
 *.lock.hcl
 .terragrunt-cache
 tg_generated_*.tf
+.env
 
 # Python stuff
 venv

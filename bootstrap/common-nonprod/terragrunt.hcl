@@ -3,6 +3,10 @@ include "global" {
   expose = true
 }
 
+locals {
+  children_account_ids = split(",", get_env("CHILDREN_ACCOUNT_IDS"))
+}
+
 generate "aws_provider" {
   path      = "providers.tf"
   if_exists = "overwrite_terragrunt"
@@ -29,5 +33,20 @@ provider "aws" {
     }
   }
 }
+
+%{ for account_id in local.children_account_ids }
+provider "aws" {
+  alias  = "aws-${account_id}"
+  region = "${include.global.locals.region}"
+
+  assume_role {
+    role_arn = "arn:aws:iam::${account_id}:role/OrganizationAccountAccessRole"
+  }
+}
+%{ endfor }
 EOF
+}
+
+inputs = {
+  children_account_ids = local.children_account_ids
 }

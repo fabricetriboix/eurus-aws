@@ -32,3 +32,8 @@ variable "is_common" {
   description = "Whether the target bootstrap is a 'common' account or not"
   type        = bool
 }
+
+variable "children_account_ids" {
+  description = "List of account IDs of the child accounts"
+  type        = list(string)
+}
