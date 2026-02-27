@@ -9,7 +9,7 @@ variable "org" {
 }
 
 variable "project" {
-  description = "The project for this bootstrap"
+  description = "The project name of the platform to bootstrap"
   type        = string
 
   validation {
@@ -18,42 +18,42 @@ variable "project" {
   }
 }
 
-variable "realm" {
-  description = "In which realm to deploy this bootstrap module (typically nonprod or prod)"
-  type        = string
-
-  validation {
-    condition     = length(var.realm) > 1
-    error_message = "The `realm` must be set."
-  }
-}
-
-variable "account_id" {
-  description = "The account ID"
-  type        = string
-
-  validation {
-    condition     = length(var.account_id) > 1
-    error_message = "The `account_id` must be set."
-  }
-}
-
-variable "account_type" {
-  description = "The account type (common or app) "
-  type        = string
-
-  validation {
-    condition     = var.account_type == "common" || var.account_type == "app"
-    error_message = "The `account_type` must be either 'common' or 'app'."
-  }
-}
-
 variable "region" {
-  description = "The region to deploy the bootstrap module to"
+  description = "The region where the platform to bootstrap is located"
   type        = string
 
   validation {
     condition     = length(var.region) > 1
-    error_message = "The `region` must be set."
+    error_message = "The `region` variable must be set."
+  }
+}
+
+variable "realm" {
+  description = "Realm the AWS account belongs to (typically `nonprod` or `prod`)"
+  type        = string
+
+  validation {
+    condition     = length(var.realm) > 1
+    error_message = "The `realm` variable must be set."
+  }
+}
+
+variable "account_id" {
+  description = "ID of the AWS account to bootstrap"
+  type        = string
+
+  validation {
+    condition     = length(var.account_id) > 1
+    error_message = "The `account_id` variable must be set."
+  }
+}
+
+variable "account_type" {
+  description = "The account type of the AWS account to bootstrap (must be either `common` or `app`)"
+  type        = string
+
+  validation {
+    condition     = var.account_type == "common" || var.account_type == "app"
+    error_message = "The `account_type` variable must be either `common` or `app`."
   }
 }

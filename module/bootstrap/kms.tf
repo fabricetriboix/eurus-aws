@@ -9,6 +9,7 @@ module "key" {
   rotation_period_in_days = 90
 
   tags = merge(local.tags, {
-    Name = "alias/${local.kms_alias}"
+    Name    = "alias/${local.kms_alias}",
+    Purpose = "Encrypt OpenTofu state files and access logs"
   })
 }

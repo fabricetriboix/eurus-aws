@@ -22,6 +22,7 @@ module "logs_bucket" {
     }
   }
 
+  # Don't keep logs forever
   lifecycle_rule = [
     {
       id     = "cleanup"
@@ -64,6 +65,7 @@ module "tf_bucket" {
     }
   }
 
+  # Remove versions of the state files older than 1 year
   lifecycle_rule = [
     {
       id     = "cleanup"
