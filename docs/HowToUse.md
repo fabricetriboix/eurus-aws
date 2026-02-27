@@ -15,30 +15,62 @@ Obviously, you will need to fork the repo or copy the code somehow.
 You will also need to have fulfilled all the prerequisistes listed
 in the top-level [README](../README.md) file.
 
+## Allow GitHub workflows to call the AWS API
+
+You will need to figure out how the GitHub workflows will authenticate
+to AWS. This is highly dependent on your organisation, compliance
+aspect, security aspects, etc.
+
+In the case of this repo, I configured GitHub to be an identity
+provider in the AWS management account. Then the bootstrap unit (see
+next section) creates the necessary IAM policies and roles to allow
+OpenTofu to do its job.
+
+Finally I configured the GitHub workflows to assume the management
+role created by the bootstrap unit.
+
 ## Bootstrap
 
 The first step is to create backends (S3 and DynamoDB table) for the
-Terraform states. This has to be done manually.
+OpenTofu states. There will be one bucket and one DynamoDB table per
+AWS account. This is done by the [bootstrap](../bootstrap) unit. In
+addition, the bootstrap unit will create IAM policies and roles to
+give the GitHub workflows to necessary permissions to execute
+Terragrunt and OpenTofu.
 
-If the account where you want to deploy is different from the account
-from where you have credentials, you might first need to run something
-like this:
+You will need to create a file named `accounts.hcl` in the
+[bootstrap](bootstrap/) directory. This file should look like this:
 
-```sh
-$ creds=$(aws sts assume-role \
-  --role-arn arn:aws:iam::<CHILD_ACCOUNT_ID>:role/<ROLE_NAME> \
-  --role-session-name tf \
-  --output json)
-$ export AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r .Credentials.AccessKeyId)
-$ export AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r .Credentials.SecretAccessKey)
-$ export AWS_SESSION_TOKEN=$(echo "$creds" | jq -r .Credentials.SessionToken)
-$ aws sts get-caller-identity
+```hcl
+locals {
+  accounts = {
+    common-nonprod = {
+      id    = "001122334455"
+      type  = "common"
+      realm = "nonprod"
+    }
+    common-prod = {
+      id    = "001122334455"
+      type  = "common"
+      realm = "prod"
+    }
+    dev = {
+      id    = "001122334455"
+      type  = "app"
+      realm = "nonprod"
+    }
+    prod = {
+      id    = "001122334455"
+      type  = "app"
+      realm = "prod"
+    }
+  }
+}
 ```
 
-NB: There are more elegant ways to achieve the same result using AWS
-Identity Center, but this is outside the scope of this project.
+Obviously, use the real account IDs for your setup.
 
-Example commands for the common-nonprod backend:
+Then run the following manually:
 
 ```sh
 $ cd bootstrap/common-nonprod
@@ -47,4 +79,4 @@ $ terragrunt plan
 $ terragrunt apply
 ```
 
-You will then need to decide where to store the Terraform state file.
+You will then need to decide where to store the OpenTofu state file.

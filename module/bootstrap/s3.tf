@@ -1,5 +1,5 @@
 locals {
-  tf_bucket_name   = "${var.org}-${var.project}-${local.account_type}-${var.realm}-tf"
+  tf_bucket_name   = "${var.org}-${var.project}-${var.account_type}-${var.realm}-tf"
   logs_bucket_name = "${local.tf_bucket_name}-logs"
 }
 
@@ -8,19 +8,21 @@ module "logs_bucket" {
   source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
 
   bucket              = local.logs_bucket_name
+  region              = var.region
   allowed_kms_key_arn = module.key.key_arn
 
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm            = "aws:kms"
-        kms_master_key_id        = "alias/tf"
+        kms_master_key_id        = "alias/${local.kms_alias}"
         bucket_key_enabled       = true
         blocked_encryption_types = ["SSE-C"]
       }
     }
   }
 
+  # Don't keep logs forever
   lifecycle_rule = [
     {
       id     = "cleanup"
@@ -49,19 +51,21 @@ module "tf_bucket" {
   source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
 
   bucket              = local.tf_bucket_name
+  region              = var.region
   allowed_kms_key_arn = module.key.key_arn
 
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm            = "aws:kms"
-        kms_master_key_id        = "alias/tf"
+        kms_master_key_id        = "alias/${local.kms_alias}"
         bucket_key_enabled       = true
         blocked_encryption_types = ["SSE-C"]
       }
     }
   }
 
+  # Remove versions of the state files older than 1 year
   lifecycle_rule = [
     {
       id     = "cleanup"
