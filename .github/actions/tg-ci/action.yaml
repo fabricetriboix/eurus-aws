@@ -3,10 +3,10 @@ description: Run TG checks
 
 inputs:
   component-type:
-    description: "Type of component to run CI on, eg: `bootstrap`"
+    description: "Type of component to run CI on, eg: `env`"
     required: true
   component-name:
-    description: "Name of the component to run CI on, eg: `nonprod`"
+    description: "Name of the component to run CI on, eg: `dev`"
     required: true
 
 runs:
