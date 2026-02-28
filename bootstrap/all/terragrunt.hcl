@@ -23,7 +23,7 @@ terraform {
 }
 
 provider "aws" {
-  region = include.global.locals.region
+  region = "${include.global.locals.region}"
 
   default_tags {
     tags = {
@@ -83,4 +83,9 @@ module "bootstrap_${account_name}" {
 }
 %{ endfor }
 EOF
+}
+
+inputs = {
+  region   = include.global.locals.region
+  accounts = include.accounts.locals.accounts
 }
