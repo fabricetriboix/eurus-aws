@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-    account_id = data.aws_caller_identity.current.account_id
+  account_id = data.aws_caller_identity.current.account_id
 }
 
 data "aws_iam_policy_document" "github_actions_assume_role_policy" {

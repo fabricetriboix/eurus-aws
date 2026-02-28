@@ -10,7 +10,7 @@ variable "region" {
 
 variable "accounts" {
   description = "A map of AWS accounts to bootstrap"
-  type        = map(object({
+  type = map(object({
     id    = string
     type  = string
     realm = string
