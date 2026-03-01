@@ -38,6 +38,13 @@ addition, the bootstrap unit will create IAM policies and roles to
 give the GitHub workflows to necessary permissions to execute
 Terragrunt and OpenTofu.
 
+It should be noted that, as it stands, the IAM roles deployed by the
+`bootstrap` have `AdministratorAccess` permissions. This is obviously
+unacceptable and you should give these roles appropriate permissions
+based on the least privilege principle, according to your compliance
+and security needs. You should do this in the [bootstrap
+module](../module/bootstrap/tf-iam.tf).
+
 You will need to create a file named `accounts.hcl` in the
 [bootstrap](bootstrap/) directory. This file should look like this:
 

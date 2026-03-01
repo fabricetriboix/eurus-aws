@@ -30,6 +30,11 @@ data "aws_iam_policy_document" "github_actions_assume_role_policy" {
 resource "aws_iam_role" "github_actions_role" {
   name               = "github-actions-role"
   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role_policy.json
+
+  tags = {
+    Name    = "github-actions-role"
+    Purpose = "Allow GitHub workflows to assume this role to deploy OpenTofu"
+  }
 }
 
 data "aws_iam_policy_document" "assume_subaccount" {
@@ -47,6 +52,10 @@ resource "aws_iam_policy" "assume_subaccount" {
 
   name   = "tf-assume-subaccount-${each.key}-${var.region}"
   policy = data.aws_iam_policy_document.assume_subaccount[each.key].json
+
+  tags = {
+    Name = "tf-assume-subaccount-${each.key}-${var.region}"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_role_policy_attachment" {

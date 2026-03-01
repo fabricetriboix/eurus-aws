@@ -72,14 +72,16 @@ module "bootstrap_${account_name}" {
   }
 
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v0.2.1"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v0.2.1"
+  #source = "../../module/bootstrap"
 
-  org          = "${include.global.locals.org}"
-  project      = "${include.global.locals.project}"
-  region       = "${include.global.locals.region}"
-  realm        = "${account.realm}"
-  account_id   = "${account.id}"
-  account_type = "${account.type}"
+  org                        = "${include.global.locals.org}"
+  project                    = "${include.global.locals.project}"
+  region                     = "${include.global.locals.region}"
+  realm                      = "${account.realm}"
+  account_id                 = "${account.id}"
+  account_type               = "${account.type}"
+  management_github_role_arn = aws_iam_role.github_actions_role.arn
 }
 %{ endfor }
 EOF
