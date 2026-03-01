@@ -26,6 +26,6 @@ resource "aws_iam_role" "tf_role" {
 resource "aws_iam_role_policy_attachment" "tf_role_attachment" {
   role = aws_iam_role.tf_role.name
 
-  # checkov:skip=CKV_AWS_274:AdministratorAccess is allowed as an exception
+  # checkov:skip=CKV_AWS_274
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
