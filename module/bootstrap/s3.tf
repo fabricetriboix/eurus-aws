@@ -28,7 +28,7 @@ module "logs_bucket" {
       id     = "cleanup"
       status = "Enabled"
 
-      // Matches all objects in this bucket
+      # Matches all objects in this bucket
       filter = {}
 
       expiration = {
@@ -71,7 +71,7 @@ module "tf_bucket" {
       id     = "cleanup"
       status = "Enabled"
 
-      // Matches all objects in this bucket
+      # Matches all objects in this bucket
       filter = {}
 
       noncurrent_version_expiration = {
