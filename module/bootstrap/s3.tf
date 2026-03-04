@@ -4,7 +4,7 @@ locals {
 }
 
 module "logs_bucket" {
-  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  # checkov:skip=CKV_TF_1,CKV_TF_2:Ignore false positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
 
   bucket              = local.logs_bucket_name
@@ -47,7 +47,7 @@ module "logs_bucket" {
 }
 
 module "tf_bucket" {
-  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  # checkov:skip=CKV_TF_1,CKV_TF_2:Ignore false positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
 
   bucket              = local.tf_bucket_name
