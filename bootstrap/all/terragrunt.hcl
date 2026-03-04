@@ -23,7 +23,7 @@ terraform {
 }
 
 provider "aws" {
-  region = include.global.locals.region
+  region = "${include.global.locals.region}"
 
   default_tags {
     tags = {
@@ -72,16 +72,22 @@ module "bootstrap_${account_name}" {
   }
 
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v1.0.0"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v0.2.1"
   source = "../../module/bootstrap"
 
-  org          = "${include.global.locals.org}"
-  project      = "${include.global.locals.project}"
-  region       = "${include.global.locals.region}"
-  realm        = "${account.realm}"
-  account_id   = "${account.id}"
-  account_type = "${account.type}"
+  org                        = "${include.global.locals.org}"
+  project                    = "${include.global.locals.project}"
+  region                     = "${include.global.locals.region}"
+  realm                      = "${account.realm}"
+  account_id                 = "${account.id}"
+  account_type               = "${account.type}"
+  management_github_role_arn = aws_iam_role.github_actions_role.arn
 }
 %{ endfor }
 EOF
+}
+
+inputs = {
+  region   = include.global.locals.region
+  accounts = include.accounts.locals.accounts
 }
