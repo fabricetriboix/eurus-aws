@@ -4,7 +4,7 @@ CHECKOV ?= 1
 CHECKOV_QUIET ?= 1
 MODULES := bootstrap
 FEATURES := networking
-BOOTSTRAPS := common-nonprod
+BOOTSTRAPS := all
 ENVS := common-nonprod
 
 ## This help screen

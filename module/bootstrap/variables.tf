@@ -9,7 +9,7 @@ variable "org" {
 }
 
 variable "project" {
-  description = "The project for this bootstrap"
+  description = "The project name of the platform to bootstrap"
   type        = string
 
   validation {
@@ -18,17 +18,52 @@ variable "project" {
   }
 }
 
+variable "region" {
+  description = "The region where the platform to bootstrap is located"
+  type        = string
+
+  validation {
+    condition     = length(var.region) > 1
+    error_message = "The `region` variable must be set."
+  }
+}
+
 variable "realm" {
-  description = "In which realm to deploy this bootstrap module (typically nonprod or prod)"
+  description = "Realm the AWS account belongs to (typically `nonprod` or `prod`)"
   type        = string
 
   validation {
     condition     = length(var.realm) > 1
-    error_message = "The `realm` must be set."
+    error_message = "The `realm` variable must be set."
   }
 }
 
-variable "is_common" {
-  description = "Whether the target bootstrap is a 'common' account or not"
-  type        = bool
+variable "account_id" {
+  description = "ID of the AWS account to bootstrap"
+  type        = string
+
+  validation {
+    condition     = length(var.account_id) > 1
+    error_message = "The `account_id` variable must be set."
+  }
+}
+
+variable "account_type" {
+  description = "The account type of the AWS account to bootstrap (must be either `common` or `app`)"
+  type        = string
+
+  validation {
+    condition     = var.account_type == "common" || var.account_type == "app"
+    error_message = "The `account_type` variable must be either `common` or `app`."
+  }
+}
+
+variable "management_github_role_arn" {
+  description = "The ARN of the GitHub role in the management account"
+  type        = string
+
+  validation {
+    condition     = length(var.management_github_role_arn) > 1
+    error_message = "The `management_github_role_arn` variable must be set."
+  }
 }

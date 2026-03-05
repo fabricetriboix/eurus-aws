@@ -1,7 +1,7 @@
 locals {
   region  = "eu-west-1"
-  org     = "myorg"
-  project = "myproject"
+  org     = "ft"
+  project = "eurus"
 
   tf_bucket_prefix = "${local.org}-${local.project}"
 
@@ -9,6 +9,6 @@ locals {
   # like so: "{tf_bucket_prefix}-{account_type}-{realm}-tf"
   #
   # Examples:
-  #   - "myorg-myproject-common-nonprod-tf"
-  #   - "myorg-myproject-app-prod-tf"
+  #   - "ft-eurus-common-nonprod-tf"
+  #   - "ft-eurus-app-prod-tf"
 }

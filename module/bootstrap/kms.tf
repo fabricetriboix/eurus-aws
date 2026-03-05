@@ -3,11 +3,13 @@ module "key" {
   source = "git::https://github.com/fabricetriboix/terraform-aws-kms.git?ref=v4.1.1-1"
 
   description             = "Key to encrypt OpenTofu state files"
+  region                  = var.region
   aliases                 = [local.kms_alias]
   deletion_window_in_days = 7
   rotation_period_in_days = 90
 
   tags = merge(local.tags, {
-    Name = "alias/${local.kms_alias}"
+    Name    = "alias/${local.kms_alias}",
+    Purpose = "Encrypt OpenTofu state files and access logs"
   })
 }

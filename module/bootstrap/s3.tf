@@ -1,32 +1,34 @@
 locals {
-  tf_bucket_name   = "${var.org}-${var.project}-${local.account_type}-${var.realm}-tf"
+  tf_bucket_name   = "${var.org}-${var.project}-${var.account_type}-${var.realm}-tf"
   logs_bucket_name = "${local.tf_bucket_name}-logs"
 }
 
 module "logs_bucket" {
-  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  # checkov:skip=CKV_TF_1,CKV_TF_2:Ignore false positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
 
   bucket              = local.logs_bucket_name
+  region              = var.region
   allowed_kms_key_arn = module.key.key_arn
 
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm            = "aws:kms"
-        kms_master_key_id        = "alias/tf"
+        kms_master_key_id        = "alias/${local.kms_alias}"
         bucket_key_enabled       = true
         blocked_encryption_types = ["SSE-C"]
       }
     }
   }
 
+  # Don't keep logs forever
   lifecycle_rule = [
     {
       id     = "cleanup"
       status = "Enabled"
 
-      // Matches all objects in this bucket
+      # Matches all objects in this bucket
       filter = {}
 
       expiration = {
@@ -45,29 +47,31 @@ module "logs_bucket" {
 }
 
 module "tf_bucket" {
-  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  # checkov:skip=CKV_TF_1,CKV_TF_2:Ignore false positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
 
   bucket              = local.tf_bucket_name
+  region              = var.region
   allowed_kms_key_arn = module.key.key_arn
 
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm            = "aws:kms"
-        kms_master_key_id        = "alias/tf"
+        kms_master_key_id        = "alias/${local.kms_alias}"
         bucket_key_enabled       = true
         blocked_encryption_types = ["SSE-C"]
       }
     }
   }
 
+  # Remove versions of the state files older than 1 year
   lifecycle_rule = [
     {
       id     = "cleanup"
       status = "Enabled"
 
-      // Matches all objects in this bucket
+      # Matches all objects in this bucket
       filter = {}
 
       noncurrent_version_expiration = {
