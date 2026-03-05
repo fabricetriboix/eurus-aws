@@ -55,7 +55,6 @@ ci-env-%:
 	@set -euxo pipefail && \
 		cd env/$* && \
 		terragrunt stack generate && \
-		terragrunt stack run init && \
 		terragrunt stack run plan && \
 		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
 		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi

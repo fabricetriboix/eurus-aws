@@ -28,7 +28,25 @@ $ git push --tags
 You will also need to have fulfilled all the prerequisistes listed
 in the top-level [README](../README.md) file.
 
-## Allow GitHub workflows to call the AWS API
+## Setup GitHub
+
+### Create environments and variables/secrets
+
+Create environments in GitHub for each environment. Example for this
+project:
+  - common-nonprod
+  - common-prod
+  - dev
+  - prod
+
+For each environment, add an `AWS_ACCOUNT_ID` variable which holds the
+ID of the AWS account that hosts this particular environment.
+
+You can customise environments to your liking, for example by
+requesting certain users to approve the workflows before being
+deployed, etc.
+
+### Allow GitHub workflows to call the AWS API
 
 You will need to figure out how the GitHub workflows will authenticate
 to AWS. This is highly dependent on your organisation, compliance
