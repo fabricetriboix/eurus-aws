@@ -1,44 +1,82 @@
-locals {
-  public_subnets = [
-    for i in var.availability_zones :
-    cidrsubnet(var.cidr, var.public_subnet_bits, i)
-  ]
+# VPC
 
-  private_subnets = [
-    for i in var.availability_zones :
-    cidrsubnet(var.cidr, var.private_subnet_bits, i + 8)
-  ]
+resource "aws_vpc" "this" {
+  cidr_block                           = var.cidr
+  enable_dns_hostnames                 = true
+  enable_dns_support                   = true
+  enable_network_address_usage_metrics = true
 
-  db_subnets = [
-    for i in var.availability_zones :
-    cidrsubnet(var.cidr, var.db_subnet_bits, i + 16)
-  ]
-
-  # "Internal subnets" don't have any routes to go outside.
-  internal_subnets = [
-    for i in var.availability_zones :
-    cidrsubnet(var.cidr, var.internal_subnet_bits, i + 24)
-  ]
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}"
+  })
 }
 
-module "vpc" {
-  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/terraform-aws-vpc.git?ref=master"
+resource "aws_default_security_group" "default" {
+  vpc_id = aws_vpc.this.id
+}
 
-  name             = var.env
-  cidr             = var.cidr
-  azs              = var.availability_zones
-  public_subnets   = local.public_subnets
-  private_subnets  = local.private_subnets
-  database_subnets = local.db_subnets
-  intra_subnets    = local.internal_subnets
+resource "aws_vpc_ipv4_cidr_block_association" "this" {
+  count = length(var.secondary_cidrs)
 
-  create_igw         = true
-  enable_nat_gateway = true
+  vpc_id     = aws_vpc.this.id
+  cidr_block = var.secondary_cidrs[count.index]
+}
 
-  enable_dns_hostnames         = true
-  enable_dns_support           = true
-  enable_flow_log              = false
-  enable_ipv6                  = false
-  create_database_subnet_group = true
+resource "aws_vpc_dhcp_options" "this" {
+  count = var.enable_dhcp_options ? 1 : 0
+
+  domain_name          = var.dhcp_options_domain_name
+  domain_name_servers  = var.dhcp_options_domain_name_servers
+  ntp_servers          = var.dhcp_options_ntp_servers
+  netbios_name_servers = var.dhcp_options_netbios_name_servers
+  netbios_node_type    = var.dhcp_options_netbios_node_type
+
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}-dhcp-options"
+  })
+}
+
+resource "aws_vpc_dhcp_options_association" "this" {
+  count = var.enable_dhcp_options ? 1 : 0
+
+  vpc_id          = aws_vpc.this.id
+  dhcp_options_id = aws_vpc_dhcp_options.this[0].id
+}
+
+# Subnets & routing tables
+
+check "egress_length_matches_az_count" {
+  assert {
+    condition     = var.egress_subnets == null || (length(var.egress_subnets) == length(var.availability_zones))
+    error_message = "egress_subnets and availability_zones must have the same number of elements."
+  }
+}
+
+resource "aws_subnet" "egress" {
+  count = length(var.egress_subnets)
+
+  vpc_id            = aws_vpc.this.id
+  cidr_block        = var.egress_subnets[count.index]
+  availability_zone = var.availability_zones[count.index]
+
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
+  })
+}
+
+resource "aws_route_table" "egress" {
+  count = length(var.egress_subnets)
+
+  vpc_id = aws_vpc.this.id
+
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
+  })
+}
+
+resource "aws_route_table_association" "egress" {
+  count = length(var.egress_subnets)
+
+  subnet_id      = aws_subnet.egress[count.index].id
+  route_table_id = aws_route_table.egress[count.index].id
 }

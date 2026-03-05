@@ -1,0 +1,19 @@
+account_type: common
+realm: nonprod
+env: common-nonprod
+
+features:
+  networking:
+    enabled: true
+    version: feature-networking-v0.1.0
+    cidr: 10.101.0.0/16
+    secondary_cidrs: [172.31.0.0/16]
+    availability_zones: [eu-west-1a, eu-west-1b]
+    egress_subnets: [10.101.0.16/28, 10.101.0.32/28]
+
+    flow_logs:
+      enabled: false
+
+#  grafana:
+#    enabled: true
+#    version: feature-grafana-v0.1.0
