@@ -1,5 +1,5 @@
 locals {
-  region  = "eu-west-1"
+  region  = get_env("AWS_REGION")
   org     = "ft"
   project = "eurus"
 

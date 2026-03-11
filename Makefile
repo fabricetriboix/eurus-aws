@@ -1,3 +1,7 @@
+# When running the Makefile, you need to ensure the following
+# environment variables are set:
+#   - AWS_REGION: Region where the platform is deployed
+
 SHELL := /bin/bash
 
 CHECKOV ?= 1

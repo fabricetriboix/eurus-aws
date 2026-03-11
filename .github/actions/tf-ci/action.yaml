@@ -8,6 +8,9 @@ inputs:
   component-name:
     description: "Name of the component to run CI on, eg: `networking`"
     required: true
+  role-arn:
+    description: "ARN of the role to assume"
+    required: true
 
 runs:
   using: composite
@@ -32,6 +35,15 @@ runs:
       restore-keys: |
         ${{ runner.os }}-tf-${{ inputs.component-type }}
         ${{ runner.os }}-tf-
+
+  - name: Assume role in child account
+    shell: bash
+    run: |
+      creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tf-ci)
+      echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
+      echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV
+      echo "AWS_SESSION_TOKEN=$(echo "$creds" | jq -r '.Credentials.SessionToken')" >> $GITHUB_ENV
+      echo "AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
 
   - name: Run CI job
     shell: bash
