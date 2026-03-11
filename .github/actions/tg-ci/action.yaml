@@ -38,6 +38,7 @@ runs:
     shell: bash
     env:
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
+      AWS_REGION: ${{ vars.AWS_REGION }}
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0
 
