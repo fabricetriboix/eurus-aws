@@ -11,6 +11,9 @@ inputs:
   role-arn:
     description: "ARN of the role to assume"
     required: true
+  aws-region:
+    description: "AWS region where the CI is running"
+    required: true
 
 runs:
   using: composite
@@ -39,20 +42,20 @@ runs:
   - name: Assume role in child account
     shell: bash
     env:
-      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_REGION: ${{ inputs.aws-region }}
     run: |
       echo "XXX role ARN: >>>${{ inputs.role-arn }}<<<"
-      echo "XXX AWS_REGION: >>>${{ vars.AWS_REGION }}<<<"
+      echo "XXX AWS_REGION: >>>${{ inputs.aws-region }}<<<"
       creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tf-ci)
       echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
       echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV
       echo "AWS_SESSION_TOKEN=$(echo "$creds" | jq -r '.Credentials.SessionToken')" >> $GITHUB_ENV
-      echo "AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
+      echo "AWS_REGION=${{ inputs.aws-region }}" >> $GITHUB_ENV
 
   - name: Run CI job
     shell: bash
     env:
-      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_REGION: ${{ inputs.aws-region }}
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0
