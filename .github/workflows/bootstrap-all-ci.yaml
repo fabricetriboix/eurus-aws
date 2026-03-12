@@ -14,12 +14,14 @@ on:
     - .github/actions/tg-ci/**
     - Makefile
 
+permissions:
+  contents: read
+  security-events: write  # For `github/codeql-action/upload-sarif` to upload SARIF results
+
 jobs:
   ci:
-    permissions:
-      contents: read
-      security-events: write  # For `github/codeql-action/upload-sarif` to upload SARIF results
     runs-on: ubuntu-latest
+    environment: bootstrap
 
     steps:
     - name: Checkout the code
@@ -30,5 +32,5 @@ jobs:
       with:
         component-type: bootstrap
         component-name: all
-        role-arn: "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/tf-role-${{ vars.AWS_REGION }}"
+        role-arn: "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-role"
         aws-region: ${{ vars.AWS_REGION }}
