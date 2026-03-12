@@ -45,8 +45,6 @@ runs:
     env:
       AWS_REGION: ${{ inputs.aws-region }}
     run: |
-      echo "XXX role ARN: >>>${{ inputs.role-arn }}<<<"
-      echo "XXX AWS_REGION: >>>${{ inputs.aws-region }}<<<"
       creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tf-ci)
       echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
       echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV

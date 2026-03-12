@@ -32,12 +32,14 @@ in the top-level [README](../README.md) file.
 
 ### Create environments and variables/secrets
 
-Create environments in GitHub for each environment. Example for this
+Create environments in GitHub for each environment, plus a `bootstrap`
+environment (which is used only for bootstrap CI). Example for this
 project:
   - common-nonprod
   - common-prod
   - dev
   - prod
+  - bootstrap
 
 For each environment, add an `AWS_ACCOUNT_ID` variable which holds the
 ID of the AWS account that hosts this particular environment. You also
