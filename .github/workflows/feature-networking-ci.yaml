@@ -30,5 +30,3 @@ jobs:
       with:
         component-type: feature
         component-name: networking
-        role-arn: "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/tf-role-${{ vars.AWS_REGION }}"
-        aws-region: ${{ vars.AWS_REGION }}
