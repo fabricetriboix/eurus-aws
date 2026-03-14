@@ -15,6 +15,11 @@ runs:
   - name: Install OpenTofu
     uses: opentofu/setup-opentofu@v1
 
+  - name: Print OpenTofu version
+    shell: bash
+    run: |
+      echo "OpenTofu version: $(tofu version)"
+
   - name: Ensure TF cache folder exists
     shell: bash
     run: mkdir -p /tmp/tf-cache
@@ -31,6 +36,7 @@ runs:
   - name: Run CI job
     shell: bash
     env:
+      AWS_REGION: ${{ inputs.aws-region }}
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0
