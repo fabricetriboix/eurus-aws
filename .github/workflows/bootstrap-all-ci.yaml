@@ -62,7 +62,7 @@ jobs:
       shell: bash
       env:
         TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
-        AWS_REGION: ${{ inputs.aws-region }}
+        AWS_REGION: ${{ vars.AWS_REGION }}
       run: |
         make ci-bootstrap-all CHECKOV=0
 
