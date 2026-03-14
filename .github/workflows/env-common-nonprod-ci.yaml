@@ -35,11 +35,6 @@ jobs:
         role-session-name: github-actions
         aws-region: ${{ vars.AWS_REGION }}
 
-    - name: STS get caller identity
-      shell: bash
-      run: |
-        aws sts get-caller-identity
-
     - name: Run CI
       uses: ./.github/actions/tg-ci
       with:
