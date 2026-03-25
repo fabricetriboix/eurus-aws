@@ -19,6 +19,8 @@ permissions:
   contents: read          # This is required for actions/checkout
   security-events: write  # For `github/codeql-action/upload-sarif` to upload SARIF results
 
+# NB: Bootstrap is a special case so we don't use the actions defined in this
+# repo, we just write our custom steps.
 jobs:
   ci:
     runs-on: ubuntu-latest

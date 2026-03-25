@@ -1,5 +1,5 @@
 module "key" {
-  count = var.enable_flow_log ? 1 : 0
+  count = var.enable_flow_logs ? 1 : 0
 
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-kms.git?ref=v4.1.1-1"
@@ -15,13 +15,13 @@ module "key" {
 }
 
 resource "aws_cloudwatch_log_group" "flow_logs" {
-  count = var.enable_flow_log ? 1 : 0
+  count = var.enable_flow_logs ? 1 : 0
 
   name       = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
   kms_key_id = module.key[0].key_arn
 
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
-  retention_in_days = var.flow_log_retention_days
+  retention_in_days = var.flow_logs_retention_days
 
   tags = merge(local.tags, {
     Name = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "flow_logs_assume_role" {
 }
 
 resource "aws_iam_role" "flow_log_role" {
-  count = var.enable_flow_log ? 1 : 0
+  count = var.enable_flow_logs ? 1 : 0
 
   name               = "${var.org}-${var.project}-${var.env}-flow-log-role"
   assume_role_policy = data.aws_iam_policy_document.flow_logs_assume_role.json
@@ -53,7 +53,7 @@ resource "aws_iam_role" "flow_log_role" {
 }
 
 data "aws_iam_policy_document" "flow_logs" {
-  count = var.enable_flow_log ? 1 : 0
+  count = var.enable_flow_logs ? 1 : 0
 
   statement {
     actions = [
@@ -68,7 +68,7 @@ data "aws_iam_policy_document" "flow_logs" {
 }
 
 resource "aws_iam_policy" "flow_logs" {
-  count = var.enable_flow_log ? 1 : 0
+  count = var.enable_flow_logs ? 1 : 0
 
   name   = "${var.org}-${var.project}-${var.env}-flow-log-policy"
   policy = data.aws_iam_policy_document.flow_logs[0].json
@@ -79,14 +79,14 @@ resource "aws_iam_policy" "flow_logs" {
 }
 
 resource "aws_iam_role_policy_attachment" "flow_logs" {
-  count = var.enable_flow_log ? 1 : 0
+  count = var.enable_flow_logs ? 1 : 0
 
   role       = aws_iam_role.flow_log_role[0].name
   policy_arn = aws_iam_policy.flow_logs[0].arn
 }
 
 resource "aws_flow_log" "this" {
-  count = var.enable_flow_log ? 1 : 0
+  count = var.enable_flow_logs ? 1 : 0
 
   vpc_id          = aws_vpc.this.id
   log_destination = aws_cloudwatch_log_group.flow_logs[0].arn

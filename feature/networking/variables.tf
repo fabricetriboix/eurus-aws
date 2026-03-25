@@ -81,13 +81,13 @@ variable "egress_subnets" {
   default     = null
 }
 
-variable "enable_flow_log" {
+variable "enable_flow_logs" {
   description = "Whether to enable flow logs for the VPC"
   type        = bool
   default     = true
 }
 
-variable "flow_log_retention_days" {
+variable "flow_logs_retention_days" {
   description = "Retention days for flow logs"
   type        = number
   default     = 30

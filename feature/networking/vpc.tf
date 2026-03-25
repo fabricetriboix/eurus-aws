@@ -53,7 +53,7 @@ check "egress_length_matches_az_count" {
 }
 
 resource "aws_subnet" "egress" {
-  count = length(var.egress_subnets)
+  count = try(length(var.egress_subnets), 0)
 
   vpc_id            = aws_vpc.this.id
   cidr_block        = var.egress_subnets[count.index]
@@ -65,7 +65,7 @@ resource "aws_subnet" "egress" {
 }
 
 resource "aws_route_table" "egress" {
-  count = length(var.egress_subnets)
+  count = try(length(var.egress_subnets), 0)
 
   vpc_id = aws_vpc.this.id
 
@@ -75,7 +75,7 @@ resource "aws_route_table" "egress" {
 }
 
 resource "aws_route_table_association" "egress" {
-  count = length(var.egress_subnets)
+  count = try(length(var.egress_subnets), 0)
 
   subnet_id      = aws_subnet.egress[count.index].id
   route_table_id = aws_route_table.egress[count.index].id

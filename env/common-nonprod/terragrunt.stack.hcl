@@ -24,6 +24,6 @@ unit "networking" {
     availability_zones                = local.config.features.networking.availability_zones
     egress_subnets                    = local.config.features.networking.egress_subnets
     enable_flow_logs                  = local.config.features.networking.flow_logs.enabled
-    flow_log_retention_days           = try(local.config.features.networking.flow_log_retention_days, 7)
+    flow_logs_retention_days          = try(local.config.features.networking.flow_logs_retention_days, 7)
   }
 }

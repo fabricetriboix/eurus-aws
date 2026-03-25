@@ -15,7 +15,7 @@
 #     values.availability_zones: List of availability zones (minimum 2)
 #     values.egress_subnets: List of CIDRs for the egress subnets
 #     values.enable_flow_logs: Boolean
-#     values.flow_log_retention_days: How many days to retain the flow logs
+#     values.flow_logs_retention_days: How many days to retain the flow logs
 
 include "global" {
   path   = find_in_parent_folders("global.hcl")
@@ -67,5 +67,5 @@ inputs = {
   availability_zones                = values.availability_zones
   egress_subnets                    = values.egress_subnets
   enable_flow_logs                  = values.enable_flow_logs
-  flow_log_retention_days           = values.flow_log_retention_days
+  flow_logs_retention_days          = values.flow_logs_retention_days
 }

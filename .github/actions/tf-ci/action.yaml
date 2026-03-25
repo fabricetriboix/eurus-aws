@@ -36,7 +36,6 @@ runs:
   - name: Run CI job
     shell: bash
     env:
-      AWS_REGION: ${{ inputs.aws-region }}
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0
