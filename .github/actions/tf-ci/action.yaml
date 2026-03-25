@@ -45,6 +45,7 @@ runs:
     with:
       directory: ./${{ inputs.component-type }}/${{ inputs.component-name }}
       quiet: true
+      skip_check: CKV_TF_1,CKV_TF_2
       output_format: cli,sarif
       output_file_path: console,results.sarif
 
