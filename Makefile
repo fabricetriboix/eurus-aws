@@ -28,7 +28,10 @@ help:
 	@printf "\n"
 
 ## Run all CI jobs
-ci: $(foreach f,$(MODULES),ci-module-$(f)) $(foreach f,$(FEATURES),ci-feature-$(f)) $(foreach f,$(BOOTSTRAPS),ci-bootstrap-$(f))
+ci: $(foreach f,$(MODULES),ci-module-$(f)) $(foreach f,$(FEATURES),ci-feature-$(f)) $(foreach f,$(BOOTSTRAPS),ci-bootstrap-$(f)) $(foreach f,$(ENVS),ci-env-$(f))
+
+## Run all CD jobs
+cd: $(foreach f,$(ENVS),cd-env-$(f))
 
 ci-module-%:
 	@set -euxo pipefail && \
@@ -62,3 +65,9 @@ ci-env-%:
 		terragrunt stack run plan && \
 		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
 		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
+
+cd-env-%:
+	@set -euxo pipefail && \
+		cd env/$* && \
+		terragrunt stack generate && \
+		terragrunt stack run apply
