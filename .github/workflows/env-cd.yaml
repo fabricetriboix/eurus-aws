@@ -1,12 +1,8 @@
-name: OpenTofu on-demand CD
+name: OpenTofu on-demand deployment
 
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: Branch to deploy
-        required: true
-        type: string
       environment:
         description: "Environment to deploy; eg: `common-nonprod`"
         required: true
@@ -24,15 +20,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  ci:
+  cd:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
     steps:
     - name: Checkout the code
       uses: actions/checkout@v5
-      with:
-        ref: ${{ inputs.branch }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v6
