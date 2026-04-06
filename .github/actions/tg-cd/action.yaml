@@ -56,5 +56,6 @@ runs:
     env:
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
       AWS_REGION: ${{ inputs.aws-region }}
+      TG_NON_INTERACTIVE: "true"
     run: |
       make cd-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0
