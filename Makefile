@@ -63,10 +63,8 @@ ci-env-%:
 		cd env/$* && \
 		export TF_INPUT=0 && \
 		terragrunt stack generate && \
-		terragrunt stack run plan \
-			--terragrunt-non-interactive \
-			--terragrunt-include-external-dependencies \
-			-auto-approve && \
+		terragrunt --non-interactive stack run plan \
+			--queue-include-external && \
 		if [ $(CHECKOV_QUIET) -eq 1 ]; then checkov_args=--quiet; else checkov_args=; fi && \
 		if [ $(CHECKOV) -eq 1 ]; then checkov -d . $$checkov_args; fi
 
@@ -75,7 +73,6 @@ cd-env-%:
 		cd env/$* && \
 		export TF_INPUT=0 && \
 		terragrunt stack generate && \
-		terragrunt stack run apply \
-			--terragrunt-non-interactive \
-			--terragrunt-include-external-dependencies \
-			-auto-approve
+		terragrunt --non-interactive stack run apply \
+			--queue-include-external \
+			-- -auto-approve
