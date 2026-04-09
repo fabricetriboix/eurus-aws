@@ -1,4 +1,4 @@
-name: OpenTofu on-demand deployment
+name: ++ OpenTofu CD - On-demand deployment
 
 on:
   workflow_dispatch:
