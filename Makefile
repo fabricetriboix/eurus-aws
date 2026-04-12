@@ -10,6 +10,7 @@ MODULES := bootstrap
 FEATURES := networking
 BOOTSTRAPS := all
 ENVS := common-nonprod
+ACTION ?= apply
 
 ## This help screen
 help:
@@ -73,6 +74,6 @@ cd-env-%:
 		cd env/$* && \
 		export TF_INPUT=0 && \
 		terragrunt stack generate && \
-		terragrunt --non-interactive stack run apply \
+		terragrunt --non-interactive stack run $(ACTION) \
 			--queue-include-external \
 			-- -auto-approve

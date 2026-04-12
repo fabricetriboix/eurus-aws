@@ -14,6 +14,13 @@ inputs:
   aws-region:
     description: "AWS region where the component is deployed"
     required: true
+  action:
+    description: "Action to run; must be either `apply` or `destroy`"
+    required: true
+    default: apply
+    options:
+    - apply
+    - destroy
 
 runs:
   using: composite
@@ -58,4 +65,4 @@ runs:
       AWS_REGION: ${{ inputs.aws-region }}
       TG_NON_INTERACTIVE: "true"
     run: |
-      make cd-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0
+      make cd-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0 ACTION=${{ inputs.action }}
