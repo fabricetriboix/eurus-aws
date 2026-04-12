@@ -10,6 +10,14 @@ on:
         options:
         - common-nonprod
         - dev
+      action:
+        description: "Action to run; must be either `apply` or `destroy`"
+        required: true
+        type: choice
+        default: apply
+        options:
+        - apply
+        - destroy
 
 permissions:
   id-token: write # This is required for requesting the JWT
@@ -42,3 +50,4 @@ jobs:
         component-name: ${{ inputs.environment }}
         role-arn: "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/tf-role-${{ vars.AWS_REGION }}"
         aws-region: ${{ vars.AWS_REGION }}
+        action: ${{ inputs.action }}
