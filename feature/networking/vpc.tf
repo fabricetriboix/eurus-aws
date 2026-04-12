@@ -59,6 +59,11 @@ resource "aws_subnet" "egress" {
   cidr_block        = var.egress_subnets[count.index]
   availability_zone = var.availability_zones[count.index]
 
+  # Subnets in a secondary CIDR must be destroyed before that association is
+  # removed; without this, OpenTofu may disassociate the block while subnets
+  # still exist.
+  depends_on = [aws_vpc_ipv4_cidr_block_association.this]
+
   tags = merge(local.tags, {
     Name = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
   })
