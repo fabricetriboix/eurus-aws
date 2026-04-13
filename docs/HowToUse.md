@@ -116,7 +116,7 @@ Obviously, use the real account IDs for your setup.
 Then run the following manually:
 
 ```sh
-$ cd bootstrap/common-nonprod
+$ cd bootstrap/all
 $ terragrunt init
 $ terragrunt plan
 $ terragrunt apply
