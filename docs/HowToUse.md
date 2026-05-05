@@ -67,22 +67,22 @@ role created by the bootstrap unit.
 
 ## Bootstrap
 
-The first step is to create backends (S3 and DynamoDB table) for the
-OpenTofu states. There will be one bucket and one DynamoDB table per
-AWS account. This is done by the [bootstrap](../bootstrap) unit. In
-addition, the bootstrap unit will create IAM policies and roles to
-give the GitHub workflows to necessary permissions to execute
-Terragrunt and OpenTofu.
+The next step is to create S3 backends for the OpenTofu states. There
+will be one bucket per AWS account. This is done by the
+[bootstrap](../bootstrap) unit. In addition, the bootstrap unit will
+create IAM policies and roles to give the GitHub workflows to
+necessary permissions to execute Terragrunt and OpenTofu.
 
 It should be noted that, as it stands, the IAM roles deployed by the
 `bootstrap` have `AdministratorAccess` permissions. This is obviously
 unacceptable and you should give these roles appropriate permissions
-based on the least privilege principle, according to your compliance
-and security needs. You should do this in the [bootstrap
+based on the principle of least privilege, according to your
+compliance and security needs. You should do this in the [bootstrap
 module](../module/bootstrap/tf-iam.tf).
 
 You will need to create a file named `accounts.hcl` in the
-[bootstrap](bootstrap/) directory. This file should look like this:
+[bootstrap/all](bootstrap/all/) directory. This file should look like
+this:
 
 ```hcl
 locals {
@@ -117,12 +117,14 @@ Then run the following manually:
 
 ```sh
 $ cd bootstrap/all
+$ export AWS_REGION=eu-west-1  # or whatever is your chosen region
 $ terragrunt init
 $ terragrunt plan
 $ terragrunt apply
 ```
 
-You will then need to decide where to store the OpenTofu state file.
+You will then need to decide where to store the OpenTofu state file
+for this operation, which is outside the scope of this document.
 
 ## Create the infrastructure
 
@@ -135,9 +137,14 @@ cater for every possible scenario.
 
 Generally speaking, you should avoid any overlap in CIDRs. This is
 because you might want to create routes between VPCs and overlapping
-CIDRs will make this impossible.
+CIDRs will make this very difficult.
 
 Every environment has a `config.yaml` file that fully describes it. As
 far as possible, every configuration parameter should go into this
 file in order to make it easy to review and modify the configuration
 of a given environment.
+
+Open your browser to your github monorepo and click "Actions" in the
+menu bar. Click on the "++ OpenTofu CD - On-demand deployment"
+workflow. Run a workflow for each environment one at a time, starting
+with common-nonprod, common-prod, and all the other environments.
