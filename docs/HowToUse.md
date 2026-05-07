@@ -11,6 +11,11 @@ I obviously can't cover all specific circumstances, so I will detail
 here how `eurus-aws` can be used in exactly the same manner it is used
 here.
 
+**VERY IMPORTANT**: You can't just apply this repository and expect
+things to work for your organisation. You need to make the necessary
+adaptations for `eurus-aws` to work for your organisation. As far as
+possible, I highlighted the changes you need to make in this document.
+
 ## Prerequisites
 
 Fork the [eurus-aws](https://github.com/fabricetriboix/eurus-aws)
@@ -27,6 +32,17 @@ $ git push --tags
 
 You will also need to have fulfilled all the prerequisistes listed
 in the top-level [README](../README.md) file.
+
+You will need a way to authenticate whomever needs to access the
+infrastructure: DevOps engineers, SRE engineers, developers of tenant
+applications (to see metrics and logs), etc. This is of course highly
+dependent on your organisation. For this project, I am simply using
+AWS IAM Identity Center. This is how I set it up (AWS provides only
+limited APIs for IAM Identity Center, so I did all this by hand):
+  - Enable AWS IAM Identity Center in the management account
+  - Instance type should be "organization instance"
+  - Identity source should be "IAM Identity Center"
+  - Create users and groups
 
 ## Setup GitHub
 
