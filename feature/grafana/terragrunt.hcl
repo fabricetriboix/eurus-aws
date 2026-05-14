@@ -12,7 +12,7 @@ include "global" {
 
 locals {
   unit_name = "feature-grafana"
-  enabled   = try(values.enabled, true)
+  enabled   = try(values.enabled, false)
 }
 
 exclude {
