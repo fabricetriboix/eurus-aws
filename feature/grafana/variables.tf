@@ -8,6 +8,11 @@ variable "project" {
   type        = string
 }
 
+variable "region" {
+  description = "Region where the Grafana workspace will be deployed"
+  type        = string
+}
+
 variable "env" {
   description = "Name of the environment this VPC will be deployed to (eg: dev, stg, prd)"
   type        = string

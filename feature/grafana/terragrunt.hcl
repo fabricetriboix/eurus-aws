@@ -43,5 +43,6 @@ terraform {
 inputs = {
   org     = include.global.locals.org
   project = include.global.locals.project
+  region  = include.global.locals.region
   env     = values.env
 }
