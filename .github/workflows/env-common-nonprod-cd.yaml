@@ -15,7 +15,7 @@ permissions:
   contents: read  # This is required for actions/checkout
 
 jobs:
-  ci:
+  cd:
     runs-on: ubuntu-latest
     environment: common-nonprod
 
