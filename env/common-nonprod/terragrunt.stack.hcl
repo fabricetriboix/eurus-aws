@@ -27,3 +27,17 @@ unit "networking" {
     flow_logs_retention_days          = try(local.config.features.networking.flow_logs_retention_days, 7)
   }
 }
+
+unit "grafana" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.grafana.version}"
+
+  path = "feature-grafana"
+
+  values = {
+    enabled      = local.config.features.grafana.enabled
+    account_type = local.config.account_type
+    realm        = local.config.realm
+    env          = local.config.env
+  }
+}
