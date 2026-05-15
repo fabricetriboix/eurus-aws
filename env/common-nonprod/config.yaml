@@ -16,4 +16,4 @@ features:
 
   grafana:
     enabled: true
-    version: feature-grafana-v0.2.0
+    version: feature-grafana-v0.2.1
