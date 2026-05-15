@@ -27,6 +27,7 @@ resource "aws_grafana_workspace" "this" {
   permission_type          = "CUSTOMER_MANAGED"
   region                   = var.region
   kms_key_id               = module.key.key_arn
+  role_arn                 = aws_iam_role.grafana.arn
 
   tags = merge(local.tags, {
     Name    = "${var.org}-${var.project}-${var.env}"
