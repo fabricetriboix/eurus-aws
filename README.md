@@ -38,9 +38,10 @@ Features:
   - Egress provided by NAT Gateways [ref](https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-scenarios.html#private-nat-allowed-range)
   - Observability:
       * Logging: provided by CloudWatch Logs
-      * Metrics: provided by CloudWatch Metrics
+      * Metrics from AWS managed services: CloudWatch (no choice)
+      * Custom metrics: provided by Amazon Managed Prometheus
       * Distributed tracing: AWS X-Ray
-      * Visualisation: CloudWatch Dashboards
+      * Visualisation: Amazon Managed Grafana
       * Alerting: CloudWatch Alarms
   - High availability achieved using multiple availability zones with
     failovers for each components of the architecture
