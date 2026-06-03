@@ -32,21 +32,21 @@ A few notes:
   - How the VPC is linked to the on-prem networks is beyond the scope
     of this project.
 
-Since this project is geared towards small and medium sized
-businesses, it is quite uncommon such businesses have on-prem
-workloads/databases to connect to. So `eurus-aws` will provide an
-egress solution, but it will be shared between tenants and thus may be
-subject to the "noisy neighbour" problem. This is the tradeoff in
-order to keep cost low, given that the egress solution is based on NAT
-Gateways which aren't cheap.
+Since this project is geared towards medium-to-large businesses, it is
+somewhat uncommon such businesses have on-prem workloads/databases to
+connect to. So `eurus-aws` will provide an egress solution, but it
+will be shared between tenants and thus may be subject to the "noisy
+neighbour" problem. This is the tradeoff in order to keep cost low,
+given that the egress solution is based on NAT Gateways which aren't
+cheap.
 
 In terms of ingress, the amount of traffic will depend on the client
 apps themselves as much as the apps running inside the platform. There
-are many variables outside the control of the app themselves (eg: how
-does the clients behave, DDoS attack, network configuration, etc.) so
-some variability in the ingress traffic is inevitable. Consequently,
-there will be only one ingress per environment (as opposed to a
-segregated ingress for each tenant).
+are many variables outside the control of the tenants (eg: how clients
+behave, DDoS attack, network configuration, etc.) so some variability
+in the ingress traffic is inevitable. Consequently, there will be only
+one ingress per environment (as opposed to a segregated ingress for
+each tenant).
 
 # Observability and alerting
 
@@ -97,8 +97,8 @@ wrong.
 Tenant workloads must run in a closed subnet (i.e. with no direct
 access to/from anything outside the VPC). In order to increase
 security and minimise the chances of one tenant exhausting the IP
-address pool of such a subnet, there will be one app subnet per tenant
-per availability zone.
+address pool of such a subnet, there will be one tenant subnet per
+tenant per availability zone.
 
 On the database side of things, AWS provides an excellent serverless
 SQL database service: Aurora Serverless V2. It scales from almost 0 to
@@ -124,6 +124,6 @@ a dedicated database instance/cluster.
 The resources that are dedicated to a given tenant will be created
 when this specific tenant is onboarded (as opposed to the platform
 itself being updated). These resources are:
-  - Dedicated app subnets
+  - Dedicated tenant subnets
   - Dedicated database subnets
   - Dedicated ECS cluster backed by Fargate
