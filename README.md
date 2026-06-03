@@ -2,13 +2,16 @@
 
 Multi-tenant platform built using AWS managed services.
 
-**Important design decision**: The target for this platform are small
-and medium-sized businesses with light to medium requirements in terms
-of regulations and governance. In addition, such businesses are often
-cost-conscious and want to minimise their costs. Consequently,
+**Important design decision**: The target for this platform are
+medium-sized to large businesses with light to medium requirements in
+terms of regulations and governance. In addition, such businesses are
+often cost-conscious and want to minimise their costs. Consequently,
 resources that can be shared between tenants will be shared. If
 increased tenant isolation is required, it is always possible to
 deploy more than one instance of the platform.
+
+Please note that small businesses can also use eurus-aws, and it is
+also possible to run a single app.
 
 See [docs/HowToUse.md](docs/HowToUse.md) for details on how to use
 `eurus-aws`.
@@ -38,10 +41,12 @@ Features:
   - Egress provided by NAT Gateways [ref](https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-scenarios.html#private-nat-allowed-range)
   - Observability:
       * Logging: provided by CloudWatch Logs
-      * Metrics: provided by CloudWatch Metrics
+      * Metrics from AWS managed services: CloudWatch (no choice)
+      * Custom metrics: provided by Amazon Managed Prometheus
       * Distributed tracing: AWS X-Ray
-      * Visualisation: CloudWatch Dashboards
-      * Alerting: CloudWatch Alarms
+      * Visualisation: Amazon Managed Grafana
+      * Alerting for AWS managed services: CloudWatch Alarms
+      * Alerting for custom metrics: Amazon Managed Prometheus
   - High availability achieved using multiple availability zones with
     failovers for each components of the architecture
   - Workload scaling provided by AWS Application Auto Scaling
@@ -70,4 +75,4 @@ Must exists prior:
 
 Here are links to documentations with more details:
   - [How to use](docs/HowToUse.md)
-  - [Networking](docs/Networking.md)
+  - [Mini Architectural Decisions Records](docs/Mini ADRs.md)
