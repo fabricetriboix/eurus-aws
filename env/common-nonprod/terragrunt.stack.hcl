@@ -28,15 +28,15 @@ unit "networking" {
   }
 }
 
-unit "grafana" {
+unit "amg" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.grafana.version}"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.amg.version}"
   #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/grafana?ref=fix-grafana"
 
-  path = "feature-grafana"
+  path = "feature-amg"
 
   values = {
-    enabled      = local.config.features.grafana.enabled
+    enabled      = local.config.features.amg.enabled
     account_type = local.config.account_type
     realm        = local.config.realm
     env          = local.config.env

@@ -11,12 +11,12 @@ data "aws_iam_policy_document" "grafana_assume_role_policy" {
 }
 
 resource "aws_iam_role" "grafana" {
-  name               = "${var.org}-${var.project}-${var.env}-grafana"
+  name               = "${var.org}-${var.project}-${var.env}-amg"
   assume_role_policy = data.aws_iam_policy_document.grafana_assume_role_policy.json
 
   tags = merge(local.tags, {
-    Name    = "${var.org}-${var.project}-${var.env}-grafana"
-    Purpose = "Allow Grafana to access what it needs to access"
+    Name    = "${var.org}-${var.project}-${var.env}-amg"
+    Purpose = "Allow Amazon Managed Grafana to access what it needs to access"
   })
 }
 
@@ -31,6 +31,6 @@ resource "aws_grafana_workspace" "this" {
 
   tags = merge(local.tags, {
     Name    = "${var.org}-${var.project}-${var.env}"
-    Purpose = "Grafana workspace for ${var.org}-${var.project}-${var.env}"
+    Purpose = "Amazon Managed Grafana workspace for ${var.org}-${var.project}-${var.env}"
   })
 }
