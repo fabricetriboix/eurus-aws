@@ -30,8 +30,8 @@ unit "networking" {
 
 unit "amg" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.amg.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/grafana?ref=fix-grafana"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.amg.version}"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/amg?ref=fix-amg"
 
   path = "feature-amg"
 
