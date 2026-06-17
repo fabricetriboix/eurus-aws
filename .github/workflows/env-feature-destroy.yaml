@@ -1,0 +1,69 @@
+name: ++ OpenTofu CD - Remove env feature
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to target; eg: `common-nonprod`"
+        required: true
+        type: choice
+        options:
+        - common-nonprod
+        - dev
+      feature:
+        description: "Feature name (eg: grafana, networking) — must match features: key in config.yaml"
+        required: true
+        type: string
+      confirmation:
+        description: "Type the feature name again to confirm"
+        required: true
+        type: string
+      action:
+        description: "plan-destroy runs `tofu plan -destroy`; destroy runs `tofu destroy`"
+        required: true
+        type: choice
+        default: plan-destroy
+        options:
+        - plan-destroy
+        - destroy
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
+
+concurrency:
+  group: env-${{ inputs.environment }}-feature-destroy
+  cancel-in-progress: false
+
+jobs:
+  destroy-unit:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+    - name: Confirm feature name
+      shell: bash
+      run: |
+        if [ "${{ inputs.confirmation }}" != "${{ inputs.feature }}" ]; then
+          echo "Confirmation '${{ inputs.confirmation }}' does not match feature '${{ inputs.feature }}'"
+          exit 1
+        fi
+
+    - name: Checkout the code
+      uses: actions/checkout@v5
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        role-to-assume: arn:aws:iam::${{ vars.AWS_MANAGEMENT_ACCOUNT_ID }}:role/github-actions-role
+        role-session-name: github-actions
+        aws-region: ${{ vars.AWS_REGION }}
+
+    - name: Run feature destroy
+      uses: ./.github/actions/tg-destroy-unit
+      with:
+        environment: ${{ inputs.environment }}
+        feature: ${{ inputs.feature }}
+        role-arn: "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/tf-role-${{ vars.AWS_REGION }}"
+        aws-region: ${{ vars.AWS_REGION }}
+        action: ${{ inputs.action }}

@@ -12,6 +12,13 @@ BOOTSTRAPS := all
 ENVS := common-nonprod
 ACTION ?= apply
 
+# Feature name only (e.g. grafana, networking, amg) — not the full stack path
+STACK_UNIT ?=
+
+define stack_queue_flags
+$(if $(STACK_UNIT),--queue-include-dir "**/feature-$(STACK_UNIT)" --queue-strict-include,)
+endef
+
 ## This help screen
 help:
 	@printf "Available targets:\n\n"
@@ -75,5 +82,29 @@ cd-env-%:
 		export TF_INPUT=0 && \
 		terragrunt stack generate && \
 		terragrunt --non-interactive stack run $(ACTION) \
+			--queue-include-external \
+			-- -auto-approve
+
+## Preview destroy for a single feature in an environment (runs: tofu plan -destroy)
+plan-destroy-env-unit-%:
+	@set -euxo pipefail && \
+		test -n "$(STACK_UNIT)" || { echo "STACK_UNIT is required (feature name, e.g. grafana)"; exit 1; } && \
+		cd env/$* && \
+		export TF_INPUT=0 && \
+		terragrunt stack generate && \
+		terragrunt --non-interactive stack run plan \
+			$(stack_queue_flags) \
+			--queue-include-external \
+			-- -destroy
+
+## Destroy a single feature in an environment (runs: tofu destroy)
+destroy-env-unit-%:
+	@set -euxo pipefail && \
+		test -n "$(STACK_UNIT)" || { echo "STACK_UNIT is required (feature name, e.g. grafana)"; exit 1; } && \
+		cd env/$* && \
+		export TF_INPUT=0 && \
+		terragrunt stack generate && \
+		terragrunt --non-interactive stack run destroy \
+			$(stack_queue_flags) \
 			--queue-include-external \
 			-- -auto-approve
