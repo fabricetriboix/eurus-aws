@@ -52,7 +52,7 @@ jobs:
       run: mkdir -p /tmp/tf-cache
 
     - name: Restore or create the TF cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: /tmp/tf-cache
         key: ${{ runner.os }}-tf-bootstrap-all
