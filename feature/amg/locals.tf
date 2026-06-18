@@ -1,5 +1,5 @@
 locals {
   tags = {
-    FeatureSource = "feature/grafana"
+    FeatureSource = "feature/amg"
   }
 }

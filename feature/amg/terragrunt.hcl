@@ -11,7 +11,7 @@ include "global" {
 }
 
 locals {
-  unit_name = "feature-grafana"
+  unit_name = "feature-amg"
   enabled   = try(values.enabled, false)
 }
 
