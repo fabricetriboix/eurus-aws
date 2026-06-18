@@ -28,8 +28,8 @@ locals {
 }
 
 exclude {
-  if     = !local.enabled
-  actions = ["all"]
+  if      = !local.enabled
+  actions = ["plan", "apply"]
 }
 
 generate "backend" {

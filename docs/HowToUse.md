@@ -164,3 +164,34 @@ Open your browser to your github monorepo and click "Actions" in the
 menu bar. Click on the "++ OpenTofu CD - On-demand deployment"
 workflow. Run a workflow for each environment one at a time, starting
 with common-nonprod, common-prod, and all the other environments.
+
+## Remove a feature from an environment
+
+If, for some reason, you want to remove a feature from an already
+deployed environment, use the "++ OpenTofu CD - Remove env feature"
+workflow.
+
+1. Ensure the feature is still defined in the environment's
+   `terragrunt.stack.hcl` file. Destroy must run **before** removing
+   the unit from the stack.
+2. Set `enabled: true` for the feature in `config.yaml`.
+3. Run the workflow with `action: plan-destroy` and `feature` set to
+   the feature name (eg: `grafana`, not `feature-grafana`). Review the
+   plan output.
+4. Run the workflow again with `action: destroy`, the same `feature`
+   value, and type the feature name in `confirmation`.
+5. Set `enabled: false` for the feature in `config.yaml`, or otherwise
+   just remove it entirely from the `config.yaml` file.
+
+Locally, the equivalent commands are (example here for the `grafana`
+feature):
+
+```sh
+$ export AWS_REGION=eu-west-1
+$ make plan-destroy-env-unit-common-nonprod STACK_UNIT=grafana
+$ make destroy-env-unit-common-nonprod STACK_UNIT=grafana
+```
+
+Please note the `++ OpenTofu CD - On-demand deployment` workflow with
+`action: destroy` destroys the **entire** environment stack, including
+networking. Use it only when you intend to remove everything.
