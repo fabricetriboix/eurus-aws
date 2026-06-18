@@ -192,6 +192,6 @@ $ make plan-destroy-env-unit-common-nonprod STACK_UNIT=grafana
 $ make destroy-env-unit-common-nonprod STACK_UNIT=grafana
 ```
 
-The `++ OpenTofu CD - On-demand deployment` workflow with
+Please note the `++ OpenTofu CD - On-demand deployment` workflow with
 `action: destroy` destroys the **entire** environment stack, including
 networking. Use it only when you intend to remove everything.

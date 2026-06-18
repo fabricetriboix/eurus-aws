@@ -11,7 +11,7 @@ on:
         - common-nonprod
         - dev
       feature:
-        description: "Feature name (eg: grafana, networking) — must match features: key in config.yaml"
+        description: "Feature name (eg: grafana, networking) — must match `features:` key in config.yaml"
         required: true
         type: string
       action:
