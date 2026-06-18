@@ -14,17 +14,13 @@ on:
         description: "Feature name (eg: grafana, networking) — must match features: key in config.yaml"
         required: true
         type: string
-      confirmation:
-        description: "Type the feature name again to confirm"
-        required: true
-        type: string
       action:
-        description: "plan-destroy runs `tofu plan -destroy`; destroy runs `tofu destroy`"
+        description: "'plan' runs `tofu plan -destroy`; 'destroy' runs `tofu destroy`"
         required: true
         type: choice
-        default: plan-destroy
+        default: plan
         options:
-        - plan-destroy
+        - plan
         - destroy
 
 permissions:
@@ -32,7 +28,7 @@ permissions:
   contents: read  # This is required for actions/checkout
 
 concurrency:
-  group: env-${{ inputs.environment }}-feature-destroy
+  group: env-${{ inputs.environment }}
   cancel-in-progress: false
 
 jobs:
@@ -41,14 +37,6 @@ jobs:
     environment: ${{ inputs.environment }}
 
     steps:
-    - name: Confirm feature name
-      shell: bash
-      run: |
-        if [ "${{ inputs.confirmation }}" != "${{ inputs.feature }}" ]; then
-          echo "Confirmation '${{ inputs.confirmation }}' does not match feature '${{ inputs.feature }}'"
-          exit 1
-        fi
-
     - name: Checkout the code
       uses: actions/checkout@v5
 

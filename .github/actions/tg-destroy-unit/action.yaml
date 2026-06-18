@@ -6,7 +6,7 @@ inputs:
     description: "Name of the environment, eg: `common-nonprod`"
     required: true
   feature:
-    description: "Feature name only (eg: `grafana`), not the full stack path"
+    description: "Feature name (eg: `grafana`)"
     required: true
   role-arn:
     description: "ARN of the role to assume"
@@ -15,9 +15,9 @@ inputs:
     description: "AWS region where the component is deployed"
     required: true
   action:
-    description: "plan-destroy runs `tofu plan -destroy`; destroy runs `tofu destroy`"
+    description: "'plan' runs `tofu plan -destroy`; 'destroy' runs `tofu destroy`"
     required: true
-    default: plan-destroy
+    default: plan
 
 runs:
   using: composite
@@ -79,7 +79,7 @@ runs:
       TG_NON_INTERACTIVE: "true"
     run: |
       set -euo pipefail
-      if [ "${{ inputs.action }}" = "plan-destroy" ]; then
+      if [ "${{ inputs.action }}" = "plan" ]; then
         make plan-destroy-env-unit-${{ inputs.environment }} STACK_UNIT=${{ inputs.feature }} CHECKOV=0
       else
         make destroy-env-unit-${{ inputs.environment }} STACK_UNIT=${{ inputs.feature }} CHECKOV=0

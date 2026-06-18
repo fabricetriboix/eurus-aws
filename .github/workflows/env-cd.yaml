@@ -1,5 +1,5 @@
 # Deploy or destroy an entire environment stack. To tear down a single feature
-# without affecting the rest of the stack, use the "++ OpenTofu CD - Destroy env
+# without affecting the rest of the stack, use the "++ OpenTofu CD - Remove env
 # feature" workflow instead.
 name: ++ OpenTofu CD - On-demand deployment
 

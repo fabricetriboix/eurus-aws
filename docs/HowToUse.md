@@ -174,16 +174,17 @@ workflow.
 1. Ensure the feature is still defined in the environment's
    `terragrunt.stack.hcl` file. Destroy must run **before** removing
    the unit from the stack.
-2. Set `enabled: false` for the feature in `config.yaml` if you want
-   routine deploys to skip it. Disabled features still allow explicit
-   destroy.
+2. Set `enabled: true` for the feature in `config.yaml`.
 3. Run the workflow with `action: plan-destroy` and `feature` set to
    the feature name (eg: `grafana`, not `feature-grafana`). Review the
    plan output.
 4. Run the workflow again with `action: destroy`, the same `feature`
    value, and type the feature name in `confirmation`.
+5. Set `enabled: false` for the feature in `config.yaml`, or otherwise
+   just remove it entirely from the `config.yaml` file.
 
-Locally, the equivalent commands are (for the `grafana` feature):
+Locally, the equivalent commands are (example here for the `grafana`
+feature):
 
 ```sh
 $ export AWS_REGION=eu-west-1
