@@ -47,7 +47,7 @@ jobs:
         role-session-name: github-actions
         aws-region: ${{ vars.AWS_REGION }}
 
-    - name: Run feature destroy
+    - name: Run feature destroy ${{ inputs.action }}
       uses: ./.github/actions/tg-destroy-unit
       with:
         environment: ${{ inputs.environment }}
