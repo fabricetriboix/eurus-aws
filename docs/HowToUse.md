@@ -175,8 +175,8 @@ workflow.
    `terragrunt.stack.hcl` file. Destroy must run **before** removing
    the unit from the stack.
 2. Set `enabled: true` for the feature in `config.yaml`.
-3. Run the workflow with `action: plan-destroy` and `feature` set to
-   the feature name (eg: `grafana`, not `feature-grafana`). Review the
+3. Run the workflow with `action: plan` and `feature` set to the
+   feature name (eg: `grafana`, not `feature-grafana`). Review the
    plan output.
 4. Run the workflow again with `action: destroy`, the same `feature`
    value, and type the feature name in `confirmation`.
