@@ -1,4 +1,4 @@
-name: OpenTofu CI - feature/grafana
+name: OpenTofu CI - feature/amg
 
 on:
   pull_request:
@@ -9,8 +9,8 @@ on:
     branches:
     - main
     paths:
-    - feature/grafana/**
-    - .github/workflows/feature-grafana-ci.yaml
+    - feature/amg/**
+    - .github/workflows/feature-amg-ci.yaml
     - .github/actions/tf-ci/**
     - Makefile
 
@@ -30,4 +30,4 @@ jobs:
       uses: ./.github/actions/tf-ci
       with:
         component-type: feature
-        component-name: grafana
+        component-name: amg

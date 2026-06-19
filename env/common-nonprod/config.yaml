@@ -14,6 +14,6 @@ features:
     flow_logs:
       enabled: false
 
-#  grafana:
-#    enabled: true
-#    version: feature-grafana-v0.2.1
+  amg:
+    enabled: true
+    version: feature-amg-v0.1.0
