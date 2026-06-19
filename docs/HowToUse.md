@@ -176,20 +176,19 @@ workflow.
    the unit from the stack.
 2. Set `enabled: true` for the feature in `config.yaml`.
 3. Run the workflow with `action: plan` and `feature` set to the
-   feature name (eg: `grafana`, not `feature-grafana`). Review the
-   plan output.
+   feature name (eg: `amg`). Review the plan output.
 4. Run the workflow again with `action: destroy`, the same `feature`
    value, and type the feature name in `confirmation`.
 5. Set `enabled: false` for the feature in `config.yaml`, or otherwise
    just remove it entirely from the `config.yaml` file.
 
-Locally, the equivalent commands are (example here for the `grafana`
+Locally, the equivalent commands are (example here for the `amg`
 feature):
 
 ```sh
 $ export AWS_REGION=eu-west-1
-$ make plan-destroy-env-unit-common-nonprod STACK_UNIT=grafana
-$ make destroy-env-unit-common-nonprod STACK_UNIT=grafana
+$ make plan-destroy-env-unit-common-nonprod STACK_UNIT=amg
+$ make destroy-env-unit-common-nonprod STACK_UNIT=amg
 ```
 
 Please note the `++ OpenTofu CD - On-demand deployment` workflow with
