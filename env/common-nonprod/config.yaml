@@ -17,3 +17,7 @@ features:
   amg:
     enabled: true
     version: feature-amg-v0.1.0
+
+  amp:
+    enabled: true
+    version: feature-amp-v0.1.0
