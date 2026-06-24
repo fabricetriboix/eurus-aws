@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 module "key" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-kms.git?ref=v4.1.1-1"
@@ -7,6 +9,67 @@ module "key" {
   aliases                 = ["amp"]
   deletion_window_in_days = 7
   rotation_period_in_days = 90
+
+  key_statements = [
+    {
+      sid = "CloudWatchLogs"
+      actions = [
+        "kms:Encrypt*",
+        "kms:Decrypt*",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:Describe*",
+      ]
+      resources = ["*"]
+
+      principals = [
+        {
+          type        = "Service"
+          identifiers = ["logs.${var.region}.amazonaws.com"]
+        }
+      ]
+
+      condition = [
+        {
+          test     = "ArnLike"
+          variable = "kms:EncryptionContext:aws:logs:arn"
+          values = [
+            "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:*",
+          ]
+        }
+      ]
+    },
+    {
+      sid = "AmazonManagedPrometheus"
+      actions = [
+        "kms:DescribeKey",
+        "kms:CreateGrant",
+        "kms:GenerateDataKey",
+        "kms:Decrypt",
+      ]
+      resources = ["*"]
+
+      principals = [
+        {
+          type        = "AWS"
+          identifiers = ["*"]
+        }
+      ]
+
+      condition = [
+        {
+          test     = "StringEquals"
+          variable = "kms:ViaService"
+          values   = ["aps.${var.region}.amazonaws.com"]
+        },
+        {
+          test     = "StringEquals"
+          variable = "kms:CallerAccount"
+          values   = [data.aws_caller_identity.current.account_id]
+        },
+      ]
+    },
+  ]
 
   tags = merge(local.tags, {
     Name    = "alias/amp",
