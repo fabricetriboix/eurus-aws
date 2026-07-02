@@ -1,5 +1,3 @@
-data "aws_caller_identity" "current" {}
-
 module "key" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-kms.git?ref=v4.1.1-1"
@@ -12,6 +10,16 @@ module "key" {
 
   key_statements = [
     {
+      sid = "Root"
+      actions = ["kms:*"]
+      principals = [
+        {
+          type = "AWS"
+          identifiers = ["arn:aws:iam::${local.account_id}:root"]
+        }
+      ]
+      resources = ["*"]
+    },
       sid = "CloudWatchLogs"
       actions = [
         "kms:Encrypt*",
@@ -34,7 +42,7 @@ module "key" {
           test     = "ArnLike"
           variable = "kms:EncryptionContext:aws:logs:arn"
           values = [
-            "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:*",
+            "arn:aws:logs:${var.region}:${local.account_id}:log-group:/amp/*",
           ]
         }
       ]
@@ -65,7 +73,7 @@ module "key" {
         {
           test     = "StringEquals"
           variable = "kms:CallerAccount"
-          values   = [data.aws_caller_identity.current.account_id]
+          values   = [local.account_id]
         },
       ]
     },
