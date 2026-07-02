@@ -42,3 +42,18 @@ unit "amg" {
     env          = local.config.env
   }
 }
+
+unit "amp" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.amp.version}"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/amp?ref=fix-deploy-amp"
+
+  path = "feature-amp"
+
+  values = {
+    enabled      = local.config.features.amp.enabled
+    account_type = local.config.account_type
+    realm        = local.config.realm
+    env          = local.config.env
+  }
+}
