@@ -10,11 +10,11 @@ module "key" {
 
   key_statements = [
     {
-      sid = "Root"
+      sid     = "Root"
       actions = ["kms:*"]
       principals = [
         {
-          type = "AWS"
+          type        = "AWS"
           identifiers = ["arn:aws:iam::${local.account_id}:root"]
         }
       ]
