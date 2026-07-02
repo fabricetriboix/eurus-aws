@@ -20,6 +20,7 @@ module "key" {
       ]
       resources = ["*"]
     },
+    {
       sid = "CloudWatchLogs"
       actions = [
         "kms:Encrypt*",
