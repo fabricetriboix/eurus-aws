@@ -14,7 +14,7 @@ unit "networking" {
     realm                             = local.config.realm
     env                               = local.config.env
     cidr                              = local.config.features.networking.cidr
-    secondary_cidrs                   = local.config.features.networking.secondary_cidrs
+    secondary_cidrs                   = try(local.config.features.networking.secondary_cidrs, null)
     enable_dhcp_options               = try(local.config.features.networking.dhcp_options.enabled, false)
     dhcp_options_domain_name          = try(local.config.features.networking.dhcp_options.domain_name, null)
     dhcp_options_domain_name_servers  = try(local.config.features.networking.dhcp_options.domain_name_servers, null)
