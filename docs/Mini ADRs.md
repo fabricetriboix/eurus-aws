@@ -8,7 +8,8 @@ note that only IPv4 is supported. There is no support for IPv6.
 There is one VPC per environment. Each VPC has a primary CIDR
 associated with it. It is possible to associate secondary CIDR to the
 VPC in order to setup egress to some external networks (typically to
-on-prem services).
+on-prem services). Such CIDRs are typically allocated by the network
+team to allow access to on-prem services.
 
 Each VPC must spread over a minimum of two availability zones in order
 to increase availability.
