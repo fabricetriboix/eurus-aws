@@ -45,8 +45,8 @@ unit "amg" {
 
 unit "amp" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.amp.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/amp?ref=fix-deploy-amp"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.amp.version}"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/amp?ref=fix-deploy-amp"
 
   path = "feature-amp"
 
