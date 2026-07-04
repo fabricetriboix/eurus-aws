@@ -3,7 +3,7 @@
 resource "aws_cloudwatch_log_group" "this" {
   name       = "/amp/${var.org}-${var.project}-${var.env}"
   region     = var.region
-  kms_key_id = module.key.key_arn
+  #kms_key_id = module.key.key_arn
 
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
   retention_in_days = var.log_retention_days
@@ -13,7 +13,7 @@ resource "aws_cloudwatch_log_group" "this" {
     Purpose = "Amazon Managed Prometheus log group for ${var.org}-${var.project}-${var.env}"
   })
 
-  depends_on = [module.key]
+  #depends_on = [module.key]
 }
 
 resource "aws_prometheus_workspace" "this" {
