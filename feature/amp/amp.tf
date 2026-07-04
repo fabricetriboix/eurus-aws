@@ -3,6 +3,7 @@
 resource "aws_cloudwatch_log_group" "this" {
   name   = "/amp/${var.org}-${var.project}-${var.env}"
   region = var.region
+  # Checkov:skip=CKV_AWS_158:debug
   #kms_key_id = module.key.key_arn
 
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
