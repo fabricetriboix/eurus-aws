@@ -20,7 +20,7 @@ resource "aws_prometheus_workspace" "this" {
   kms_key_arn = module.key.key_arn
 
   logging_configuration {
-    log_group_arn = aws_cloudwatch_log_group.this.arn
+    log_group_arn = "${aws_cloudwatch_log_group.this.arn}:*"
   }
 
   tags = merge(local.tags, {
