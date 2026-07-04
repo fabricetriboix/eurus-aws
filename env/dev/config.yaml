@@ -5,7 +5,7 @@ env: dev
 features:
   networking:
     enabled: true
-    version: feature-networking-v0.3.0
+    version: feature-networking-v0.4.0
     cidr: 10.111.0.0/16
     secondary_cidrs: [10.102.9.0/24]
     availability_zones: [eu-west-1a, eu-west-1b]
