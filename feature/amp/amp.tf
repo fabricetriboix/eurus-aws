@@ -12,6 +12,8 @@ resource "aws_cloudwatch_log_group" "this" {
     Name    = "/amp/${var.org}-${var.project}-${var.env}"
     Purpose = "Amazon Managed Prometheus log group for ${var.org}-${var.project}-${var.env}"
   })
+
+  depends_on = [module.key]
 }
 
 resource "aws_prometheus_workspace" "this" {
