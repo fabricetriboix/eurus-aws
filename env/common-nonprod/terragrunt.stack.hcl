@@ -22,7 +22,7 @@ unit "networking" {
     dhcp_options_netbios_name_servers = try(local.config.features.networking.dhcp_options.netbios_name_servers, null)
     dhcp_options_netbios_node_type    = try(local.config.features.networking.dhcp_options.netbios_node_type, null)
     availability_zones                = local.config.features.networking.availability_zones
-    egress_subnets                    = local.config.features.networking.egress_subnets
+    egress_subnets                    = try(local.config.features.networking.egress_subnets, null)
     enable_flow_logs                  = local.config.features.networking.flow_logs.enabled
     flow_logs_retention_days          = try(local.config.features.networking.flow_logs_retention_days, 7)
   }
