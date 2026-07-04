@@ -16,7 +16,7 @@ resource "aws_default_security_group" "default" {
 }
 
 resource "aws_vpc_ipv4_cidr_block_association" "this" {
-  count = length(var.secondary_cidrs)
+  count = try(length(var.secondary_cidrs), 0)
 
   vpc_id     = aws_vpc.this.id
   cidr_block = var.secondary_cidrs[count.index]
