@@ -5,7 +5,7 @@ locals {
 unit "networking" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.networking.version}"
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/amp?ref=feat-dev"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/networking?ref=feat-dev"
 
   path = "feature-networking"
 
