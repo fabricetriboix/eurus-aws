@@ -9,7 +9,7 @@ CHECKOV_QUIET ?= 1
 MODULES := bootstrap
 FEATURES := networking
 BOOTSTRAPS := all
-ENVS := common-nonprod
+ENVS := common-nonprod dev
 ACTION ?= apply
 
 # Feature name only (e.g. grafana, networking, amg) — not the full stack path
