@@ -43,7 +43,7 @@ resource "aws_vpc_dhcp_options_association" "this" {
   dhcp_options_id = aws_vpc_dhcp_options.this[0].id
 }
 
-# Subnets & routing tables
+# Egress subnets & routing tables
 
 check "egress_length_matches_az_count" {
   assert {
@@ -84,4 +84,42 @@ resource "aws_route_table_association" "egress" {
 
   subnet_id      = aws_subnet.egress[count.index].id
   route_table_id = aws_route_table.egress[count.index].id
+}
+
+# Platform subnets & routing tables
+
+check "platform_length_matches_az_count" {
+  assert {
+    condition     = length(var.platform_subnets) == length(var.availability_zones)
+    error_message = "platform_subnets and availability_zones must have the same number of elements."
+  }
+}
+
+resource "aws_subnet" "platform" {
+  count = length(var.platform_subnets)
+
+  vpc_id            = aws_vpc.this.id
+  cidr_block        = var.platform_subnets[count.index]
+  availability_zone = var.availability_zones[count.index]
+
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}-platform-${var.availability_zones[count.index]}"
+  })
+}
+
+resource "aws_route_table" "platform" {
+  count = length(var.platform_subnets)
+
+  vpc_id = aws_vpc.this.id
+
+  tags = merge(local.tags, {
+    Name = "${var.org}-${var.project}-${var.env}-platform-${var.availability_zones[count.index]}"
+  })
+}
+
+resource "aws_route_table_association" "platform" {
+  count = length(var.platform_subnets)
+
+  subnet_id      = aws_subnet.platform[count.index].id
+  route_table_id = aws_route_table.platform[count.index].id
 }
