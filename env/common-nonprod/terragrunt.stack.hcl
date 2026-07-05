@@ -4,8 +4,8 @@ locals {
 
 unit "networking" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.networking.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/networking?ref=feat-dev"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.networking.version}"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/networking?ref=fix-add-plf-subnets"
 
   path = "feature-networking"
 
@@ -24,6 +24,7 @@ unit "networking" {
     dhcp_options_netbios_node_type    = try(local.config.features.networking.dhcp_options.netbios_node_type, null)
     availability_zones                = local.config.features.networking.availability_zones
     egress_subnets                    = try(local.config.features.networking.egress_subnets, null)
+    platform_subnets                  = local.config.features.networking.platform_subnets
     enable_flow_logs                  = local.config.features.networking.flow_logs.enabled
     flow_logs_retention_days          = try(local.config.features.networking.flow_logs_retention_days, 7)
   }

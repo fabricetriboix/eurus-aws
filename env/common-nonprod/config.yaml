@@ -8,6 +8,7 @@ features:
     version: feature-networking-v0.4.0
     cidr: 10.101.0.0/16
     availability_zones: [eu-west-1a, eu-west-1b]
+    platform_subnets: [10.101.1.0/24, 10.101.2.0/24]
 
     flow_logs:
       enabled: false
