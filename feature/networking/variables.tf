@@ -81,6 +81,11 @@ variable "egress_subnets" {
   default     = null
 }
 
+variable "platform_subnets" {
+  description = "CIDRs for platform subnets (used to deploy platform services). This list must have exactly the same number of items as `availability_zones`."
+  type        = list(string)
+}
+
 variable "enable_flow_logs" {
   description = "Whether to enable flow logs for the VPC"
   type        = bool

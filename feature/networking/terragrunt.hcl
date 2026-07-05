@@ -13,7 +13,8 @@
 #     values.dhcp_options_netbios_name_servers: List of NETBIOS name servers
 #     values.dhcp_options_netbios_node_type: The NetBIOS node type (1, 2, 4, or 8)
 #     values.availability_zones: List of availability zones (minimum 2)
-#     values.egress_subnets: List of CIDRs for the egress subnets
+#     values.egress_subnets: List of CIDRs for the egress subnets (if any)
+#     values.platform_subnets: List of CIDRs for the platform subnets
 #     values.enable_flow_logs: Boolean
 #     values.flow_logs_retention_days: How many days to retain the flow logs
 
@@ -66,6 +67,7 @@ inputs = {
   dhcp_options_netbios_node_type    = values.dhcp_options_netbios_node_type
   availability_zones                = values.availability_zones
   egress_subnets                    = values.egress_subnets
+  platform_subnets                  = values.platform_subnets
   enable_flow_logs                  = values.enable_flow_logs
   flow_logs_retention_days          = values.flow_logs_retention_days
 }
