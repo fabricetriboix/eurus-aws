@@ -51,6 +51,8 @@ each tenant).
 
 # Observability and alerting
 
+## Generalities
+
 This section explains how observability and alerting work for
 `eurus-aws`.
 
@@ -92,6 +94,26 @@ NB: There are ways to convert CloudWatch Metrics into Prometheus
 metrics, but these are non-trivial and I decided not to do it in order
 to reduce the amount of moving parts and reduce risks of things going
 wrong.
+
+## Detailed explanation of metrics and traces
+
+Each environment will run a standalone ADOT collector in the
+platform's ECS cluster (an ECS cluster per environment dedicated to
+platform components).
+
+Each ECS task will run an ADOT collector sidecar container, which will
+be responsible for:
+  - Collecting metrics and traces from the app itself
+  - Collecting container insights metrics using the
+    `awsecscontainermetrics` receiver (which read such metrics from
+    the Task Metadata Endpoint v4)
+  - Forwarding metrics and traces to the environment's ADOT collector
+
+The environment's ADOT collector will then forward the metrics to the
+realm's AMP write endpoint, and the traces to AWS X-Ray in the local
+AWS account. It will also be responsible to filter out any potentially
+problematic metrics or traces and thus act as a gateway to prevent the
+tenants from overwhelming AMP or X-Ray.
 
 # Tenant segregation and onboarding
 
