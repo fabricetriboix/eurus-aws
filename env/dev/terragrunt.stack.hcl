@@ -29,3 +29,19 @@ unit "networking" {
     flow_logs_retention_days          = try(local.config.features.networking.flow_logs_retention_days, 7)
   }
 }
+
+unit "ecs-plf" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.ecs-plf.version}"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/ecs-plf?ref=feat-ecs-cluster"
+
+  path = "feature-ecs-plf"
+
+  values = {
+    enabled            = local.config.features.ecs-plf.enabled
+    account_type       = local.config.account_type
+    realm              = local.config.realm
+    env                = local.config.env
+    log_retention_days = 7
+  }
+}

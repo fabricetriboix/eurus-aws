@@ -14,3 +14,7 @@ features:
 
     flow_logs:
       enabled: false
+
+  ecs-plf:
+    enabled: true
+    version: feature-ecs-plf-v0.1.0
