@@ -37,12 +37,15 @@ help:
 
 ## Run CI for the modules
 ci-module: $(foreach f,$(MODULES),ci-module-$(f))
+ci-modules: ci-module
 
 ## Run CI for the features
 ci-feature: $(foreach f,$(FEATURES),ci-feature-$(f))
+ci-features: ci-feature
 
 ## Run CI for the environments
 ci-env: $(foreach f,$(ENVS),ci-env-$(f))
+ci-envs: ci-env
 
 ## Run all CI jobs
 ci: ci-module ci-feature $(foreach f,$(BOOTSTRAPS),ci-bootstrap-$(f)) ci-env
