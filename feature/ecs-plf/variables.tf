@@ -1,15 +1,20 @@
 variable "org" {
-  description = "The organization name"
+  description = "Name of the organization"
   type        = string
 }
 
 variable "project" {
-  description = "The project name"
+  description = "Name of the project"
+  type        = string
+}
+
+variable "region" {
+  description = "Region where the platform ECS cluster will be deployed"
   type        = string
 }
 
 variable "env" {
-  description = "Name of the environment this ECS cluster will be deployed to (eg: dev, stg, prd)"
+  description = "Name of the environment this platform ECS cluster will be deployed to (eg: dev, stg, prd)"
   type        = string
 
   validation {
@@ -18,13 +23,8 @@ variable "env" {
   }
 }
 
-variable "region" {
-  description = "The region where the ECS cluster is located"
-  type        = string
-}
-
 variable "log_retention_days" {
-  description = "The number of days to retain the logs of the ECS cluster"
+  description = "Number of days to retain platform ECS cluster logs"
   type        = number
   default     = 30
 }
