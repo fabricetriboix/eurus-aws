@@ -29,7 +29,7 @@ module "key" {
         }
       ]
       actions = ["kms:GenerateDataKeyWithoutPlaintext"]
-      conditions = [
+      condition = [
         {
           test     = "StringEquals"
           variable = "kms:EncryptionContext:aws:ecs:clusterAccount"
@@ -52,7 +52,7 @@ module "key" {
         }
       ]
       actions = ["kms:CreateGrant"]
-      conditions = [
+      condition = [
         {
           test     = "StringEquals"
           variable = "kms:EncryptionContext:aws:ecs:clusterAccount"
