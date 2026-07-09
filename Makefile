@@ -6,8 +6,8 @@ SHELL := /bin/bash
 
 CHECKOV ?= 1
 CHECKOV_QUIET ?= 1
-MODULES := bootstrap
-FEATURES := networking
+MODULES := bootstrap ecs-cluster
+FEATURES := networking amg amp
 BOOTSTRAPS := all
 ENVS := common-nonprod dev
 ACTION ?= apply
