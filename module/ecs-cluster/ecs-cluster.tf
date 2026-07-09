@@ -22,7 +22,7 @@ resource "aws_ecs_cluster" "cluster" {
     }
 
     execute_command_configuration {
-      kms_key_id = module.kms.key_id
+      kms_key_id = module.key.key_id
       logging    = "OVERRIDE"
 
       log_configuration {
