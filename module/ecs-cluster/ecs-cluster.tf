@@ -11,6 +11,7 @@ resource "aws_cloudwatch_log_group" "logs" {
 }
 
 resource "aws_ecs_cluster" "cluster" {
+  # checkov:skip=CKV_AWS_65:Container Insights is disabled at cluster level because the ECS metrics are already collected by the ADOT sidecar containers.
   name   = local.cluster_name
   region = var.region
 
