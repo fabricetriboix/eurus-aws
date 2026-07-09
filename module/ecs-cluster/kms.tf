@@ -21,6 +21,34 @@ module "key" {
       resources = ["*"]
     },
     {
+      sid = "CloudWatchLogs"
+      actions = [
+        "kms:Encrypt*",
+        "kms:Decrypt*",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:Describe*",
+      ]
+      resources = ["*"]
+
+      principals = [
+        {
+          type        = "Service"
+          identifiers = ["logs.${var.region}.amazonaws.com"]
+        }
+      ]
+
+      condition = [
+        {
+          test     = "ArnLike"
+          variable = "kms:EncryptionContext:aws:logs:arn"
+          values = [
+            "arn:aws:logs:${var.region}:${local.account_id}:log-group:/${var.org}/${var.project}/${var.env}/ecs-cluster-logs/*",
+          ]
+        }
+      ]
+    },
+    {
       sid = "Allow generate data key for Fargate tasks"
       principals = [
         {
