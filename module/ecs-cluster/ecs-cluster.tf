@@ -17,8 +17,8 @@ resource "aws_ecs_cluster" "cluster" {
 
   configuration {
     managed_storage_configuration {
-      kms_key_id                           = module.kms.key_id
-      fargate_ephemeral_storage_kms_key_id = module.kms.key_id
+      kms_key_id                           = module.key.key_id
+      fargate_ephemeral_storage_kms_key_id = module.key.key_id
     }
 
     execute_command_configuration {
