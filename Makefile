@@ -35,8 +35,17 @@ help:
 	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
 	@printf "\n"
 
+## Run CI for the modules
+ci-module: $(foreach f,$(MODULES),ci-module-$(f))
+
+## Run CI for the features
+ci-feature: $(foreach f,$(FEATURES),ci-feature-$(f))
+
+## Run CI for the environments
+ci-env: $(foreach f,$(ENVS),ci-env-$(f))
+
 ## Run all CI jobs
-ci: $(foreach f,$(MODULES),ci-module-$(f)) $(foreach f,$(FEATURES),ci-feature-$(f)) $(foreach f,$(BOOTSTRAPS),ci-bootstrap-$(f)) $(foreach f,$(ENVS),ci-env-$(f))
+ci: ci-module ci-feature $(foreach f,$(BOOTSTRAPS),ci-bootstrap-$(f)) ci-env
 
 ## Run all CD jobs
 cd: $(foreach f,$(ENVS),cd-env-$(f))
