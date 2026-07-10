@@ -4,8 +4,8 @@ locals {
 
 unit "networking" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.networking.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/networking?ref=feat-dev"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.networking.version}"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/networking?ref=fix-version-tag"
 
   path = "feature-networking"
 
@@ -33,8 +33,8 @@ unit "networking" {
 
 unit "ecs-plf" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.ecs-plf.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/ecs-plf?ref=fix-ecs-cluster"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.ecs-plf.version}"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/ecs-plf?ref=fix-version-tag"
 
   path = "feature-ecs-plf"
 
