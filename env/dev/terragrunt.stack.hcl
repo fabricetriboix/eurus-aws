@@ -32,8 +32,8 @@ unit "networking" {
 
 unit "ecs-plf" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.ecs-plf.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/ecs-plf?ref=feat-ecs-cluster"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.ecs-plf.version}"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/ecs-plf?ref=fix-ecs-cluster"
 
   path = "feature-ecs-plf"
 
