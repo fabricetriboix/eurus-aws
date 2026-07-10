@@ -23,6 +23,11 @@ variable "region" {
   type        = string
 }
 
+variable "cluster_name_suffix" {
+  description = "The suffix of the ECS cluster name"
+  type        = string
+}
+
 variable "log_retention_days" {
   description = "The number of days to retain the logs of the ECS cluster"
   type        = number
