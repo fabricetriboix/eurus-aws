@@ -47,11 +47,11 @@ terraform {
 }
 
 inputs = merge({
-    version = values.version
-    org     = include.global.locals.org
-    project = include.global.locals.project
-    region  = include.global.locals.region
-    env     = values.env
+    feature_version = values.version
+    org             = include.global.locals.org
+    project         = include.global.locals.project
+    region          = include.global.locals.region
+    env             = values.env
   },
   try(values.log_retention_days, null) != null ? {
     log_retention_days = values.log_retention_days

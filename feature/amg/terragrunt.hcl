@@ -42,9 +42,9 @@ terraform {
 }
 
 inputs = {
-  version = values.version
-  org     = include.global.locals.org
-  project = include.global.locals.project
-  region  = include.global.locals.region
-  env     = values.env
+  feature_version = values.version
+  org             = include.global.locals.org
+  project         = include.global.locals.project
+  region          = include.global.locals.region
+  env             = values.env
 }
