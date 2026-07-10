@@ -26,6 +26,16 @@ variable "region" {
 variable "cluster_name_suffix" {
   description = "The suffix of the ECS cluster name"
   type        = string
+
+  validation {
+    condition     = length(var.cluster_name_suffix) > 1 && length(var.cluster_name_suffix) <= 16
+    error_message = "The `cluster_name_suffix` variable must be set and must have at most 16 characters and at least 2 characters."
+  }
+
+  validation {
+    condition     = regex("^[a-z0-9]+$", var.cluster_name_suffix)
+    error_message = "The `cluster_name_suffix` variable must contain only lowercase alphanumeric characters."
+  }
 }
 
 variable "log_retention_days" {
