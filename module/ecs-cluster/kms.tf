@@ -43,7 +43,7 @@ module "key" {
           test     = "ArnLike"
           variable = "kms:EncryptionContext:aws:logs:arn"
           values = [
-            "arn:aws:logs:${var.region}:${local.account_id}:log-group:/${var.org}/${var.project}/${var.env}/ecs-cluster-logs/${local.cluster_name}/*",
+            "arn:aws:logs:${var.region}:${local.account_id}:log-group:/${var.org}/${var.project}/${var.env}/ecs-cluster-logs/${local.cluster_name}",
           ]
         }
       ]
