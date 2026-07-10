@@ -1,4 +1,4 @@
-variable "version" {
+variable "feature_version" {
   description = "Version of the feature"
   type        = string
 }

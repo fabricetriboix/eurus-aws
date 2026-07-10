@@ -5,6 +5,6 @@ locals {
 
   tags = {
     FeatureSource  = "feature/amp"
-    FeatureVersion = var.version
+    FeatureVersion = var.feature_version
   }
 }
