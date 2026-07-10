@@ -6,7 +6,7 @@ locals {
   cluster_name = "${var.org}-${var.project}-${var.env}-${var.cluster_name_suffix}"
   kms_alias    = "ecs-cluster-${local.cluster_name}"
 
-  tags = {
-    ModuleSource = "modules/ecs-cluster"
-  }
+  tags = merge(var.extra_tags, {
+    ModuleSource = "module/ecs-cluster"
+  })
 }

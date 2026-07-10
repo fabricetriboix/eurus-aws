@@ -33,3 +33,9 @@ variable "log_retention_days" {
   type        = number
   default     = 30
 }
+
+variable "extra_tags" {
+  description = "Extra tags to add to the ECS cluster"
+  type        = map(string)
+  default     = {}
+}

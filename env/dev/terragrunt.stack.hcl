@@ -42,6 +42,6 @@ unit "ecs-plf" {
     account_type       = local.config.account_type
     realm              = local.config.realm
     env                = local.config.env
-    log_retention_days = 7
+    log_retention_days = try(local.config.features.ecs-plf.log_retention_days, 7)
   }
 }

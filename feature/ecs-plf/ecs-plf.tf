@@ -8,4 +8,5 @@ module "ecs_cluster" {
   region              = var.region
   cluster_name_suffix = "plf"
   log_retention_days  = var.log_retention_days
+  extra_tags          = local.tags
 }
