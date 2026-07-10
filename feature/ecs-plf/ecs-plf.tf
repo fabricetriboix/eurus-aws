@@ -1,5 +1,5 @@
 module "ecs_cluster" {
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=feature-ecs-cluster-v0.1.1"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=module-ecs-cluster-v0.1.1"
   #source = "git::https://github.com/fabricetriboix/eurus-aws.git//module/ecs-cluster?ref=feat-ecs-cluster"
 
   org                 = var.org
