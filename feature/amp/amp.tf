@@ -1,7 +1,7 @@
 # Amazon Managed Prometheus
 
 resource "aws_cloudwatch_log_group" "this" {
-  name       = "/amp/${var.org}-${var.project}-${var.env}"
+  name       = "/${var.org}/${var.project}/${var.env}/amp-logs"
   region     = var.region
   kms_key_id = module.key.key_arn
 
@@ -9,7 +9,7 @@ resource "aws_cloudwatch_log_group" "this" {
   retention_in_days = var.log_retention_days
 
   tags = merge(local.tags, {
-    Name    = "/amp/${var.org}-${var.project}-${var.env}"
+    Name    = "/${var.org}/${var.project}/${var.env}/amp-logs"
     Purpose = "Amazon Managed Prometheus log group for ${var.org}-${var.project}-${var.env}"
   })
 }
