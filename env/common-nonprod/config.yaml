@@ -19,4 +19,4 @@ features:
 
   amp:
     enabled: true
-    version: feature-amp-v0.1.1
+    version: feature-amp-v0.2.0
