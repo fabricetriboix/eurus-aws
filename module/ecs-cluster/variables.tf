@@ -33,7 +33,7 @@ variable "cluster_name_suffix" {
   }
 
   validation {
-    condition     = regex("^[a-z0-9]+$", var.cluster_name_suffix)
+    condition     = can(regex("^[a-z0-9]+$", var.cluster_name_suffix))
     error_message = "The `cluster_name_suffix` variable must contain only lowercase alphanumeric characters."
   }
 }
