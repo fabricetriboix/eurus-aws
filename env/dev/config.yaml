@@ -17,4 +17,4 @@ features:
 
   ecs-plf:
     enabled: true
-    version: feature-ecs-plf-v0.1.0
+    version: feature-ecs-plf-v0.1.1
