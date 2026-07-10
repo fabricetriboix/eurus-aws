@@ -1,5 +1,6 @@
 locals {
   tags = {
-    FeatureSource = "feature/ecs-plf"
+    FeatureSource  = "feature/ecs-plf"
+    FeatureVersion = var.version
   }
 }

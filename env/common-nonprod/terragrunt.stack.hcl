@@ -11,6 +11,7 @@ unit "networking" {
 
   values = {
     enabled                           = local.config.features.networking.enabled
+    version                           = local.config.features.networking.version
     account_type                      = local.config.account_type
     realm                             = local.config.realm
     env                               = local.config.env
@@ -39,6 +40,7 @@ unit "amg" {
 
   values = {
     enabled      = local.config.features.amg.enabled
+    version      = local.config.features.amg.version
     account_type = local.config.account_type
     realm        = local.config.realm
     env          = local.config.env
@@ -54,6 +56,7 @@ unit "amp" {
 
   values = {
     enabled      = local.config.features.amp.enabled
+    version      = local.config.features.amp.version
     account_type = local.config.account_type
     realm        = local.config.realm
     env          = local.config.env

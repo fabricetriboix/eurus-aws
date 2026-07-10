@@ -1,5 +1,6 @@
 locals {
   tags = {
-    FeatureSource = "feature/amg"
+    FeatureSource  = "feature/amg"
+    FeatureVersion = var.version
   }
 }

@@ -11,6 +11,7 @@ unit "networking" {
 
   values = {
     enabled                           = local.config.features.networking.enabled
+    version                           = local.config.features.networking.version
     account_type                      = local.config.account_type
     realm                             = local.config.realm
     env                               = local.config.env
@@ -39,6 +40,7 @@ unit "ecs-plf" {
 
   values = {
     enabled            = local.config.features.ecs-plf.enabled
+    version            = local.config.features.ecs-plf.version
     account_type       = local.config.account_type
     realm              = local.config.realm
     env                = local.config.env

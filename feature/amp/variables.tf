@@ -1,3 +1,8 @@
+variable "version" {
+  description = "Version of the feature"
+  type        = string
+}
+
 variable "org" {
   description = "Name of the organization"
   type        = string
