@@ -5,7 +5,7 @@ env: common-nonprod
 features:
   networking:
     enabled: true
-    version: feature-networking-v0.4.1
+    version: feature-networking-v0.5.0
     cidr: 10.101.0.0/16
     availability_zones: [eu-west-1a, eu-west-1b]
     platform_subnets: [10.101.1.0/24, 10.101.2.0/24]
@@ -15,8 +15,8 @@ features:
 
   amg:
     enabled: true
-    version: feature-amg-v0.1.0
+    version: feature-amg-v0.2.0
 
   amp:
     enabled: true
-    version: feature-amp-v0.2.0
+    version: feature-amp-v0.3.0
