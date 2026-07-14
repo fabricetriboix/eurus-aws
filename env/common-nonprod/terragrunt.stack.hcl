@@ -11,7 +11,7 @@ unit "networking" {
 
   values = {
     enabled                           = local.config.features.networking.enabled
-    feature_version                   = local.config.features.networking.version
+    version                           = local.config.features.networking.version
     account_type                      = local.config.account_type
     realm                             = local.config.realm
     env                               = local.config.env
@@ -39,11 +39,11 @@ unit "amg" {
   path = "feature-amg"
 
   values = {
-    enabled         = local.config.features.amg.enabled
-    feature_version = local.config.features.amg.version
-    account_type    = local.config.account_type
-    realm           = local.config.realm
-    env             = local.config.env
+    enabled      = local.config.features.amg.enabled
+    version      = local.config.features.amg.version
+    account_type = local.config.account_type
+    realm        = local.config.realm
+    env          = local.config.env
   }
 }
 
@@ -55,10 +55,10 @@ unit "amp" {
   path = "feature-amp"
 
   values = {
-    enabled         = local.config.features.amp.enabled
-    feature_version = local.config.features.amp.version
-    account_type    = local.config.account_type
-    realm           = local.config.realm
-    env             = local.config.env
+    enabled      = local.config.features.amp.enabled
+    version      = local.config.features.amp.version
+    account_type = local.config.account_type
+    realm        = local.config.realm
+    env          = local.config.env
   }
 }
