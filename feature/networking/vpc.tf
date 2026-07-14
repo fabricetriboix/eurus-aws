@@ -6,9 +6,9 @@ resource "aws_vpc" "this" {
   enable_dns_support                   = true
   enable_network_address_usage_metrics = true
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.org}-${var.project}-${var.env}"
-  })
+  }
 }
 
 resource "aws_default_security_group" "default" {
@@ -31,9 +31,9 @@ resource "aws_vpc_dhcp_options" "this" {
   netbios_name_servers = var.dhcp_options_netbios_name_servers
   netbios_node_type    = var.dhcp_options_netbios_node_type
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.org}-${var.project}-${var.env}-dhcp-options"
-  })
+  }
 }
 
 resource "aws_vpc_dhcp_options_association" "this" {
@@ -64,9 +64,9 @@ resource "aws_subnet" "egress" {
   # still exist.
   depends_on = [aws_vpc_ipv4_cidr_block_association.this]
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
-  })
+  }
 }
 
 resource "aws_route_table" "egress" {
@@ -74,9 +74,9 @@ resource "aws_route_table" "egress" {
 
   vpc_id = aws_vpc.this.id
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
-  })
+  }
 }
 
 resource "aws_route_table_association" "egress" {
@@ -102,9 +102,9 @@ resource "aws_subnet" "platform" {
   cidr_block        = var.platform_subnets[count.index]
   availability_zone = var.availability_zones[count.index]
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.org}-${var.project}-${var.env}-platform-${var.availability_zones[count.index]}"
-  })
+  }
 }
 
 resource "aws_route_table" "platform" {
@@ -112,9 +112,9 @@ resource "aws_route_table" "platform" {
 
   vpc_id = aws_vpc.this.id
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.org}-${var.project}-${var.env}-platform-${var.availability_zones[count.index]}"
-  })
+  }
 }
 
 resource "aws_route_table_association" "platform" {

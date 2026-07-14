@@ -80,8 +80,8 @@ module "key" {
     },
   ]
 
-  tags = merge(local.tags, {
+  tags = {
     Name    = "alias/amp",
     Purpose = "Encrypt Amazon Managed Prometheus data"
-  })
+  }
 }

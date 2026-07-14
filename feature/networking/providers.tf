@@ -6,3 +6,12 @@ terraform {
     }
   }
 }
+
+provider "aws" {
+  default_tags {
+    tags = {
+      FeatureSource  = "feature/networking"
+      FeatureVersion = var.feature_version
+    }
+  }
+}

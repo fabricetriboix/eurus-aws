@@ -8,10 +8,10 @@ resource "aws_cloudwatch_log_group" "this" {
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
   retention_in_days = var.log_retention_days
 
-  tags = merge(local.tags, {
+  tags = {
     Name    = "/${var.org}/${var.project}/${var.env}/amp-logs"
     Purpose = "Amazon Managed Prometheus log group for ${var.org}-${var.project}-${var.env}"
-  })
+  }
 }
 
 resource "aws_prometheus_workspace" "this" {
@@ -23,8 +23,8 @@ resource "aws_prometheus_workspace" "this" {
     log_group_arn = "${aws_cloudwatch_log_group.this.arn}:*"
   }
 
-  tags = merge(local.tags, {
+  tags = {
     Name    = "${var.org}-${var.project}-${var.env}"
     Purpose = "Amazon Managed Prometheus workspace for ${var.org}-${var.project}-${var.env}"
-  })
+  }
 }

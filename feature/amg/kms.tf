@@ -8,8 +8,8 @@ module "key" {
   deletion_window_in_days = 7
   rotation_period_in_days = 90
 
-  tags = merge(local.tags, {
+  tags = {
     Name    = "alias/amg",
     Purpose = "Encrypt Amazon Managed Grafana data"
-  })
+  }
 }

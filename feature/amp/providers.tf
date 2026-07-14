@@ -6,3 +6,12 @@ terraform {
     }
   }
 }
+
+provider "aws" {
+  default_tags {
+    tags = {
+      FeatureSource  = "feature/amp"
+      FeatureVersion = var.feature_version
+    }
+  }
+}
