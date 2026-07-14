@@ -5,7 +5,8 @@ env: dev
 features:
   networking:
     enabled: true
-    version: feature-networking-v0.5.0
+    #version: feature-networking-v0.5.0
+    version: fix-tags-refactor
     cidr: 10.111.0.0/16
     secondary_cidrs: [10.102.9.0/24]
     availability_zones: [eu-west-1a, eu-west-1b]
@@ -17,4 +18,5 @@ features:
 
   ecs-plf:
     enabled: true
-    version: feature-ecs-plf-v0.2.0
+    #version: feature-ecs-plf-v0.2.0
+    version: fix-tags-refactor
