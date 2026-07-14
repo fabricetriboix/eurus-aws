@@ -4,13 +4,14 @@ locals {
 
 unit "networking" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.networking.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/networking?ref=fix-add-plf-subnets"
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.networking.version)) ? "" : "feature/networking"}?ref=${local.config.features.networking.version}"
 
   path = "feature-networking"
 
   values = {
     enabled                           = local.config.features.networking.enabled
+    version                           = local.config.features.networking.version
     account_type                      = local.config.account_type
     realm                             = local.config.realm
     env                               = local.config.env
@@ -32,13 +33,14 @@ unit "networking" {
 
 unit "amg" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.amg.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/amg?ref=feat-amg"
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.amg.version)) ? "" : "feature/amg"}?ref=${local.config.features.amg.version}"
 
   path = "feature-amg"
 
   values = {
     enabled      = local.config.features.amg.enabled
+    version      = local.config.features.amg.version
     account_type = local.config.account_type
     realm        = local.config.realm
     env          = local.config.env
@@ -47,13 +49,14 @@ unit "amg" {
 
 unit "amp" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.amp.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/amp?ref=fix-amp"
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.amp.version)) ? "" : "feature/amp"}?ref=${local.config.features.amp.version}"
 
   path = "feature-amp"
 
   values = {
     enabled      = local.config.features.amp.enabled
+    version      = local.config.features.amp.version
     account_type = local.config.account_type
     realm        = local.config.realm
     env          = local.config.env

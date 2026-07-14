@@ -1,6 +1,7 @@
 # Required values:
 #
 #     values.enabled: Whether to enable or disable this feature
+#     values.version: The version of the feature
 #     values.account_type: Type of AWS account, either "common" or "app"
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
@@ -46,10 +47,11 @@ terraform {
 }
 
 inputs = merge({
-    org     = include.global.locals.org
-    project = include.global.locals.project
-    region  = include.global.locals.region
-    env     = values.env
+    feature_version = values.version
+    org             = include.global.locals.org
+    project         = include.global.locals.project
+    region          = include.global.locals.region
+    env             = values.env
   },
   try(values.log_retention_days, null) != null ? {
     log_retention_days = values.log_retention_days

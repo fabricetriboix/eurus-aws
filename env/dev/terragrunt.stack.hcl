@@ -4,13 +4,14 @@ locals {
 
 unit "networking" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.networking.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/networking?ref=feat-dev"
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.networking.version)) ? "" : "feature/networking"}?ref=${local.config.features.networking.version}"
 
   path = "feature-networking"
 
   values = {
     enabled                           = local.config.features.networking.enabled
+    version                           = local.config.features.networking.version
     account_type                      = local.config.account_type
     realm                             = local.config.realm
     env                               = local.config.env
@@ -32,13 +33,14 @@ unit "networking" {
 
 unit "ecs-plf" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=${local.config.features.ecs-plf.version}"
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//feature/ecs-plf?ref=fix-ecs-cluster"
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.ecs-plf.version)) ? "" : "feature/ecs-plf"}?ref=${local.config.features.ecs-plf.version}"
 
   path = "feature-ecs-plf"
 
   values = {
     enabled            = local.config.features.ecs-plf.enabled
+    version            = local.config.features.ecs-plf.version
     account_type       = local.config.account_type
     realm              = local.config.realm
     env                = local.config.env

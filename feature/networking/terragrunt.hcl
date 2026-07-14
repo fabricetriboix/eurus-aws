@@ -1,6 +1,7 @@
 # Required values:
 #
 #     values.enabled: Whether to enable or disable this feature
+#     values.version: The version of the feature
 #     values.account_type: Type of AWS account, either "common" or "app"
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
@@ -54,6 +55,7 @@ terraform {
 }
 
 inputs = {
+  feature_version                   = values.version
   org                               = include.global.locals.org
   project                           = include.global.locals.project
   env                               = values.env
