@@ -9,9 +9,9 @@ module "key" {
   deletion_window_in_days = 7
   rotation_period_in_days = 90
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "alias/${local.kms_alias}"
-  })
+  }
 }
 
 resource "aws_cloudwatch_log_group" "flow_logs" {
@@ -23,9 +23,9 @@ resource "aws_cloudwatch_log_group" "flow_logs" {
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
   retention_in_days = var.flow_logs_retention_days
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
-  })
+  }
 }
 
 data "aws_iam_policy_document" "flow_logs_assume_role" {
@@ -47,9 +47,9 @@ resource "aws_iam_role" "flow_log_role" {
   name               = "${var.org}-${var.project}-${var.env}-flow-log-role"
   assume_role_policy = data.aws_iam_policy_document.flow_logs_assume_role.json
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.org}-${var.project}-${var.env}-flow-log-role"
-  })
+  }
 }
 
 data "aws_iam_policy_document" "flow_logs" {
@@ -73,9 +73,9 @@ resource "aws_iam_policy" "flow_logs" {
   name   = "${var.org}-${var.project}-${var.env}-flow-log-policy"
   policy = data.aws_iam_policy_document.flow_logs[0].json
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.org}-${var.project}-${var.env}-flow-log-policy"
-  })
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "flow_logs" {
@@ -93,7 +93,7 @@ resource "aws_flow_log" "this" {
   traffic_type    = "ALL"
   iam_role_arn    = aws_iam_role.flow_log_role[0].arn
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
-  })
+  }
 }

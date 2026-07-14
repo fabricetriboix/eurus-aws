@@ -6,3 +6,12 @@ terraform {
     }
   }
 }
+
+provider "aws" {
+  default_tags {
+    tags = {
+      FeatureSource  = "feature/amg"
+      FeatureVersion = var.feature_version
+    }
+  }
+}

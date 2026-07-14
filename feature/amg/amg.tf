@@ -14,10 +14,10 @@ resource "aws_iam_role" "amg" {
   name               = "${var.org}-${var.project}-${var.env}-amg"
   assume_role_policy = data.aws_iam_policy_document.amg_assume_role_policy.json
 
-  tags = merge(local.tags, {
+  tags = {
     Name    = "${var.org}-${var.project}-${var.env}-amg"
     Purpose = "Allow Amazon Managed Grafana to access what it needs to access"
-  })
+  }
 }
 
 resource "aws_grafana_workspace" "this" {
@@ -29,8 +29,8 @@ resource "aws_grafana_workspace" "this" {
   kms_key_id               = module.key.key_arn
   role_arn                 = aws_iam_role.amg.arn
 
-  tags = merge(local.tags, {
+  tags = {
     Name    = "${var.org}-${var.project}-${var.env}"
     Purpose = "Amazon Managed Grafana workspace for ${var.org}-${var.project}-${var.env}"
-  })
+  }
 }
