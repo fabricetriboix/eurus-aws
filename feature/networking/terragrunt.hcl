@@ -54,6 +54,7 @@ terraform {
 }
 
 inputs = {
+  feature_version                   = values.version
   org                               = include.global.locals.org
   project                           = include.global.locals.project
   env                               = values.env
