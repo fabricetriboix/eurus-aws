@@ -1,8 +1,12 @@
 import pytest
 import moto
 import boto3
+import freezegun
 
+from datetime import datetime, timezone, timedelta
 from pydantic import ValidationError
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 
 from certificate import (
     CertificateParameters,
@@ -226,3 +230,44 @@ def test_create_cert_with_good_params_should_succeed(good_cert_params_self_signe
     kms_key_id = response['KeyMetadata']['KeyId']
     cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
     assert cert is not None
+
+
+@moto.mock_aws
+def test_renew_cert_with_good_params_should_succeed(good_cert_params_self_signed: CertificateParameters):
+    kms_client = boto3.client('kms', region_name="eu-west-1")
+    response = kms_client.create_key(Description="Test Key")
+    kms_key_id = response['KeyMetadata']['KeyId']
+    cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    assert cert is not None
+
+    cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    assert cert is not None
+
+
+def _load_cert_from_acm(cert_arn: str) -> x509.Certificate:
+    acm_client = boto3.client('acm', region_name="eu-west-1")
+    pem = acm_client.get_certificate(CertificateArn=cert_arn)['Certificate']
+    if isinstance(pem, str):
+        pem = pem.encode('utf-8')
+    return x509.load_pem_x509_certificate(pem, backend=default_backend())
+
+
+@moto.mock_aws
+def test_renew_cert_issued_one_month_ago_should_move_validity_window(good_cert_params_self_signed: CertificateParameters):
+    kms_client = boto3.client('kms', region_name="eu-west-1")
+    response = kms_client.create_key(Description="Test Key")
+    kms_key_id = response['KeyMetadata']['KeyId']
+
+    now = datetime.now(timezone.utc)
+    one_month_ago = now - timedelta(days=30)
+
+    with freezegun.freeze_time(one_month_ago):
+        # Everything inside this block sees `one_month_ago` as the current time
+        assert datetime.now(timezone.utc) == one_month_ago
+        old_cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+
+    # X.509 timestamps have a one-second resolution
+    assert _load_cert_from_acm(old_cert.cert_arn).not_valid_before_utc == one_month_ago.replace(microsecond=0)
+
+    new_cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    assert _load_cert_from_acm(new_cert.cert_arn).not_valid_before_utc >= now.replace(microsecond=0)
