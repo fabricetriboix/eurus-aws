@@ -272,7 +272,7 @@ def create_or_renew_certificate(
             critical=params.basic_constraints.is_critical,
             value=x509.BasicConstraints(
                 ca=is_ca,
-                path_length=params.basic_constraints.path_length
+                path_length=params.basic_constraints.path_length if is_ca else None
             )
         )
         extensions.append(extension)
@@ -335,7 +335,7 @@ def create_or_renew_certificate(
             CertificateArn=ca_cert.cert_arn
         )
         ca_cert_obj = x509.load_pem_x509_certificate(
-            acm_cert['Certificate'],
+            acm_cert['Certificate'].encode('utf-8'),
             backend=default_backend()
         )
         issuer = ca_cert_obj.subject
