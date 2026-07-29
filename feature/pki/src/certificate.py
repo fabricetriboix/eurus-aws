@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from typing import Literal
 from pydantic import BaseModel, Field, model_validator
@@ -14,6 +15,7 @@ from datetime import datetime, timezone, timedelta
 
 
 logger = Logger(service="pki")
+region = os.environ['AWS_REGION']
 
 
 class BasicConstraints(BaseModel):
@@ -122,7 +124,7 @@ class Key(BaseModel):
     key: str = Field(..., description="The private key in PEM format")
 
 
-def get_key_from_ssm(
+def _get_key_from_ssm(
     ssm_client: boto3.client,
     param_name: str
 ) -> Key:
@@ -142,7 +144,7 @@ class Certificate(BaseModel):
     ca_key_ssm_param: str | None = None
 
 
-def get_certificate_from_ssm(
+def _get_certificate_from_ssm(
     ssm_client: boto3.client,
     param_name: str
 ) -> Certificate:
@@ -153,7 +155,7 @@ def get_certificate_from_ssm(
     return Certificate.model_validate_json(tmp['Parameter']['Value'])
 
 
-def add_attribute_if_present(
+def _add_attribute_if_present(
     params: CertificateParameters,
     attribute_name: str,
     attributes: list[x509.Extension],
@@ -162,19 +164,19 @@ def add_attribute_if_present(
     if getattr(params, attribute_name) is None:
         logger.debug(f"Attribute `{attribute_name}` is not present, skipping")
     else:
-        value = getattr(params, attribute_name).encode('utf-8')
+        value = getattr(params, attribute_name)#.encode('utf-8')
         logger.debug(f"Adding attribute `{attribute_name}` with value `{value}` to subject")
-        attributes.append(x509.NameAttribute(oid, value))
+        attributes.append(x509.NameAttribute(oid, str(value)))
 
 
-def upsert_ssm_param(
+def _upsert_ssm_param(
     ssm_client: boto3.client,
     ksm_key_id: str,
     name: str,
     value: str,
     desc: str,
     tags: dict[str, str]
-) -> str:
+) -> None:
     """
     Save the SSM parameter.
     
@@ -195,12 +197,14 @@ def upsert_ssm_param(
         ResourceType="Parameter",
         ResourceId=name
     )
-    logger.debug(f"upsert_ssm_param: Calling ssm_client.remove_tags_from_resource(ResourceId={name})")
-    ssm_client.remove_tags_from_resource(
-        ResourceType="Parameter",
-        ResourceId=name,
-        TagKeys=[tag['Key'] for tag in resp['TagList']]
-    )
+    existing_tag_keys = [tag['Key'] for tag in resp['TagList']]
+    if existing_tag_keys:
+        logger.debug(f"upsert_ssm_param: Calling ssm_client.remove_tags_from_resource(ResourceId={name})")
+        ssm_client.remove_tags_from_resource(
+            ResourceType="Parameter",
+            ResourceId=name,
+            TagKeys=existing_tag_keys
+        )
 
     # Save the new tags
     if tags:
@@ -215,10 +219,9 @@ def upsert_ssm_param(
     resp = ssm_client.get_parameter(Name=name)
     arn = resp['Parameter']['ARN']
     logger.debug(f"upsert_ssm_param: Success - ARN: {arn}")
-    return arn
 
 
-def chain_certificate(
+def _chain_certificate(
     ssm_client: boto3.client,
     acm_client: boto3.client,
     chain: str,
@@ -236,8 +239,8 @@ def chain_certificate(
     if ca_cert.ca_cert_ssm_param is None:
         return chain  # Self-signed certificate => end of chain
 
-    parent_ca_cert = get_certificate_from_ssm(ssm_client, ca_cert.ca_cert_ssm_param)
-    return chain_certificate(ssm_client, acm_client, chain, parent_ca_cert)
+    parent_ca_cert = _get_certificate_from_ssm(ssm_client, ca_cert.ca_cert_ssm_param)
+    return _chain_certificate(ssm_client, acm_client, chain, parent_ca_cert)
 
 
 def create_or_renew_certificate(
@@ -247,13 +250,13 @@ def create_or_renew_certificate(
     # Build subject name
 
     attributes = []
-    add_attribute_if_present(params, 'country_name', attributes, NameOID.COUNTRY_NAME)
-    add_attribute_if_present(params, 'state_or_province_name', attributes, NameOID.STATE_OR_PROVINCE_NAME)
-    add_attribute_if_present(params, 'locality_name', attributes, NameOID.LOCALITY_NAME)
-    add_attribute_if_present(params, 'organization_name', attributes, NameOID.ORGANIZATION_NAME)
-    add_attribute_if_present(params, 'organizational_unit_name', attributes, NameOID.ORGANIZATIONAL_UNIT_NAME)
-    add_attribute_if_present(params, 'email_address', attributes, NameOID.EMAIL_ADDRESS)
-    add_attribute_if_present(params, 'common_name', attributes, NameOID.COMMON_NAME)
+    _add_attribute_if_present(params, 'country_name', attributes, NameOID.COUNTRY_NAME)
+    _add_attribute_if_present(params, 'state_or_province_name', attributes, NameOID.STATE_OR_PROVINCE_NAME)
+    _add_attribute_if_present(params, 'locality_name', attributes, NameOID.LOCALITY_NAME)
+    _add_attribute_if_present(params, 'organization_name', attributes, NameOID.ORGANIZATION_NAME)
+    _add_attribute_if_present(params, 'organizational_unit_name', attributes, NameOID.ORGANIZATIONAL_UNIT_NAME)
+    _add_attribute_if_present(params, 'email_address', attributes, NameOID.EMAIL_ADDRESS)
+    _add_attribute_if_present(params, 'common_name', attributes, NameOID.COMMON_NAME)
 
     subject = x509.Name(attributes)
 
@@ -308,8 +311,9 @@ def create_or_renew_certificate(
 
     # Get the CA key and certificate if required
 
-    ssm_client = boto3.client('ssm')
-    acm_client = boto3.client('acm')
+    acm_client = boto3.client('acm', region_name=region)
+    ssm_client = boto3.client('ssm', region_name=region)
+
     if params.ca_key_ssm_param_name is None or params.ca_cert_ssm_param_name is None:
         logger.debug("No CA key or certificate provided, certificate will be self-signed")
         ca_key = None
@@ -319,14 +323,14 @@ def create_or_renew_certificate(
         issuer = subject
     else:
         logger.debug(f"Getting CA key and certificate from SSM parameters `{params.ca_key_ssm_param_name}` and `{params.ca_cert_ssm_param_name}`")
-        ca_key = get_key_from_ssm(ssm_client, params.ca_key_ssm_param_name)
+        ca_key = _get_key_from_ssm(ssm_client, params.ca_key_ssm_param_name)
         ca_key_obj = serialization.load_pem_private_key(
             ca_key.key.encode('utf-8'),
             password=None,
             backend=default_backend()
         )
 
-        ca_cert = get_certificate_from_ssm(ssm_client, params.ca_cert_ssm_param_name)
+        ca_cert = _get_certificate_from_ssm(ssm_client, params.ca_cert_ssm_param_name)
         acm_cert = acm_client.get_certificate(
             CertificateArn=ca_cert.cert_arn
         )
@@ -380,35 +384,39 @@ def create_or_renew_certificate(
     # Save the certificate in ACM
 
     if ca_cert is not None:
-        chain_pem = chain_certificate(ssm_client, acm_client, "", ca_cert)
+        chain_pem = _chain_certificate(ssm_client, acm_client, "", ca_cert)
     else:
         chain_pem = ""
 
     cert_arn = None
     try:
-        cert = get_certificate_from_ssm(ssm_client, params.cert_ssm_param_name)
+        cert = _get_certificate_from_ssm(ssm_client, params.cert_ssm_param_name)
         cert_arn = cert.cert_arn
         acm_client.get_certificate(
             CertificateArn=cert_arn
         )
-    except acm_client.exceptions.ResourceNotFoundException:
-        pass
+    except (
+        ssm_client.exceptions.ParameterNotFound,
+        acm_client.exceptions.ResourceNotFoundException,
+    ):
+        cert_arn = None
+
+    import_kwargs = {
+        "Certificate": cert_obj.public_bytes(serialization.Encoding.PEM),
+        "PrivateKey": key_pem.encode('utf-8'),
+    }
+    if chain_pem:
+        import_kwargs["CertificateChain"] = chain_pem
 
     if cert_arn is None:
         logger.info(f"Creating certificate `{params.cert_ssm_param_name}`")
-        resp = acm_client.import_certificate(
-            Certificate=cert_obj.public_bytes(serialization.Encoding.PEM),
-            PrivateKey=key_pem.encode('utf-8'),
-            CertificateChain=chain_pem
-        )
+        resp = acm_client.import_certificate(**import_kwargs)
         cert_arn = resp['CertificateArn']
     else:
         logger.info(f"Updating certificate `{params.cert_ssm_param_name}` - ARN: {cert_arn}")
         acm_client.import_certificate(
             CertificateArn=cert_arn,
-            PrivateKey=key_pem.encode('utf-8'),
-            Certificate=cert.public_bytes(serialization.Encoding.PEM),
-            CertificateChain=chain_pem
+            **import_kwargs
         )
 
     # Save the private key
@@ -422,7 +430,7 @@ def create_or_renew_certificate(
     }
 
     try:
-        upsert_ssm_param(
+        _upsert_ssm_param(
             ssm_client,
             ksm_key_id,
             params.key_ssm_param_name,
@@ -447,7 +455,7 @@ def create_or_renew_certificate(
     }
 
     try:
-        cert_ssm_param_arn = upsert_ssm_param(
+        _upsert_ssm_param(
             ssm_client,
             ksm_key_id,
             params.cert_ssm_param_name,

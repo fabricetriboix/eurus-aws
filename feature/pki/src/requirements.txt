@@ -7,3 +7,4 @@ aws-lambda-powertools[tracer] ~= 3.31
 aws-lambda-powertools[parser] ~= 3.31
 cryptography ~= 49.0
 pytest ~= 9.1
+moto[ssm,acm,kms] ~= 5.2

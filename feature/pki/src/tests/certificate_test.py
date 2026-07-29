@@ -1,4 +1,6 @@
 import pytest
+import moto
+import boto3
 
 from pydantic import ValidationError
 
@@ -7,7 +9,8 @@ from certificate import (
     BasicConstraints,
     SubjectAlternativeNames,
     KeyUsage,
-    KeyUsageEnum
+    KeyUsageEnum,
+    create_or_renew_certificate,
 )
 
 
@@ -24,11 +27,11 @@ def test_good_cert_param_should_succeed(good_cert_params: CertificateParameters)
         "common_name": "example.com",
         "basic_constraints": {
             "is_critical": True,
-            "is_ca": True,
+            "is_ca": False,
             "path_length": 3,
         },
         "sans": {
-            "is_critical": True,
+            "is_critical": False,
             "dns_names": ["example2.com", "example3.com"],
         },
         "key_usage": {
@@ -36,7 +39,6 @@ def test_good_cert_param_should_succeed(good_cert_params: CertificateParameters)
             "usages": [
                 KeyUsageEnum.DIGITAL_SIGNATURE,
                 KeyUsageEnum.KEY_ENCIPHERMENT,
-                KeyUsageEnum.KEY_CERT_SIGN
             ],
         },
         "ca_key_ssm_param_name": "ca_key",
@@ -215,3 +217,12 @@ def test_cert_params_with_ca_cert_ssm_param_name_but_not_ca_key_ssm_param_name_s
             cert_ssm_param_name="cert",
             cert_tags={"Key": "Value"},
         )
+
+
+@moto.mock_aws
+def test_create_cert_with_good_params_should_succeed(good_cert_params_self_signed: CertificateParameters):
+    kms_client = boto3.client('kms', region_name="eu-west-1")
+    response = kms_client.create_key(Description="Test Key")
+    kms_key_id = response['KeyMetadata']['KeyId']
+    cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    assert cert is not None
