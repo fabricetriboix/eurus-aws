@@ -115,6 +115,39 @@ AWS account. It will also be responsible to filter out any potentially
 problematic metrics or traces and thus act as a gateway to prevent the
 tenants from overwhelming AMP or X-Ray.
 
+# Supply chain management
+
+This section covers the handling of container images. Container images
+go through a DevSecOps pipeline to ensure tight security (this
+pipeline is described in more details below). We typically consider
+two types of container images:
+  1. apps (i.e. tenant applications)
+  2. tools (i.e. everything else)
+
+## Promotion mechanism
+
+Both app and tooling images are initially stored in the ECR registry
+located in `common-nonprod`. They have a limited lifespan (they are
+deleted after 3 months) in order to keep things tidy and secure.
+Images in the `common-nonprod` ECR registry can be promoted to
+production using a dedicated github workflow which, if successful,
+will store the image in the `common-prod` ECR registry. Images in
+`common-prod` must have fixed, semver-based tags and are not allowed
+to use floating tags.
+
+Through IAM policies, this github workflow is the only entity allowed
+to create images in the `common-prod` ECR registry. This ensures
+traceability of the promotion process.
+
+## DevSecOps pipeline
+
+Images are built and go through the following DevSecOps pipeline:
+  - Image is built using Docker BuildKit
+  - `hadolint` to link Dockerfiles
+  - `tufflehog` to detect secrets hardcoded in container images
+  - `trivy` to detect vulnerable packages (fail on high or critical)
+  - `CycloneDX` for SBOM (software bill of material)
+
 # Tenant segregation and onboarding
 
 Tenant workloads must run in a closed subnet (i.e. with no direct
