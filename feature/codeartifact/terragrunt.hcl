@@ -1,0 +1,57 @@
+# Required values:
+#
+#     values.enabled: Whether to enable or disable this feature
+#     values.version: The version of the feature
+#     values.account_type: Type of AWS account, either "common" or "app"
+#     values.realm: Either `nonprod` or `prod`
+#     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
+#     values.public_repositories: List of public repositories, eg: ["npmjs", "pypi", "nuget-org", "maven-central", "maven-googleandroid", "maven-gradleplugins", "maven-commonsware", "maven-clojars", "ruby-gems-org", "crates-io"]
+#     values.internal_formats: List of AWS CodeArtifact formats to manage internally, eg: ["npm", "pypi", "maven", "nuget", "generic", "ruby", "swift", "cargo"]
+#     values.internal_packages_namespace: Namespace (or package name prefix) for internal packages
+
+include "global" {
+  path   = find_in_parent_folders("global.hcl")
+  expose = true
+}
+
+locals {
+  unit_name = "feature-amg"
+  enabled   = try(values.enabled, false)
+}
+
+exclude {
+  if      = !local.enabled
+  actions = ["plan", "apply"]
+}
+
+generate "backend" {
+  path      = "backend.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+    terraform {
+      backend "s3" {
+        bucket       = "${include.global.locals.org}-${include.global.locals.project}-${values.account_type}-${values.realm}-tf"
+        key          = "${values.env}/${local.unit_name}/tofu.tfstate"
+        region       = "${include.global.locals.region}"
+        encrypt      = true
+        use_lockfile = true
+      }
+    }
+EOF
+}
+
+terraform {
+  source = "."
+}
+
+inputs = {
+  feature_version             = values.version
+  org                         = include.global.locals.org
+  project                     = include.global.locals.project
+  region                      = include.global.locals.region
+  realm                       = values.realm
+  env                         = values.env
+  public_repositories         = values.public_repositories
+  internal_formats            = values.internal_formats
+  internal_packages_namespace = values.internal_packages_namespace
+}
