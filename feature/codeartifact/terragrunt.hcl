@@ -7,7 +7,8 @@
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
 #     values.public_repositories: List of public repositories, eg: ["npmjs", "pypi", "nuget-org", "maven-central", "maven-googleandroid", "maven-gradleplugins", "maven-commonsware", "maven-clojars", "ruby-gems-org", "crates-io"]
 #     values.internal_formats: List of AWS CodeArtifact formats to manage internally, eg: ["npm", "pypi", "maven", "nuget", "generic", "ruby", "swift", "cargo"]
-#     values.internal_packages_namespace: Namespace (or package name prefix) for internal packages
+#     values.internal_packages_namespace: Namespace (or package name prefix) for internal packages (optional)
+#     values.internal_maven_namespace: Namespace for internal Maven packages (optional)
 
 include "global" {
   path   = find_in_parent_folders("global.hcl")
@@ -15,7 +16,7 @@ include "global" {
 }
 
 locals {
-  unit_name = "feature-amg"
+  unit_name = "feature-codeartifact"
   enabled   = try(values.enabled, false)
 }
 
@@ -51,7 +52,8 @@ inputs = {
   region                      = include.global.locals.region
   realm                       = values.realm
   env                         = values.env
-  public_repositories         = values.public_repositories
-  internal_formats            = values.internal_formats
-  internal_packages_namespace = values.internal_packages_namespace
+  public_repositories         = try(values.public_repositories, [])
+  internal_formats            = try(values.internal_formats, [])
+  internal_packages_namespace = try(values.internal_packages_namespace, null  )
+  internal_maven_namespace    = try(values.internal_maven_namespace, null)
 }

@@ -1,13 +1,13 @@
 # AWS CodeArtifact domain
 
 resource "aws_codeartifact_domain" "this" {
-  domain         = "${var.org}-${var.project}-${var.realm}"
+  domain         = local.domain_name
   region         = var.region
   encryption_key = module.key.key_arn
 
   tags = {
-    Name    = "staging"
-    Purpose = "CodeArtifact domain for ${var.org}-${var.project}-${var.realm}"
+    Name    = local.domain_name
+    Purpose = "CodeArtifact domain for `${local.domain_name}`"
   }
 }
 
@@ -16,50 +16,50 @@ resource "aws_codeartifact_domain" "this" {
 resource "aws_codeartifact_repository" "public" {
   for_each = toset(var.public_repositories)
 
-  domain      = aws_codeartifact_domain.this.domain
+  domain      = local.domain_name
   region      = var.region
-  repository  = "public:${each.value}"
-  description = "CodeArtifact public repository for public:${each.value}"
+  repository  = "public-${each.value}"
+  description = "CodeArtifact public repository for `public-${each.value}`"
 
   external_connections {
     external_connection_name = "public:${each.value}"
   }
 
   tags = {
-    Name    = "public:${each.value}"
+    Name    = "public-${each.value}"
     Purpose = "CodeArtifact `public` repository for `public:${each.value}`"
   }
 }
 
 resource "aws_codeartifact_repository" "staging" {
-  domain      = aws_codeartifact_domain.this.domain
+  domain      = local.domain_name
   region      = var.region
   repository  = "staging"
-  description = "CodeArtifact staging repository for ${var.org}-${var.project}-${var.realm}"
+  description = "CodeArtifact `staging` repository for `${local.domain_name}`"
 
   tags = {
     Name    = "staging"
-    Purpose = "CodeArtifact `staging` repository for ${var.org}-${var.project}-${var.realm}"
+    Purpose = "CodeArtifact `staging` repository for `${local.domain_name}`"
   }
 }
 
 resource "aws_codeartifact_repository" "approved" {
-  domain      = aws_codeartifact_domain.this.domain
+  domain      = local.domain_name
   region      = var.region
   repository  = "approved"
-  description = "CodeArtifact `approved` repository for ${var.org}-${var.project}-${var.realm}"
+  description = "CodeArtifact `approved` repository for `${local.domain_name}`"
 
   dynamic "upstream" {
     for_each = toset(var.public_repositories)
 
     content {
-      repository_name = "public:${upstream.value}"
+      repository_name = aws_codeartifact_repository.public[upstream.value].repository
     }
   }
 
   tags = {
     Name    = "approved"
-    Purpose = "CodeArtifact approved repository for ${var.org}-${var.project}-${var.realm}"
+    Purpose = "CodeArtifact `approved` repository for `${local.domain_name}`"
   }
 }
 
@@ -87,6 +87,7 @@ locals {
     "ruby"    = false
     "cargo"   = false
     "generic" = true
+    "swift"   = true
   }
 
   public_formats = toset([
@@ -94,12 +95,14 @@ locals {
   ])
 
   namespace = var.internal_packages_namespace == null ? var.org : var.internal_packages_namespace
+
+  maven_namespace = var.internal_maven_namespace == null ? "com.${var.org}" : var.internal_maven_namespace
 }
 
 resource "awscc_codeartifact_package_group" "public" {
   for_each = local.public_formats
 
-  domain_name = aws_codeartifact_domain.this.domain_name
+  domain_name = local.domain_name
   pattern     = "/${each.value}/*"
   description = "CodeArtifact package group for `${each.value}`"
 
@@ -110,27 +113,39 @@ resource "awscc_codeartifact_package_group" "public" {
         repositories     = []
       }
       external_upstream = {
-        restriction_mode = "ALLOW_SPECIFIC_REPOSITORIES`"
-        repositories     = [for repo in var.public_repositories : "public:${repo}" if local.public_repo_to_format[repo] == each.value]
+        restriction_mode = "ALLOW_SPECIFIC_REPOSITORIES"
+        repositories     = [for repo in var.public_repositories : "public-${repo}" if local.public_repo_to_format[repo] == each.value]
       }
       internal_upstream = {
-        restriction_mode = "BLOCK"
-        repositories     = []
+        restriction_mode = "ALLOW_SPECIFIC_REPOSITORIES"
+        repositories     = ["approved"]
       }
     }
   }
 
-  tags = merge(local.default_tags, {
-    Name    = "/${each.value}/*"
-    Purpose = "CodeArtifact package group for external upstream /${each.value}/*"
-  })
+  tags = concat(
+    [for key, value in local.default_tags : {
+      key   = key
+      value = value
+    }],
+    [
+      {
+        key   = "Name"
+        value = "/${each.value}/*"
+      },
+      {
+        key   = "Purpose"
+        value = "CodeArtifact package group for public repositories `/${each.value}/*`"
+      }
+    ]
+  )
 }
 
 resource "awscc_codeartifact_package_group" "internal" {
-  for_each = local.internal_formats
+  for_each = toset(var.internal_formats)
 
-  domain_name = aws_codeartifact_domain.this.domain_name
-  pattern     = local.format_has_namespace[each.value] ? "/${each.value}//${local.namespace}~" : "/${each.value}/${local.namespace}/*"
+  domain_name = local.domain_name
+  pattern     = each.value == "maven" ? "/${each.value}/${local.maven_namespace}/*" : local.format_has_namespace[each.value] ? "/${each.value}/${local.namespace}/*" : "/${each.value}//${local.namespace}~"
   description = "CodeArtifact package group for internal packages `${each.value}`"
 
   origin_configuration = {
@@ -150,8 +165,20 @@ resource "awscc_codeartifact_package_group" "internal" {
     }
   }
 
-  tags = merge(local.default_tags, {
-    Name    = local.format_has_namespace[each.value] ? "/${each.value}//${local.namespace}~" : "/${each.value}/${local.namespace}/*"
-    Purpose = "CodeArtifact package group for internal upstream /${each.value}/*"
-  })
+  tags = concat(
+    [for key, value in local.default_tags : {
+      key   = key
+      value = value
+    }],
+    [
+      {
+        key   = "Name"
+        value = each.value == "maven" ? "/${each.value}/${local.maven_namespace}/*" : local.format_has_namespace[each.value] ? "/${each.value}/${local.namespace}/*" : "/${each.value}//${local.namespace}~"
+      },
+      {
+        key   = "Purpose"
+        value = "CodeArtifact package group for internal packages `/${each.value}/*`"
+      }
+    ]
+  )
 }

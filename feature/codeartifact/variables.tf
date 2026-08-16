@@ -92,3 +92,14 @@ variable "internal_packages_namespace" {
     error_message = "The `internal_packages_namespace` variable must be either `null` or a non-empty string of at most 16 characters."
   }
 }
+
+variable "internal_maven_namespace" {
+  description = "Namespace to use for internal Maven packages. This can be either `null`, in which case `com.{org}` will be used, or a non-empty string of at most 16 characters. This parameter is ignored if `internal_formats` does not contain `maven`."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.internal_maven_namespace == null || (length(var.internal_maven_namespace) > 0 && length(var.internal_maven_namespace) <= 16)
+    error_message = "The `internal_maven_namespace` variable must be either `null` or a non-empty string of at most 16 characters."
+  }
+}
