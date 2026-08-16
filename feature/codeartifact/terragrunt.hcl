@@ -18,6 +18,10 @@ include "global" {
 locals {
   unit_name = "feature-codeartifact"
   enabled   = try(values.enabled, false)
+
+  codeartifact_read_account_ids = compact([
+    for id in split(",", get_env("CODEARTIFACT_READ_ACCOUNT_IDS", "")) : trimspace(id)
+  ])
 }
 
 exclude {
@@ -54,6 +58,7 @@ inputs = {
   env                         = values.env
   public_repositories         = try(values.public_repositories, [])
   internal_formats            = try(values.internal_formats, [])
-  internal_packages_namespace = try(values.internal_packages_namespace, null  )
+  internal_packages_namespace = try(values.internal_packages_namespace, null)
   internal_maven_namespace    = try(values.internal_maven_namespace, null)
+  accounts_with_pull_access   = local.codeartifact_read_account_ids
 }

@@ -12,6 +12,8 @@ resource "aws_codeartifact_domain" "this" {
 }
 
 data "aws_iam_policy_document" "domain" {
+  count = length(var.accounts_with_pull_access) > 0 ? 1 : 0
+
   statement {
     sid = "BasicDomainPolicy"
     actions = [
@@ -29,8 +31,10 @@ data "aws_iam_policy_document" "domain" {
 }
 
 resource "aws_codeartifact_domain_permissions_policy" "this" {
+  count = length(var.accounts_with_pull_access) > 0 ? 1 : 0
+
   domain          = aws_codeartifact_domain.this.domain
-  policy_document = data.aws_iam_policy_document.domain.json
+  policy_document = data.aws_iam_policy_document.domain[0].json
 }
 
 # AWS CodeArtifact repositories
@@ -85,7 +89,9 @@ resource "aws_codeartifact_repository" "approved" {
   }
 }
 
-resource "aws_iam_policy_document" "approved" {
+data "aws_iam_policy_document" "approved" {
+  count = length(var.accounts_with_pull_access) > 0 ? 1 : 0
+
   statement {
     sid = "Allow pulling packages"
     actions = [
@@ -99,9 +105,7 @@ resource "aws_iam_policy_document" "approved" {
       "codeartifact:ListPackageVersionDependencies",
       "codeartifact:ReadFromRepository"
     ]
-    resources = [
-      "arn:aws:codeartifact:${var.region}:${local.account_id}:repository/${local.domain_name}/approved"
-    ]
+    resources = ["*"]
     principals {
       type        = "AWS"
       identifiers = [for account in var.accounts_with_pull_access : "arn:aws:iam::${account}:root"]
@@ -110,10 +114,11 @@ resource "aws_iam_policy_document" "approved" {
 }
 
 resource "aws_codeartifact_repository_permissions_policy" "approved" {
-  region          = var.region
-  repository      = aws_codeartifact_repository.approved.repository
+  count = length(var.accounts_with_pull_access) > 0 ? 1 : 0
+
   domain          = aws_codeartifact_domain.this.domain
-  policy_document = data.aws_iam_policy_document.approved.json
+  repository      = aws_codeartifact_repository.approved.repository
+  policy_document = data.aws_iam_policy_document.approved[0].json
 }
 
 # AWS CodeArtifact package groups

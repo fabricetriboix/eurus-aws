@@ -14,6 +14,10 @@ inputs:
   aws-region:
     description: "AWS region where the CI is running"
     required: true
+  codeartifact-read-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts that should be granted pull access to the `approved` CodeArtifact repository; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -56,5 +60,6 @@ runs:
     env:
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
       AWS_REGION: ${{ inputs.aws-region }}
+      CODEARTIFACT_READ_ACCOUNT_IDS: ${{ inputs.codeartifact-read-account-ids }}
     run: |
       make ci-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0

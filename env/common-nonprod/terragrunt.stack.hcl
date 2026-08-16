@@ -76,9 +76,9 @@ unit "codeartifact" {
     account_type                = local.config.account_type
     realm                       = local.config.realm
     env                         = local.config.env
-    public_repositories         = try(local.config.features.codeartifact.public_repositories)
-    internal_formats            = try(local.config.features.codeartifact.internal_formats)
-    internal_packages_namespace = try(local.config.features.codeartifact.internal_packages_namespace)
-    internal_maven_namespace    = try(local.config.features.codeartifact.internal_maven_namespace)
+    public_repositories         = try(local.config.features.codeartifact.public_repositories, [])
+    internal_formats            = try(local.config.features.codeartifact.internal_formats, [])
+    internal_packages_namespace = try(local.config.features.codeartifact.internal_packages_namespace, null)
+    internal_maven_namespace    = try(local.config.features.codeartifact.internal_maven_namespace, null)
   }
 }

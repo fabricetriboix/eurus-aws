@@ -108,11 +108,4 @@ variable "accounts_with_pull_access" {
   description = "List of IDs of AWS accounts that should be granted pull access to the approved repository; eg: [\"123456789012\", \"123456789013\"]"
   type        = list(string)
   default     = []
-
-  validation {
-    condition = alltrue([
-      for account in var.accounts_with_pull_access : length(account) == 12
-    ])
-    error_message = "Each item in `accounts_with_pull_access` must be a 12-digit string."
-  }
 }

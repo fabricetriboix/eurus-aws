@@ -1,13 +1,14 @@
 # When running the Makefile, you need to ensure the following
 # environment variables are set:
 #   - AWS_REGION: Region where the platform is deployed
+#   - CODEARTIFACT_READ_ACCOUNT_IDS: Comma-separated list of IDs of AWS accounts that should be granted pull access to the `approved` CodeArtifact repository; eg: "123456789012,123456789013" (optional)
 
 SHELL := /bin/bash
 
 CHECKOV ?= 1
 CHECKOV_QUIET ?= 1
 MODULES := bootstrap ecs-cluster
-FEATURES := networking amg amp ecs-plf
+FEATURES := networking amg amp ecs-plf codeartifact
 BOOTSTRAPS := all
 ENVS := common-nonprod dev
 ACTION ?= apply
