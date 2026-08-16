@@ -20,3 +20,9 @@ features:
   amp:
     enabled: true
     version: feature-amp-v0.4.0
+
+  codeartifact:
+    enabled: true
+    version: feat-codeartifact
+    public_repositories: ["npmjs", "pypi"]
+    internal_formats: ["pypi"]

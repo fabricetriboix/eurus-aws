@@ -62,3 +62,23 @@ unit "amp" {
     env          = local.config.env
   }
 }
+
+unit "codeartifact" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.codeartifact.version)) ? "" : "feature/codeartifact"}?ref=${local.config.features.codeartifact.version}"
+
+  path = "feature-codeartifact"
+
+  values = {
+    enabled                     = local.config.features.codeartifact.enabled
+    version                     = local.config.features.codeartifact.version
+    account_type                = local.config.account_type
+    realm                       = local.config.realm
+    env                         = local.config.env
+    public_repositories         = try(local.config.features.codeartifact.public_repositories)
+    internal_formats            = try(local.config.features.codeartifact.internal_formats)
+    internal_packages_namespace = try(local.config.features.codeartifact.internal_packages_namespace)
+    internal_maven_namespace    = try(local.config.features.codeartifact.internal_maven_namespace)
+  }
+}
