@@ -11,6 +11,28 @@ resource "aws_codeartifact_domain" "this" {
   }
 }
 
+data "aws_iam_policy_document" "domain" {
+  statement {
+    sid = "BasicDomainPolicy"
+    actions = [
+      "codeartifact:GetDomainPermissionsPolicy",
+      "codeartifact:ListRepositoriesInDomain",
+      "codeartifact:GetAuthorizationToken",
+      "codeartifact:DescribeDomain"
+    ]
+    resources = ["*"]
+    principals {
+      type        = "AWS"
+      identifiers = [for account in var.accounts_with_pull_access : "arn:aws:iam::${account}:root"]
+    }
+  }
+}
+
+resource "aws_codeartifact_domain_permissions_policy" "this" {
+  domain          = aws_codeartifact_domain.this.domain
+  policy_document = data.aws_iam_policy_document.domain.json
+}
+
 # AWS CodeArtifact repositories
 
 resource "aws_codeartifact_repository" "public" {
@@ -61,6 +83,37 @@ resource "aws_codeartifact_repository" "approved" {
     Name    = "approved"
     Purpose = "CodeArtifact `approved` repository for `${local.domain_name}`"
   }
+}
+
+resource "aws_iam_policy_document" "approved" {
+  statement {
+    sid = "Allow pulling packages"
+    actions = [
+      "codeartifact:DescribePackageVersion",
+      "codeartifact:DescribeRepository",
+      "codeartifact:GetPackageVersionReadme",
+      "codeartifact:GetRepositoryEndpoint",
+      "codeartifact:ListPackages",
+      "codeartifact:ListPackageVersions",
+      "codeartifact:ListPackageVersionAssets",
+      "codeartifact:ListPackageVersionDependencies",
+      "codeartifact:ReadFromRepository"
+    ]
+    resources = [
+      "arn:aws:codeartifact:${var.region}:${local.account_id}:repository/${local.domain_name}/approved"
+    ]
+    principals {
+      type        = "AWS"
+      identifiers = [for account in var.accounts_with_pull_access : "arn:aws:iam::${account}:root"]
+    }
+  }
+}
+
+resource "aws_codeartifact_repository_permissions_policy" "approved" {
+  region          = var.region
+  repository      = aws_codeartifact_repository.approved.repository
+  domain          = aws_codeartifact_domain.this.domain
+  policy_document = data.aws_iam_policy_document.approved.json
 }
 
 # AWS CodeArtifact package groups
