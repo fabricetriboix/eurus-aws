@@ -93,7 +93,7 @@ data "aws_iam_policy_document" "approved" {
   count = length(var.accounts_with_pull_access) > 0 ? 1 : 0
 
   statement {
-    sid = "Allow pulling packages"
+    sid = "AllowPullingPackages"
     actions = [
       "codeartifact:DescribePackageVersion",
       "codeartifact:DescribeRepository",
