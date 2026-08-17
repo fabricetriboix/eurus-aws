@@ -115,6 +115,31 @@ AWS account. It will also be responsible to filter out any potentially
 problematic metrics or traces and thus act as a gateway to prevent the
 tenants from overwhelming AMP or X-Ray.
 
+# Build system
+
+The `eurus-aws` platform includes a build system that allows building
+container images. This system implements best practices related to
+security and supply chain management.
+
+Building container images occur only in the non-prod realm and are
+stored in the non-prod ECR. Images in the non-prod ECR are
+automatically deleted after three months to save on storage. Once an
+image went through the internal approval process that you must define
+for yourself, the image can be promoted and copied to the prod ECR
+where it is stored indefinitely. The prod ECR is available to the
+entire platform, but the non-prod ECR is only available to
+environments in the non-prod realm.
+
+## Software packages
+
+Software packages (such as pypi for Python and npm for NodeJS) will be
+managed by AWS CodeArtifact. An AWS CodeArtifact domain is available
+to store packages published by developers, although the DevSecOps
+pipeline to achieve this does not exist at this stage (because it
+wasn't necessary yet).
+
+![AWS CodeArtifact](assets/eurus-aws-codeartifact.png)
+
 # Tenant segregation and onboarding
 
 Tenant workloads must run in a closed subnet (i.e. with no direct
