@@ -23,6 +23,6 @@ features:
 
   codeartifact:
     enabled: true
-    version: feat-codeartifact
+    version: feature-codeartifact-v0.1.0
     public_repositories: ["npmjs", "pypi"]
     internal_formats: ["pypi"]
