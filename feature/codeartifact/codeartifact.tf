@@ -7,7 +7,7 @@ resource "aws_codeartifact_domain" "this" {
 
   tags = {
     Name    = local.domain_name
-    Purpose = "CodeArtifact domain for `${local.domain_name}`"
+    Purpose = "CodeArtifact domain for ${local.domain_name}"
   }
 }
 
@@ -42,7 +42,7 @@ resource "aws_codeartifact_domain_permissions_policy" "this" {
 resource "aws_codeartifact_repository" "public" {
   for_each = toset(var.public_repositories)
 
-  domain      = local.domain_name
+  domain      = aws_codeartifact_domain.this.domain
   region      = var.region
   repository  = "public-${each.value}"
   description = "CodeArtifact public repository for `public-${each.value}`"
@@ -53,24 +53,24 @@ resource "aws_codeartifact_repository" "public" {
 
   tags = {
     Name    = "public-${each.value}"
-    Purpose = "CodeArtifact `public` repository for `public:${each.value}`"
+    Purpose = "CodeArtifact public repository for public:${each.value}"
   }
 }
 
 resource "aws_codeartifact_repository" "staging" {
-  domain      = local.domain_name
+  domain      = aws_codeartifact_domain.this.domain
   region      = var.region
   repository  = "staging"
   description = "CodeArtifact `staging` repository for `${local.domain_name}`"
 
   tags = {
     Name    = "staging"
-    Purpose = "CodeArtifact `staging` repository for `${local.domain_name}`"
+    Purpose = "CodeArtifact staging repository for domain ${local.domain_name}"
   }
 }
 
 resource "aws_codeartifact_repository" "approved" {
-  domain      = local.domain_name
+  domain      = aws_codeartifact_domain.this.domain
   region      = var.region
   repository  = "approved"
   description = "CodeArtifact `approved` repository for `${local.domain_name}`"
@@ -85,7 +85,7 @@ resource "aws_codeartifact_repository" "approved" {
 
   tags = {
     Name    = "approved"
-    Purpose = "CodeArtifact `approved` repository for `${local.domain_name}`"
+    Purpose = "CodeArtifact approved repository for domain ${local.domain_name}"
   }
 }
 
@@ -160,7 +160,7 @@ locals {
 resource "awscc_codeartifact_package_group" "public" {
   for_each = local.public_formats
 
-  domain_name = local.domain_name
+  domain_name = aws_codeartifact_domain.this.domain
   pattern     = "/${each.value}/*"
   description = "CodeArtifact package group for `${each.value}`"
 
@@ -189,11 +189,11 @@ resource "awscc_codeartifact_package_group" "public" {
     [
       {
         key   = "Name"
-        value = "/${each.value}/*"
+        value = "/${each.value}/"
       },
       {
         key   = "Purpose"
-        value = "CodeArtifact package group for public repositories `/${each.value}/*`"
+        value = "CodeArtifact package group for public repositories /${each.value}/"
       }
     ]
   )
@@ -202,7 +202,7 @@ resource "awscc_codeartifact_package_group" "public" {
 resource "awscc_codeartifact_package_group" "internal" {
   for_each = toset(var.internal_formats)
 
-  domain_name = local.domain_name
+  domain_name = aws_codeartifact_domain.this.domain
   pattern     = each.value == "maven" ? "/${each.value}/${local.maven_namespace}/*" : local.format_has_namespace[each.value] ? "/${each.value}/${local.namespace}/*" : "/${each.value}//${local.namespace}~"
   description = "CodeArtifact package group for internal packages `${each.value}`"
 
@@ -231,11 +231,11 @@ resource "awscc_codeartifact_package_group" "internal" {
     [
       {
         key   = "Name"
-        value = each.value == "maven" ? "/${each.value}/${local.maven_namespace}/*" : local.format_has_namespace[each.value] ? "/${each.value}/${local.namespace}/*" : "/${each.value}//${local.namespace}~"
+        value = each.value == "maven" ? "/${each.value}/${local.maven_namespace}/" : local.format_has_namespace[each.value] ? "/${each.value}/${local.namespace}/" : "/${each.value}//${local.namespace}"
       },
       {
         key   = "Purpose"
-        value = "CodeArtifact package group for internal packages `/${each.value}/*`"
+        value = "CodeArtifact package group for internal packages /${each.value}/"
       }
     ]
   )
