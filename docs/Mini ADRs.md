@@ -115,15 +115,6 @@ AWS account. It will also be responsible to filter out any potentially
 problematic metrics or traces and thus act as a gateway to prevent the
 tenants from overwhelming AMP or X-Ray.
 
-# Supply chain management
-
-This section covers the handling of container images. Container images
-go through a DevSecOps pipeline to ensure tight security (this
-pipeline is described in more details below). We typically consider
-two types of container images:
-  1. apps (i.e. tenant applications)
-  2. tools (i.e. everything else)
-
 ## Promotion mechanism
 
 Both app and tooling images are initially stored in the ECR registry
@@ -147,6 +138,62 @@ Images are built and go through the following DevSecOps pipeline:
   - `tufflehog` to detect secrets hardcoded in container images
   - `trivy` to detect vulnerable packages (fail on high or critical)
   - `CycloneDX` for SBOM (software bill of material)
+
+# Build system
+
+The `eurus-aws` platform includes a build system that allows building
+container images. This system implements best practices related to
+security and supply chain management.
+
+Building container images occur only in the non-prod realm and are
+stored in the non-prod ECR. Images in the non-prod ECR are
+automatically deleted after three months to save on storage. Once an
+image went through the internal approval process that you must define
+for yourself, the image can be promoted and copied to the prod ECR
+where it is stored indefinitely. The prod ECR is available to the
+entire platform, but the non-prod ECR is only available to
+environments in the non-prod realm.
+
+## Software packages
+
+Software packages (such as pypi for Python and npm for NodeJS) will be
+managed by AWS CodeArtifact. An AWS CodeArtifact domain is available
+to store packages published by developers, although the DevSecOps
+pipeline to achieve this does not exist at this stage (because it
+wasn't necessary yet).
+
+![AWS CodeArtifact](assets/eurus-aws-codeartifact.png)
+
+We use only one domain, as recommended by AWS. This domain has a
+number of repositories:
+  - The `staging` repository is to publish packages under development.
+  - The `approved` repository makes available internal packages that
+    went through the promotion process, as well as external packages
+    from public repositories.
+  - The `public[*]` repositories mirrors existing public repositories.
+    AWS CodeArtifact allows only one mirror in each CodeArtifact
+    repository, hence there has to be one internal repository per
+    external repository to mirror.
+
+We then use package origin control to ensure that:
+  - Internal packages can only be published to the `staging` repo and
+    can't be directly used in the build system (they have to go
+    through the promotion mechanism and copied into the `approved`
+    repo)
+  - External packages can only be pulled through the `public[*]`
+    repositories
+  - Only the `approved` repository can be used by the build system (it
+    is not possible to pull packages directly from the other
+    repositories).
+
+## Managing container images
+
+This section covers the handling of container images. Container images
+go through a DevSecOps pipeline to ensure tight security (this
+pipeline is described in more details below). We typically consider
+two types of container images:
+  1. apps (i.e. tenant applications)
+  2. tools (i.e. everything else)
 
 # Tenant segregation and onboarding
 

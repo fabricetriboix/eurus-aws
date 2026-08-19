@@ -58,10 +58,16 @@ project:
   - bootstrap
 
 For each environment, add an `AWS_ACCOUNT_ID` variable which holds the
-ID of the AWS account that hosts this particular environment. You also
-need to create the following repository variables:
+ID of the AWS account that hosts this particular environment.
+
+You also need to create the following repository variables:
   - `AWS_MANAGEMENT_ACCOUNT_ID`: ID of the management account
   - `AWS_REGION`: Region where the platform is deployed
+  - `CODEARTIFACT_READ_ACCOUNT_IDS`: Comma-separated list of the IDs
+    of the AWS accounts that need to be able to pull packages from AWS
+    CodeArtifact. Typically, this would be the common-nonprod account
+    as well as any lower environment that want to build container
+    images.
 
 You can customise environments to your liking, for example by
 requesting certain users to approve the workflows before being

@@ -14,6 +14,10 @@ inputs:
   aws-region:
     description: "AWS region where the component is deployed"
     required: true
+  codeartifact-read-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts that should be granted pull access to the `approved` CodeArtifact repository; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
   action:
     description: "'plan' runs `tofu plan -destroy`; 'destroy' runs `tofu destroy`"
     required: true
@@ -76,6 +80,7 @@ runs:
     env:
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
       AWS_REGION: ${{ inputs.aws-region }}
+      CODEARTIFACT_READ_ACCOUNT_IDS: ${{ inputs.codeartifact-read-account-ids }}
       TG_NON_INTERACTIVE: "true"
     run: |
       set -euo pipefail
