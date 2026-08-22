@@ -115,6 +115,30 @@ AWS account. It will also be responsible to filter out any potentially
 problematic metrics or traces and thus act as a gateway to prevent the
 tenants from overwhelming AMP or X-Ray.
 
+## Promotion mechanism
+
+Both app and tooling images are initially stored in the ECR registry
+located in `common-nonprod`. They have a limited lifespan (they are
+deleted after 3 months) in order to keep things tidy and secure.
+Images in the `common-nonprod` ECR registry can be promoted to
+production using a dedicated github workflow which, if successful,
+will store the image in the `common-prod` ECR registry. Images in
+`common-prod` must have fixed, semver-based tags and are not allowed
+to use floating tags.
+
+Through IAM policies, this github workflow is the only entity allowed
+to create images in the `common-prod` ECR registry. This ensures
+traceability of the promotion process.
+
+## DevSecOps pipeline
+
+Images are built and go through the following DevSecOps pipeline:
+  - Image is built using Docker BuildKit
+  - `hadolint` to link Dockerfiles
+  - `trufflehog` to detect secrets hardcoded in container images
+  - `trivy` to detect vulnerable packages (fail on high or critical)
+  - `CycloneDX` for SBOM (software bill of material)
+
 # Build system
 
 The `eurus-aws` platform includes a build system that allows building
@@ -139,6 +163,37 @@ pipeline to achieve this does not exist at this stage (because it
 wasn't necessary yet).
 
 ![AWS CodeArtifact](assets/eurus-aws-codeartifact.png)
+
+We use only one domain, as recommended by AWS. This domain has a
+number of repositories:
+  - The `staging` repository is to publish packages under development.
+  - The `approved` repository makes available internal packages that
+    went through the promotion process, as well as external packages
+    from public repositories.
+  - The `public[*]` repositories mirrors existing public repositories.
+    AWS CodeArtifact allows only one mirror in each CodeArtifact
+    repository, hence there has to be one internal repository per
+    external repository to mirror.
+
+We then use package origin control to ensure that:
+  - Internal packages can only be published to the `staging` repo and
+    can't be directly used in the build system (they have to go
+    through the promotion mechanism and copied into the `approved`
+    repo)
+  - External packages can only be pulled through the `public[*]`
+    repositories
+  - Only the `approved` repository can be used by the build system (it
+    is not possible to pull packages directly from the other
+    repositories).
+
+## Managing container images
+
+This section covers the handling of container images. Container images
+go through a DevSecOps pipeline to ensure tight security (this
+pipeline is described in more details below). We typically consider
+two types of container images:
+  1. apps (i.e. tenant applications)
+  2. tools (i.e. everything else)
 
 # Tenant segregation and onboarding
 
