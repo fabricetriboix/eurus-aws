@@ -135,7 +135,7 @@ traceability of the promotion process.
 Images are built and go through the following DevSecOps pipeline:
   - Image is built using Docker BuildKit
   - `hadolint` to link Dockerfiles
-  - `tufflehog` to detect secrets hardcoded in container images
+  - `trufflehog` to detect secrets hardcoded in container images
   - `trivy` to detect vulnerable packages (fail on high or critical)
   - `CycloneDX` for SBOM (software bill of material)
 
