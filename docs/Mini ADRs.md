@@ -115,31 +115,33 @@ AWS account. It will also be responsible to filter out any potentially
 problematic metrics or traces and thus act as a gateway to prevent the
 tenants from overwhelming AMP or X-Ray.
 
-## Promotion mechanism
-
-Both app and tooling images are initially stored in the ECR registry
-located in `common-nonprod`. They have a limited lifespan (they are
-deleted after 3 months) in order to keep things tidy and secure.
-Images in the `common-nonprod` ECR registry can be promoted to
-production using a dedicated github workflow which, if successful,
-will store the image in the `common-prod` ECR registry. Images in
-`common-prod` must have fixed, semver-based tags and are not allowed
-to use floating tags.
-
-Through IAM policies, this github workflow is the only entity allowed
-to create images in the `common-prod` ECR registry. This ensures
-traceability of the promotion process.
-
-## DevSecOps pipeline
-
-Images are built and go through the following DevSecOps pipeline:
-  - Image is built using Docker BuildKit
-  - `hadolint` to link Dockerfiles
-  - `trufflehog` to detect secrets hardcoded in container images
-  - `trivy` to detect vulnerable packages (fail on high or critical)
-  - `CycloneDX` for SBOM (software bill of material)
-
 # Build system
+
+## ADR
+
+Ideally, the build system should happen in a highly controlled
+environment, typically in a network with no internet access and
+controlled mirrors for publicly available packages (pypi, npm, maven,
+etc). Such solutions would usually involve:
+  1. GitHub Enterprise Server
+  2. GitLab Enterprise Edition
+  3. Use AWS Code* Developer Tools in a controlled VPC
+
+Options (1) and (2) require significant expenses. Option (3) is doable
+but few engineers are knowledgeable in this area. The last option is
+to just github with public access.
+
+I evaluated the speed of the AWS Code* Developer Tools, and I was
+positvely surprised how fast they were. They seem to be on par with
+gihub actions as far as speed of execution is concerned. The whole
+pipeline I tested was: a CodePipeline with a CodeConnection to a
+github repo to trigger the pipeline on commits, and a CodeBuild stage
+to build a container image.
+
+Overall, using AWS Code* Developer Tools seems the right tradeoff in
+this situation.
+
+## Overview
 
 The `eurus-aws` platform includes a build system that allows building
 container images. This system implements best practices related to
@@ -147,53 +149,69 @@ security and supply chain management.
 
 Building container images occur only in the non-prod realm and are
 stored in the non-prod ECR. Images in the non-prod ECR are
-automatically deleted after three months to save on storage. Once an
-image went through the internal approval process that you must define
-for yourself, the image can be promoted and copied to the prod ECR
-where it is stored indefinitely. The prod ECR is available to the
-entire platform, but the non-prod ECR is only available to
-environments in the non-prod realm.
+automatically deleted after three months to save on storage and
+prevent staleness. There is a promotion process to promote images from
+the non-prod ECR to the prod ECR where it is stored indefinitely. The
+prod ECR is available to the entire platform, but the non-prod ECR is
+only available to environments in the non-prod realm.
+
+Images are built and go through the following DevSecOps pipeline:
+  - Image is built using Docker BuildKit
+  - `hadolint` to link Dockerfiles
+  - `trufflehog` to detect secrets hardcoded in container images
+  - `trivy` to detect vulnerable packages (fail on high or critical)
+  - `CycloneDX` for SBOM (software bill of material), stored in S3
 
 ## Software packages
 
 Software packages (such as pypi for Python and npm for NodeJS) will be
-managed by AWS CodeArtifact. An AWS CodeArtifact domain is available
-to store packages published by developers, although the DevSecOps
-pipeline to achieve this does not exist at this stage (because it
-wasn't necessary yet).
+managed by AWS CodeArtifact.
 
 ![AWS CodeArtifact](assets/eurus-aws-codeartifact.png)
 
-We use only one domain, as recommended by AWS. This domain has a
-number of repositories:
-  - The `staging` repository is to publish packages under development.
-  - The `approved` repository makes available internal packages that
-    went through the promotion process, as well as external packages
-    from public repositories.
-  - The `public[*]` repositories mirrors existing public repositories.
-    AWS CodeArtifact allows only one mirror in each CodeArtifact
-    repository, hence there has to be one internal repository per
-    external repository to mirror.
+CodeArtifact is only configured for accounts that build images, so in
+our case that's the `common-nonprod` account. A single CodeArtifact
+domain is created for the whole account, in line with AWS
+recommendations. The `approved` repository is the only place from
+where the build system can pull packages. In turns, it can pull
+packages from public available repositories through the `public[*]`
+repositories (one for each package store).
 
-We then use package origin control to ensure that:
-  - Internal packages can only be published to the `staging` repo and
-    can't be directly used in the build system (they have to go
-    through the promotion mechanism and copied into the `approved`
-    repo)
-  - External packages can only be pulled through the `public[*]`
-    repositories
-  - Only the `approved` repository can be used by the build system (it
-    is not possible to pull packages directly from the other
-    repositories).
+Additionally, a `staging` repository exists to store internal packages
+that are in development, but it is isolated (it is not linked to any
+other repository and can't be used by the build system). The idea is
+to quarantine internal packages and have a DevSecOps pipeline that can
+promote selected internal packages by copying them to the `approved`
+repository. Such a pipline does not exist yes (because it wasn't
+necessary at this stage).
 
-## Managing container images
+## ECR
 
-This section covers the handling of container images. Container images
-go through a DevSecOps pipeline to ensure tight security (this
-pipeline is described in more details below). We typically consider
-two types of container images:
-  1. apps (i.e. tenant applications)
-  2. tools (i.e. everything else)
+There will be two ECR repositories: one in `common-nonprod` and one in
+`common-prod`.
+
+The one in `common-nonprod` is to store images generated by the build
+system. It has a retention of 3 months, so old images are
+automatically deleted in order to (1) save on storage and (2) avoid
+stage images (where a vulnerability is detected and a CVE raised only
+after the image has been built). Images in the `common-nonprod` ECR
+are available only to non-prod environments. There is a promotion
+mechanism where a pipeline can promote an image from `common-nonprod`
+to `common-prod` and thus make it available for the entire platform.
+Such a pipeline provides an audit trail of who did this.
+
+The ECR in `common-prod` keeps the images forever and the images are
+available for the entire platform. A pipeline exists to pull images
+from public sources and copy them in the `common-prod` ECR in order to
+make them available to the platform (they are otherwise unavailable to
+the build system which doesn't have access to the internet).
+
+ECR supports scanning the images for vulnerabilities, but scans only
+occur after the image has been uploaded and ECR does not have a way to
+prevent the image being used if, for example, the scan finds HIGH or
+CRITICAL CVEs. In order to maximise security, images with HIGH or
+CRITICAL CVEs should simply fail the gate to be uploaded to ECR, so
+this should be part of the build pipeline.
 
 # Tenant segregation and onboarding
 
