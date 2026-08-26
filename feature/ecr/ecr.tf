@@ -124,18 +124,18 @@ data "aws_iam_policy_document" "template_repository_policy" {
       "ecr:BatchCheckLayerAvailability"
     ]
 
-    resources = ["*"]
+    resources = ["arn:aws:ecr:${var.region}:${local.account_id}:repository/*"]
   }
 }
 
 resource "aws_ecr_repository_creation_template" "this" {
-  region            = var.region
-  prefix            = "ROOT"
-  applied_for       = ["CREATE_ON_PUSH", "PULL_THROUGH_CACHE", "REPLICATION"]
-  custom_role_arn   = aws_iam_role.role_for_template.arn
-  image_mutability  = "IMMUTABLE"
-  lifecycle_policy  = var.retention_in_days > 0 ? data.aws_ecr_lifecycle_policy_document.retention.json : null
-  repository_policy = data.aws_iam_policy_document.template_repository_policy.json
+  region               = var.region
+  prefix               = "ROOT"
+  applied_for          = ["CREATE_ON_PUSH", "PULL_THROUGH_CACHE", "REPLICATION"]
+  custom_role_arn      = aws_iam_role.role_for_template.arn
+  image_tag_mutability = "IMMUTABLE"
+  lifecycle_policy     = var.retention_in_days > 0 ? data.aws_ecr_lifecycle_policy_document.retention.json : null
+  repository_policy    = data.aws_iam_policy_document.template_repository_policy.json
 
   resource_tags = merge(local.default_tags, {
     RepositoryConfigurationFrom = "ecr_repository_creation_template"
