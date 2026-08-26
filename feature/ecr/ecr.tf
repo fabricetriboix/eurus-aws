@@ -2,8 +2,8 @@
 
 resource "aws_ecr_account_setting" "blob_mounting" {
   region = var.region
-  name  = "BLOB_MOUNTING"
-  value = "ENABLED"
+  name   = "BLOB_MOUNTING"
+  value  = "ENABLED"
 }
 
 # Allow creation of repositories and pushing of images into this account
@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "ecr_policy" {
     sid = "AllowCreateRepositoryAndPush"
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = [for id in local.source_account_ids : "arn:aws:iam::${id}:root"]
     }
 
@@ -42,25 +42,20 @@ data "aws_iam_policy_document" "assume_role_policy_for_template" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["ecr.amazonaws.com"]
     }
   }
 }
 
 resource "aws_iam_role" "role_for_template" {
-  name = "${var.org}-${var.project}-${var.env}-ecr-template"
+  name               = "${var.org}-${var.project}-${var.env}-ecr-template"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_for_template.json
 }
 
 data "aws_iam_policy_document" "policy_for_template" {
   statement {
     sid = "AllowCreateRepository"
-
-    principals {
-      type = "AWS"
-      identifiers = ["arn:aws:iam::${local.account_id}:root"]
-    }
 
     actions = [
       "ecr:CreateRepository",
@@ -72,6 +67,7 @@ data "aws_iam_policy_document" "policy_for_template" {
 
   statement {
     sid = "AllowKmsKeyAccess"
+
     actions = [
       "kms:CreateGrant",
       "kms:RetireGrant",
@@ -83,24 +79,24 @@ data "aws_iam_policy_document" "policy_for_template" {
 }
 
 resource "aws_iam_policy" "policy_for_template" {
-  name = "${var.org}-${var.project}-${var.env}-${var.region}-ecr-template"
+  name   = "${var.org}-${var.project}-${var.env}-${var.region}-ecr-template"
   policy = data.aws_iam_policy_document.policy_for_template.json
 }
 
 resource "aws_iam_role_policy_attachment" "policy_for_template" {
-  role = aws_iam_role.role_for_template.name
+  role       = aws_iam_role.role_for_template.name
   policy_arn = aws_iam_policy.policy_for_template.arn
 }
 
 data "aws_ecr_lifecycle_policy_document" "retention" {
   rule {
-    priority = 1
+    priority    = 1
     description = "Expire images older than ${var.retention_in_days} days"
 
     selection {
-      tag_status = "any"
-      count_type = "sinceImagePushed"
-      count_unit = "days"
+      tag_status   = "any"
+      count_type   = "sinceImagePushed"
+      count_unit   = "days"
       count_number = var.retention_in_days
     }
 
@@ -112,42 +108,33 @@ data "aws_ecr_lifecycle_policy_document" "retention" {
 
 data "aws_iam_policy_document" "template_repository_policy" {
   statement {
-    sid = "AllowGetAuthorizationToken"
+    sid = "AllowPull"
 
     principals {
-      type = "AWS"
-      identifiers = [for id in local.pull_account_ids : "arn:aws:iam::${id}:root"]
-    }
-
-    actions = ["ecr:GetAuthorizationToken"]
-
-    resources = ["*"]
-  }
-
-  statement {
-    sid = "AllowCheckImage"
-
-    principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = [for id in local.pull_account_ids : "arn:aws:iam::${id}:root"]
     }
 
     actions = [
+      "ecr:ListImages",
       "ecr:DescribeImages",
-      "ecr:DescribeRepositories"
+      "ecr:DescribeRepositories",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchCheckLayerAvailability"
     ]
 
-    resources = ["arn:aws:ecr:${var.region}:${local.account_id}:repository/*"]
+    resources = ["*"]
   }
 }
 
 resource "aws_ecr_repository_creation_template" "this" {
-  region = var.region
-  prefix = "ROOT"
-  applied_for = ["CREATE_ON_PUSH", "PULL_THROUGH_CACHE", "REPLICATION"]
-  custom_role_arn = aws_iam_role.role_for_template.arn
-  image_mutability = "IMMUTABLE"
-  lifecycle_policy = var.retention_in_days > 0 ? data.aws_ecr_lifecycle_policy_document.retention.json : null
+  region            = var.region
+  prefix            = "ROOT"
+  applied_for       = ["CREATE_ON_PUSH", "PULL_THROUGH_CACHE", "REPLICATION"]
+  custom_role_arn   = aws_iam_role.role_for_template.arn
+  image_mutability  = "IMMUTABLE"
+  lifecycle_policy  = var.retention_in_days > 0 ? data.aws_ecr_lifecycle_policy_document.retention.json : null
   repository_policy = data.aws_iam_policy_document.template_repository_policy.json
 
   resource_tags = merge(local.default_tags, {
@@ -156,6 +143,6 @@ resource "aws_ecr_repository_creation_template" "this" {
 
   encryption_configuration {
     encryption_type = "KMS"
-    kms_key = module.key.key_arn
+    kms_key         = module.key.key_arn
   }
 }
