@@ -10,7 +10,7 @@ module "key" {
 
   key_statements = [
     {
-      sid = "AllowEcrTemplateRole"
+      sid = "AllowGrantsForEcrTemplateRole"
 
       principals = [
         {
@@ -20,7 +20,6 @@ module "key" {
       ]
 
       actions = [
-        "kms:DescribeKey",
         "kms:CreateGrant",
         "kms:RetireGrant"
       ]
@@ -39,6 +38,22 @@ module "key" {
           values   = ["true"]
         },
       ]
+    },
+    {
+      sid = "AllowDescribeKeyForEcrTemplateRole"
+
+      principals = [
+        {
+          type        = "AWS"
+          identifiers = [aws_iam_role.role_for_template.arn]
+        }
+      ]
+
+      actions = [
+        "kms:DescribeKey"
+      ]
+
+      resources = ["*"]
     }
   ]
 
