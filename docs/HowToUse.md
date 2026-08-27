@@ -63,11 +63,14 @@ ID of the AWS account that hosts this particular environment.
 You also need to create the following repository variables:
   - `AWS_MANAGEMENT_ACCOUNT_ID`: ID of the management account
   - `AWS_REGION`: Region where the platform is deployed
-  - `CODEARTIFACT_READ_ACCOUNT_IDS`: Comma-separated list of the IDs
-    of the AWS accounts that need to be able to pull packages from AWS
-    CodeArtifact. Typically, this would be the common-nonprod account
-    as well as any lower environment that want to build container
-    images.
+  - `COMMON_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of
+    the AWS accounts of type `common` and realm `nonprod`
+  - `COMMON_PROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the
+    AWS accounts of type `common` and realm `prod`
+  - `APP_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the
+    AWS accounts of type `app` and realm `nonprod`
+  - `APP_PROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the AWS
+    accounts of type `app` and realm `prod`
 
 You can customise environments to your liking, for example by
 requesting certain users to approve the workflows before being
