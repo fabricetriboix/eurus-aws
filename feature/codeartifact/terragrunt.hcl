@@ -19,9 +19,13 @@ locals {
   unit_name = "feature-codeartifact"
   enabled   = try(values.enabled, false)
 
-  codeartifact_read_account_ids = compact([
-    for id in split(",", get_env("CODEARTIFACT_READ_ACCOUNT_IDS", "")) : trimspace(id)
-  ])
+  # All `non-prod` accounts must be able to pull from CodeArtifact, but `prod` accounts should not because `prod` accounts don't build anything
+  codeartifact_read_account_ids = compact(concat([
+    for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+  ], [
+    for id in split(",", get_env("APP_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+
+  ]))
 }
 
 exclude {

@@ -1,7 +1,10 @@
 # When running the Makefile, you need to ensure the following
 # environment variables are set:
 #   - AWS_REGION: Region where the platform is deployed
-#   - CODEARTIFACT_READ_ACCOUNT_IDS: Comma-separated list of IDs of AWS accounts that should be granted pull access to the `approved` CodeArtifact repository; eg: "123456789012,123456789013" (optional)
+#   - COMMON_NONPROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `common` and realm `nonprod`
+#   - COMMON_PROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `common` and realm `prod`
+#   - APP_NONPROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `app` and realm `nonprod`
+#   - APP_PROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `app` and realm `prod`
 
 SHELL := /bin/bash
 
