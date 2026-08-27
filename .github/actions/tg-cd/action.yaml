@@ -17,7 +17,7 @@ inputs:
   common-nonprod-account-ids:
     description: "Comma-separated list of IDs of AWS accounts of type `common` and realm `nonprod`; eg: \"123456789012,123456789013\""
     required: false
-    default: ""\
+    default: ""
   common-prod-account-ids:
     description: "Comma-separated list of IDs of AWS accounts of type `common` and realm `prod`; eg: \"123456789012,123456789013\""
     required: false

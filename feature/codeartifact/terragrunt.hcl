@@ -24,7 +24,6 @@ locals {
     for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
   ], [
     for id in split(",", get_env("APP_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
-
   ]))
 }
 
