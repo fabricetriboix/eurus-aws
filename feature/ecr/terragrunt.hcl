@@ -5,8 +5,8 @@
 #     values.account_type: Type of AWS account, either "common" or "app"
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
-#     values.source_account_ids: IDs of the accounts that can create repositories and push images into this ECR
-#     values.pull_account_ids: IDs of the accounts that will be allowed to pull images from this ECR
+#     values.source_account_ids: IDs of the accounts that can create repositories and push images into this ECR (the current account is automatically included)
+#     values.pull_account_ids: IDs of the accounts that will be allowed to pull images from this ECR (the current account is automatically included)
 #     values.retention_in_days: How many days to keep the images; set to 0 to keep indefinitely
 
 include "global" {
