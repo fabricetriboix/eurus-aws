@@ -14,8 +14,20 @@ inputs:
   aws-region:
     description: "AWS region where the component is deployed"
     required: true
-  codeartifact-read-account-ids:
-    description: "Comma-separated list of IDs of AWS accounts that should be granted pull access to the `approved` CodeArtifact repository; eg: \"123456789012,123456789013\""
+  common-nonprod-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts of type `common` and realm `nonprod`; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
+  common-prod-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts of type `common` and realm `prod`; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
+  app-nonprod-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts of type `app` and realm `nonprod`; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
+  app-prod-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts of type `app` and realm `prod`; eg: \"123456789012,123456789013\""
     required: false
     default: ""
   action:
@@ -67,7 +79,10 @@ runs:
     env:
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
       AWS_REGION: ${{ inputs.aws-region }}
-      CODEARTIFACT_READ_ACCOUNT_IDS: ${{ inputs.codeartifact-read-account-ids }}
+      COMMON_NONPROD_ACCOUNT_IDS: ${{ inputs.common-nonprod-account-ids }}
+      COMMON_PROD_ACCOUNT_IDS: ${{ inputs.common-prod-account-ids }}
+      APP_NONPROD_ACCOUNT_IDS: ${{ inputs.app-nonprod-account-ids }}
+      APP_PROD_ACCOUNT_IDS: ${{ inputs.app-prod-account-ids }}
       TG_NON_INTERACTIVE: "true"
     run: |
       make cd-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0 ACTION=${{ inputs.action }}
