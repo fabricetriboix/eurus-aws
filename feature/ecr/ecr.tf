@@ -109,6 +109,7 @@ data "aws_ecr_lifecycle_policy_document" "retention" {
 }
 
 data "aws_iam_policy_document" "template_repository_policy" {
+  # checkov:skip=CKV_AWS_356:ECR repository policies are scoped to the repo; Resource must be "*"
   statement {
     sid = "AllowPull"
 
@@ -126,7 +127,6 @@ data "aws_iam_policy_document" "template_repository_policy" {
       "ecr:BatchCheckLayerAvailability"
     ]
 
-    # checkov:skip=CKV_AWS_356:False positive
     resources = ["*"]
   }
 }
