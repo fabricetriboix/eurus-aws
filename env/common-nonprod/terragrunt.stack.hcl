@@ -82,3 +82,20 @@ unit "codeartifact" {
     internal_maven_namespace    = try(local.config.features.codeartifact.internal_maven_namespace, null)
   }
 }
+
+unit "ecr" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.ecr.version)) ? "" : "feature/ecr"}?ref=${local.config.features.ecr.version}"
+
+  path = "feature-ecr"
+
+  values = {
+    enabled            = local.config.features.ecr.enabled
+    version            = local.config.features.ecr.version
+    account_type       = local.config.account_type
+    realm              = local.config.realm
+    env                = local.config.env
+    retention_in_days  = try(local.config.features.ecr.retention_in_days, 90)
+  }
+}
