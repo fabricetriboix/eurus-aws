@@ -17,12 +17,12 @@ locals {
   enabled   = try(values.enabled, false)
 
   # Both the `prod` and `nonprod` ECRs allow images from the `common-nonprod` account only to be pushed to them.
-  source_account_ids = [
+  source_account_ids = compact([
     for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
-  ]
+  ])
 
   # Any account can pull images from the `prod` ECR, but only `nonprod` accounts can pull images from the `nonprod` ECR
-  pull_account_ids = values.realm == "prod" ?
+  pull_account_ids = compact(values.realm == "prod" ?
     concat([
       for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
     ], [
@@ -36,7 +36,7 @@ locals {
       for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
     ], [
       for id in split(",", get_env("APP_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
-    ])
+    ]))
 }
 
 exclude {

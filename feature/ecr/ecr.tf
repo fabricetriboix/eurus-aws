@@ -6,24 +6,26 @@ resource "aws_ecr_account_setting" "blob_mounting" {
   value  = "ENABLED"
 }
 
-# Allow creation of repositories and pushing of images into this account
+# Allow pushing images into this ECR registry
 
 data "aws_iam_policy_document" "ecr_policy" {
   statement {
-    sid = "AllowCreateRepositoryAndPush"
+    sid = "AllowPush"
 
     principals {
       type        = "AWS"
       identifiers = [for id in local.source_account_ids : "arn:aws:iam::${id}:root"]
     }
 
+    # NB: We don't allow source accounts to directly create repositories. They need to push images, which will automatically create the repository with the correct template `aws_ecr_repository_creation_template`.
     actions = [
-      "ecr:CreateRepository",
       "ecr:BatchCheckLayerAvailability",
       "ecr:CompleteLayerUpload",
       "ecr:InitiateLayerUpload",
       "ecr:PutImage",
       "ecr:UploadLayerPart",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage"
     ]
 
     resources = ["arn:aws:ecr:${var.region}:${local.account_id}:repository/*"]
@@ -128,7 +130,7 @@ data "aws_iam_policy_document" "template_repository_policy" {
   }
 }
 
-resource "aws_ecr_repository_creation_template" "this" {
+resource "aws_ecr_repository_creation_template" "template" {
   region               = var.region
   prefix               = "ROOT"
   applied_for          = ["CREATE_ON_PUSH"]
