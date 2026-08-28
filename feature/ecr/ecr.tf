@@ -127,8 +127,6 @@ data "aws_iam_policy_document" "template_repository_policy" {
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchCheckLayerAvailability"
     ]
-
-    resources = ["*"]
   }
 }
 
