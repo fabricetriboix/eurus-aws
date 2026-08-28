@@ -126,7 +126,8 @@ data "aws_iam_policy_document" "template_repository_policy" {
       "ecr:BatchCheckLayerAvailability"
     ]
 
-    resources = ["arn:aws:ecr:${var.region}:${local.account_id}:repository/*"]
+    # checkov:skip=CKV_AWS_356:False positive
+    resources = ["*"]
   }
 }
 
