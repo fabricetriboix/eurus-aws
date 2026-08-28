@@ -115,7 +115,8 @@ data "aws_iam_policy_document" "template_repository_policy" {
 
     principals {
       type        = "AWS"
-      identifiers = [for id in local.pull_account_ids : "arn:aws:iam::${id}:root"]
+      identifiers = ["arn:aws:iam::${local.account_id}:root"]
+      #identifiers = [for id in local.pull_account_ids : "arn:aws:iam::${id}:root"]
     }
 
     actions = [
