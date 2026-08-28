@@ -5,8 +5,6 @@
 #     values.account_type: Type of AWS account, either "common" or "app"
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
-#     values.source_account_ids: IDs of the accounts that can create repositories and push images into this ECR (the current account is automatically included)
-#     values.pull_account_ids: IDs of the accounts that will be allowed to pull images from this ECR (the current account is automatically included)
 #     values.retention_in_days: How many days to keep the images; set to 0 to keep indefinitely
 
 include "global" {
@@ -17,6 +15,28 @@ include "global" {
 locals {
   unit_name = "feature-ecr"
   enabled   = try(values.enabled, false)
+
+  # Both the `prod` and `nonprod` ECRs allow images from the `common-nonprod` account only to be pushed to them.
+  source_account_ids = [
+    for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+  ]
+
+  # Any account can pull images from the `prod` ECR, but only `nonprod` accounts can pull images from the `nonprod` ECR
+  pull_account_ids = values.realm == "prod" ?
+    concat([
+      for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+    ], [
+      for id in split(",", get_env("COMMON_PROD_ACCOUNT_IDS", "")) : trimspace(id)
+    ], [
+      for id in split(",", get_env("APP_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+    ], [
+      for id in split(",", get_env("APP_PROD_ACCOUNT_IDS", "")) : trimspace(id)
+    ])
+    : concat([
+      for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+    ], [
+      for id in split(",", get_env("APP_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+    ])
 }
 
 exclude {
@@ -50,7 +70,7 @@ inputs = {
   project            = include.global.locals.project
   region             = include.global.locals.region
   env                = values.env
-  source_account_ids = values.source_account_ids
-  pull_account_ids   = values.pull_account_ids
+  source_account_ids = local.source_account_ids
+  pull_account_ids   = local.pull_account_ids
   retention_in_days  = values.retention_in_days
 }
