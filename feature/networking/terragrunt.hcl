@@ -58,6 +58,7 @@ inputs = {
   feature_version                   = values.version
   org                               = include.global.locals.org
   project                           = include.global.locals.project
+  region                            = include.global.locals.region
   env                               = values.env
   cidr                              = values.cidr
   secondary_cidrs                   = values.secondary_cidrs
