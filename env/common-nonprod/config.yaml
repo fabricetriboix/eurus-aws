@@ -19,7 +19,7 @@ features:
 
   amp:
     enabled: true
-    version: feature-amp-v0.4.0
+    version: feature-amp-v0.4.1
 
   codeartifact:
     enabled: true
