@@ -29,5 +29,5 @@ features:
 
   ecr:
     enabled: true
-    version: feature-ecr-v0.1.0
+    version: feature-ecr-v0.1.1
     retention_in_days: 90
