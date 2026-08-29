@@ -49,6 +49,22 @@ in the ingress traffic is inevitable. Consequently, there will be only
 one ingress per environment (as opposed to a segregated ingress for
 each tenant).
 
+# Public key infrastructure
+
+Within the `eurus-aws` platform, there is a need for an internal PKI.
+Certificates are required for various internal services, such as ADOT
+collector, internal load balancers, etc.
+
+The typical solution is to use Amazon Certificate Manager, but an
+internal PKI built with ACM is expensive. In order to keep the costs
+low, I decided to implement my own PKI solution. It is quite limited
+in the sense that it does not support everything (for example: SANs
+can only be DNS names, and there is no support for revoking already
+issued certificates). Also, only RSA encryption is supported.
+
+Implementation details of this solution can be found
+[here](../feature/pki/README.md).
+
 # Observability and alerting
 
 ## Generalities

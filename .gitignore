@@ -49,6 +49,8 @@ tg_generated_*.tf
 # Python stuff
 venv
 .venv
+.pytest_cache
+__pycache__
 
 # Terragrunt
 .terragrunt-cache
