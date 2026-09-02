@@ -5,6 +5,7 @@
 #     values.account_type: Type of AWS account, either "common" or "app"
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
+#     values.logs_retention_days: Number of days to retain logs for the `datasrc` Lambda function
 
 include "global" {
   path   = find_in_parent_folders("global.hcl")
@@ -42,9 +43,10 @@ terraform {
 }
 
 inputs = {
-  feature_version = values.version
-  org             = include.global.locals.org
-  project         = include.global.locals.project
-  region          = include.global.locals.region
-  env             = values.env
+  feature_version     = values.version
+  org                 = include.global.locals.org
+  project             = include.global.locals.project
+  region              = include.global.locals.region
+  env                 = values.env
+  logs_retention_days = values.logs_retention_days
 }
