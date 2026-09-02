@@ -27,3 +27,9 @@ variable "env" {
     error_message = "The `env` variable must be set and must have at most 16 characters."
   }
 }
+
+variable "logs_retention_days" {
+  description = "Number of days to retain logs for the `datasrc` Lambda function"
+  type        = number
+  default     = 7
+}
