@@ -34,14 +34,3 @@ resource "aws_grafana_workspace" "this" {
     Purpose = "Amazon Managed Grafana workspace for ${var.org}-${var.project}-${var.env}"
   }
 }
-
-resource "aws_grafana_workspace_service_account" "sa" {
-  region = var.region
-  name = "${var.org}-${var.project}-${var.env}-sa"
-  grafana_role = "ADMIN"
-  workspace_id = aws_grafana_workspace.this.id
-}
-
-local {
-  workspace_id = element(split("/", aws_grafana_workspace.this.arn), length(split("/", aws_grafana_workspace.this.arn)) - 1)
-}
