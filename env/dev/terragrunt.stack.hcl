@@ -31,6 +31,22 @@ unit "networking" {
   }
 }
 
+unit "amp" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.amp.version)) ? "" : "feature/amp"}?ref=${local.config.features.amp.version}"
+
+  path = "feature-amp"
+
+  values = {
+    enabled      = local.config.features.amp.enabled
+    version      = local.config.features.amp.version
+    account_type = local.config.account_type
+    realm        = local.config.realm
+    env          = local.config.env
+  }
+}
+
 unit "ecs-plf" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
