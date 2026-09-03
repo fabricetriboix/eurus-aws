@@ -17,7 +17,7 @@ resource "aws_iam_role" "datasrc_exec_role" {
 
   tags = {
     Name    = "${var.org}-${var.project}-${var.env}-${var.region}-datasrc-exec-role"
-    Purpose = "Allow the `datasrc` Lambda function to access the necessary AWS resources"
+    Purpose = "Allow the datasrc Lambda function to access the necessary AWS resources"
   }
 }
 
@@ -55,7 +55,7 @@ resource "aws_iam_policy" "datasrc_exec_role_policy" {
 
   tags = {
     Name    = "${var.org}-${var.project}-${var.env}-${var.region}-datasrc-exec-role-policy"
-    Purpose = "Allow the `datasrc` Lambda function to access the necessary AWS resources"
+    Purpose = "Allow the datasrc Lambda function to access the necessary AWS resources"
   }
 }
 
@@ -80,7 +80,7 @@ resource "aws_cloudwatch_log_group" "datasrc" {
 
   tags = {
     Name    = "/${var.org}/${var.project}/${var.env}/amg/datasrc"
-    Purpose = "Log group for the `datasrc` Lambda function"
+    Purpose = "Log group for the datasrc Lambda function"
   }
 }
 
