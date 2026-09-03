@@ -1,4 +1,4 @@
-f"""
+"""
 Lambda function to manage data sources in Amazon Managed Grafana
 
 This Lambda function is used to create/delete data sources in Amazon Managed Grafana.

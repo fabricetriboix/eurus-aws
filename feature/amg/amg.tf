@@ -36,8 +36,8 @@ resource "aws_grafana_workspace" "this" {
 }
 
 resource "aws_grafana_workspace_service_account" "sa" {
-  region = var.region
-  name = "${var.org}-${var.project}-${var.env}-sa"
+  region       = var.region
+  name         = "${var.org}-${var.project}-${var.env}-sa"
   grafana_role = "ADMIN"
   workspace_id = aws_grafana_workspace.this.id
 }
