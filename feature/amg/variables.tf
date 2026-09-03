@@ -37,5 +37,9 @@ variable "logs_retention_days" {
 variable "data_source_account_ids" {
   description = "List of account IDs that are allowed to create data sources in the Amazon Managed Grafana workspace"
   type        = list(string)
-  default     = []
+
+  validation {
+    condition     = length(var.data_source_account_ids) > 0
+    error_message = "The `data_source_account_ids` variable must be set and must have at least one element."
+  }
 }

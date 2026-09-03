@@ -43,12 +43,16 @@ terraform {
   source = "."
 }
 
-inputs = {
-  feature_version         = values.version
-  org                     = include.global.locals.org
-  project                 = include.global.locals.project
-  region                  = include.global.locals.region
-  env                     = values.env
-  logs_retention_days     = values.logs_retention_days
-  data_source_account_ids = values.data_source_account_ids
-}
+inputs = merge({
+    feature_version         = values.version
+    org                     = include.global.locals.org
+    project                 = include.global.locals.project
+    region                  = include.global.locals.region
+    env                     = values.env
+    logs_retention_days     = values.logs_retention_days
+    data_source_account_ids = values.data_source_account_ids
+  },
+  try(values.logs_retention_days, null) != null ? {
+    logs_retention_days = values.logs_retention_days
+  } : {}
+)

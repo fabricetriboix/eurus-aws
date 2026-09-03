@@ -43,11 +43,15 @@ or
 
 """
 
+import json
 import logging
 import os
-import boto3
-import requests
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
+import boto3
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -55,6 +59,25 @@ logger.setLevel(logging.INFO)
 amg_workspace_id = os.environ['AMG_WORKSPACE_ID']
 amg_service_account_id = os.environ['AMG_SERVICE_ACCOUNT_ID']
 aws_region = os.environ['AWS_REGION']
+
+HTTP_TIMEOUT_SECONDS = 10
+
+
+def _grafana_request(method, url, token, body=None):
+  headers = {
+    'Authorization': f'Bearer {token}'
+  }
+  data = None
+  if body is not None:
+    headers['Content-Type'] = 'application/json'
+    data = json.dumps(body).encode('utf-8')
+
+  request = urllib.request.Request(url, data=data, headers=headers, method=method)
+  try:
+    with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
+      return response.status, response.read().decode('utf-8')
+  except urllib.error.HTTPError as error:
+    return error.code, error.read().decode('utf-8')
 
 
 def lambda_handler(event, context):
@@ -76,88 +99,72 @@ def lambda_handler(event, context):
     workspaceId=amg_workspace_id
   )
   endpoint = "https://" + resp['workspace']['endpoint']
+  encoded_name = urllib.parse.quote(name, safe='')
+  payload = {
+    'name': name,
+    'type': event['type'],
+    'access': "proxy",
+    'url': event['url'],
+    'jsonData': {
+      'httpMethod': "POST",
+      'sigV4Auth': True,
+      'sigV4AuthType': "default",
+      'sigV4Region': aws_region,
+      'assumeRoleArn': event['role']
+    }
+  }
 
   if action == "create":
-    resp = requests.post(
+    status, text = _grafana_request(
+      'POST',
       f"{endpoint}/api/datasources",
-      headers={
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json'
-      },
-      json={
-        'name': name,
-        'type': event['type'],
-        'access': "proxy",
-        'url': event['url'],
-        'jsonData': {
-          'httpMethod': "POST",
-          'sigV4Auth': True,
-          'sigV4AuthType': "default",
-          'sigV4Region': aws_region,
-          'assumeRoleArn': event['role']
-        }
-      }
+      token,
+      payload
     )
-    if resp.status_code != 200:
-      logger.error(f"Failed to create/update data source `{name}`: {resp.text}")
+    if status != 200:
+      logger.error(f"Failed to create data source `{name}`: {text}")
       return {
         "success": False,
-        "message": f"Failed to create/update data source `{name}`: {resp.text}"
+        "message": f"Failed to create data source `{name}`: {text}"
       }
 
   elif action == "update":
-    resp = requests.get(
-      f"{endpoint}/api/datasources/name/{name}",
-      headers={
-        'Authorization': f'Bearer {token}',
-      }
+    status, text = _grafana_request(
+      'GET',
+      f"{endpoint}/api/datasources/name/{encoded_name}",
+      token
     )
-    if resp.status_code != 200:
-      logger.error(f"Failed to get data source `{name}`: {resp.text}")
+    if status != 200:
+      logger.error(f"Failed to get data source `{name}`: {text}")
       return {
         "success": False,
-        "message": f"Failed to get data source `{name}`: {resp.text}"
+        "message": f"Failed to get data source `{name}`: {text}"
       }
-    id = resp.json()['id']
-    resp = requests.put(
-      f"{endpoint}/api/datasources/{id}",
-      headers={
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json'
-      },
-      json={
-        'name': name,
-        'type': event['type'],
-        'access': "proxy",
-        'url': event['url'],
-        'jsonData': {
-          'httpMethod': "POST",
-          'sigV4Auth': True,
-          'sigV4AuthType': "default",
-          'sigV4Region': aws_region,
-          'assumeRoleArn': event['role']
-        }
-      }
+    datasource_id = json.loads(text)['id']
+    status, text = _grafana_request(
+      'PUT',
+      f"{endpoint}/api/datasources/{datasource_id}",
+      token,
+      payload
     )
-    if resp.status_code != 200:
-      logger.error(f"Failed to update data source `{name}`: {resp.text}")
+    if status != 200:
+      logger.error(f"Failed to update data source `{name}`: {text}")
       return {
         "success": False,
-        "message": f"Failed to update data source `{name}`: {resp.text}"
+        "message": f"Failed to update data source `{name}`: {text}"
       }
 
   elif action == "delete":
-    resp = requests.delete(
-      f"{endpoint}/api/datasources/name/{name}",
-      headers={
-        'Authorization': f'Bearer {token}',
-      }
+    status, text = _grafana_request(
+      'DELETE',
+      f"{endpoint}/api/datasources/name/{encoded_name}",
+      token
     )
-    if resp.status_code != 200:
-      logger.error(f"Failed to delete data source `{name}`: {resp.text}")
+    if status != 200:
+      logger.error(f"Failed to delete data source `{name}`: {text}")
       return {
         "success": False,
-        "message": f"Failed to delete data source `{name}`: {resp.text}"
+        "message": f"Failed to delete data source `{name}`: {text}"
       }
 
   else:

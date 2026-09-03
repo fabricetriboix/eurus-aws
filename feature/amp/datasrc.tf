@@ -4,8 +4,8 @@ data "aws_iam_policy_document" "amp_datasrc_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
-      type        = "Service"
-      identifiers = ["grafana.amazonaws.com"]
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${var.common_account_id}:role/${var.org}-${var.project}-${var.common_account_env}-${var.region}-amg"]
     }
   }
 }
@@ -23,7 +23,7 @@ data "aws_iam_policy_document" "amp_datasrc_policy" {
       "aps:QueryMetrics",
       "aps:GetLabels",
       "aps:GetSeries",
-      "aps:GetMetricsMetadata"
+      "aps:GetMetricMetadata"
     ]
 
     resources = [aws_prometheus_workspace.this.arn]

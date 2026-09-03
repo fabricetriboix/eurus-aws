@@ -28,28 +28,3 @@ resource "aws_prometheus_workspace" "this" {
     Purpose = "Amazon Managed Prometheus workspace for ${var.org}-${var.project}-${var.env}"
   }
 }
-
-data "aws_iam_policy_document" "amp_policy" {
-  statement {
-    sid = "AllowAccessFromAmp"
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.common_account_id}:root"]
-    }
-
-    actions = [
-      "aps:QueryMetrics",
-      "aps:GetLabels",
-      "aps:GetSeries",
-      "aps:GetMetricsMetadata"
-    ]
-
-    resources = [aws_prometheus_workspace.this.arn]
-  }
-}
-
-resource "aws_prometheus_resource_policy" "amp_policy" {
-  workspace_id    = aws_prometheus_workspace.this.id
-  policy_document = data.aws_iam_policy_document.amp_policy.json
-}

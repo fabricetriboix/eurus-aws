@@ -44,6 +44,7 @@ unit "amg" {
     account_type            = local.config.account_type
     realm                   = local.config.realm
     env                     = local.config.env
+    logs_retention_days     = try(local.config.features.amg.logs_retention_days, null)
     data_source_account_ids = compact([
       for id in split(",", get_env("APP_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
     ])

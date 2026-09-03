@@ -16,6 +16,7 @@ features:
   amg:
     enabled: true
     version: fix-amp-data-src
+    logs_retention_days: 7
 
   codeartifact:
     enabled: true

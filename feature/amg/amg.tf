@@ -11,11 +11,11 @@ data "aws_iam_policy_document" "amg_assume_role_policy" {
 }
 
 resource "aws_iam_role" "amg" {
-  name               = "${var.org}-${var.project}-${var.env}-amg"
+  name               = "${var.org}-${var.project}-${var.env}-${var.region}-amg"
   assume_role_policy = data.aws_iam_policy_document.amg_assume_role_policy.json
 
   tags = {
-    Name    = "${var.org}-${var.project}-${var.env}-amg"
+    Name    = "${var.org}-${var.project}-${var.env}-${var.region}-amg"
     Purpose = "Allow Amazon Managed Grafana to access what it needs to access"
   }
 }
@@ -25,13 +25,22 @@ data "aws_iam_policy_document" "amg_policy" {
     for_each = toset(var.data_source_account_ids)
 
     statement {
-      sid = "AllowAssumeRole-${statement.value}"
 
       actions = ["sts:AssumeRole"]
 
       resources = ["arn:aws:iam::${statement.value}:role/*"]
     }
   }
+}
+
+resource "aws_iam_policy" "amg_policy" {
+  name   = "${var.org}-${var.project}-${var.env}-${var.region}-amg-policy"
+  policy = data.aws_iam_policy_document.amg_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "amg_policy_attachment" {
+  role       = aws_iam_role.amg.name
+  policy_arn = aws_iam_policy.amg_policy.arn
 }
 
 resource "aws_grafana_workspace" "this" {
@@ -43,6 +52,7 @@ resource "aws_grafana_workspace" "this" {
   kms_key_id               = module.key.key_arn
   role_arn                 = aws_iam_role.amg.arn
   data_sources             = ["CLOUDWATCH", "PROMETHEUS"]
+  grafana_version          = "12.4"
 
   tags = {
     Name    = "${var.org}-${var.project}-${var.env}"

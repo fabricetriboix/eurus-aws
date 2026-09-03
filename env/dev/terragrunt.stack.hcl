@@ -45,9 +45,9 @@ unit "amp" {
     realm              = local.config.realm
     env                = local.config.env
     common_account_env = local.config.features.amp.common_account_env
-    common_account_id  = element([
+    common_account_id  = element(compact([
       for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
-    ], 0)
+    ]), 0)
   }
 }
 

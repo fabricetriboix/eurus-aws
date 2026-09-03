@@ -41,7 +41,10 @@ data "aws_iam_policy_document" "datasrc_exec_role_policy" {
       "logs:PutLogEvents"
     ]
 
-    resources = [aws_cloudwatch_log_group.datasrc.arn]
+    resources = [
+      aws_cloudwatch_log_group.datasrc.arn,
+      "${aws_cloudwatch_log_group.datasrc.arn}:*"
+    ]
   }
 }
 
@@ -55,39 +58,11 @@ resource "aws_iam_role_policy_attachment" "datasrc_exec_role_policy_attachment" 
   policy_arn = aws_iam_policy.datasrc_exec_role_policy.arn
 }
 
-locals {
-  datasrc_build_dir = "${path.module}/build-datasrc"
-  datasrc_zip_path  = "${path.module}/datasrc.zip"
-}
-
-resource "terraform_data" "datasrc" {
-  triggers_replace = [
-    filebase64sha256("${path.module}/datasrc/datasrc.py"),
-    filebase64sha256("${path.module}/datasrc/requirements.txt")
-  ]
-
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-
-    command = <<-END
-      set -euo pipefail
-
-      rm -rf "${local.datasrc_build_dir}"
-      mkdir -p "${local.datasrc_build_dir}"
-
-      python3 -m pip install -r "${path.module}/datasrc/requirements.txt" -t "${local.datasrc_build_dir}"
-
-      cp "${path.module}/datasrc/datasrc.py" "${local.datasrc_build_dir}"
-    END
-  }
-}
-
 data "archive_file" "datasrc" {
-  depends_on = [terraform_data.datasrc]
-
   type        = "zip"
-  output_path = local.datasrc_zip_path
-  source_dir  = local.datasrc_build_dir
+  output_path = "${path.module}/datasrc.zip"
+  source_dir  = "${path.module}/datasrc"
+  excludes    = ["__pycache__"]
 }
 
 resource "aws_cloudwatch_log_group" "datasrc" {
@@ -124,7 +99,7 @@ resource "aws_lambda_function" "datasrc" {
   environment {
     variables = {
       AMG_WORKSPACE_ID       = aws_grafana_workspace.this.id
-      AMG_SERVICE_ACCOUNT_ID = aws_grafana_workspace_service_account.sa.id
+      AMG_SERVICE_ACCOUNT_ID = aws_grafana_workspace_service_account.sa.service_account_id
     }
   }
 
@@ -136,7 +111,7 @@ resource "aws_lambda_function" "datasrc" {
   }
 
   tags = {
-    Name    = "${var.org}-${var.project}-${var.env}-${var.region}-datasrc"
+    Name    = "${var.org}-${var.project}-${var.env}-amg-datasrc"
     Purpose = "Lambda function to manage data sources in Amazon Managed Grafana"
   }
 }
@@ -147,6 +122,6 @@ resource "aws_lambda_permission" "datasrc" {
   statement_id   = "AllowExecutionFrom-${each.value}"
   action         = "lambda:InvokeFunction"
   function_name  = aws_lambda_function.datasrc.function_name
-  principal      = "arn:aws:iam::${each.value}:root"
+  principal      = "arn:aws:iam::${each.value}:role/tf-role-${var.region}"
   source_account = each.value
 }
