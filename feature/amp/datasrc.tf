@@ -13,6 +13,11 @@ data "aws_iam_policy_document" "amp_datasrc_assume_role_policy" {
 resource "aws_iam_role" "amp_datasrc" {
   name               = "${var.org}-${var.project}-${var.env}-${var.region}-amp-datasrc"
   assume_role_policy = data.aws_iam_policy_document.amp_datasrc_assume_role_policy.json
+
+  tags = {
+    Name    = "${var.org}-${var.project}-${var.env}-${var.region}-amp-datasrc"
+    Purpose = "Role assumed by Amazon Managed Grafana to query this AMP workspace"
+  }
 }
 
 data "aws_iam_policy_document" "amp_datasrc_policy" {
@@ -33,6 +38,11 @@ data "aws_iam_policy_document" "amp_datasrc_policy" {
 resource "aws_iam_policy" "amp_datasrc_policy" {
   name   = "${var.org}-${var.project}-${var.env}-${var.region}-amp-datasrc-policy"
   policy = data.aws_iam_policy_document.amp_datasrc_policy.json
+
+  tags = {
+    Name    = "${var.org}-${var.project}-${var.env}-${var.region}-amp-datasrc-policy"
+    Purpose = "Allow Amazon Managed Grafana to query this AMP workspace"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "amp_datasrc_policy_attachment" {

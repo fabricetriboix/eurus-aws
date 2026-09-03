@@ -34,6 +34,11 @@ data "aws_iam_policy_document" "amg_policy" {
 resource "aws_iam_policy" "amg_policy" {
   name   = "${var.org}-${var.project}-${var.env}-${var.region}-amg-policy"
   policy = data.aws_iam_policy_document.amg_policy.json
+
+  tags = {
+    Name    = "${var.org}-${var.project}-${var.env}-${var.region}-amg-policy"
+    Purpose = "Allow Amazon Managed Grafana to assume data source roles in app accounts"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "amg_policy_attachment" {

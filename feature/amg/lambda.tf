@@ -52,6 +52,11 @@ data "aws_iam_policy_document" "datasrc_exec_role_policy" {
 resource "aws_iam_policy" "datasrc_exec_role_policy" {
   name   = "${var.org}-${var.project}-${var.env}-${var.region}-datasrc-exec-role-policy"
   policy = data.aws_iam_policy_document.datasrc_exec_role_policy.json
+
+  tags = {
+    Name    = "${var.org}-${var.project}-${var.env}-${var.region}-datasrc-exec-role-policy"
+    Purpose = "Allow the `datasrc` Lambda function to access the necessary AWS resources"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "datasrc_exec_role_policy_attachment" {
@@ -74,7 +79,8 @@ resource "aws_cloudwatch_log_group" "datasrc" {
   retention_in_days = var.logs_retention_days
 
   tags = {
-    Name = "/${var.org}/${var.project}/${var.env}/amg/datasrc"
+    Name    = "/${var.org}/${var.project}/${var.env}/amg/datasrc"
+    Purpose = "Log group for the `datasrc` Lambda function"
   }
 }
 
