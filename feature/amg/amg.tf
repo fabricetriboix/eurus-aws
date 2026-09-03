@@ -55,7 +55,6 @@ resource "aws_grafana_workspace" "this" {
   kms_key_id               = module.key.key_arn
   role_arn                 = aws_iam_role.amg.arn
   data_sources             = ["CLOUDWATCH", "PROMETHEUS"]
-  grafana_version          = "12.4"
 
   tags = {
     Name    = "${var.org}-${var.project}-${var.env}"
