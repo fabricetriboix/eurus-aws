@@ -130,5 +130,4 @@ resource "aws_lambda_permission" "datasrc" {
   action         = "lambda:InvokeFunction"
   function_name  = aws_lambda_function.datasrc.function_name
   principal      = "arn:aws:iam::${each.value}:role/tf-role-${var.region}"
-  source_account = each.value
 }
