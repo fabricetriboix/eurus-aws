@@ -51,7 +51,8 @@ resource "aws_iam_role_policy_attachment" "amp_datasrc_policy_attachment" {
 }
 
 resource "aws_lambda_invocation" "amg_datasrc" {
-  function_name   = "arn:aws:lambda:${var.region}:${var.common_account_id}:function:${var.org}-${var.project}-${var.common_account_env}-amg-datasrc:live"
+  function_name   = "arn:aws:lambda:${var.region}:${var.common_account_id}:function:${var.org}-${var.project}-${var.common_account_env}-amg-datasrc"
+  qualifier       = "live"
   lifecycle_scope = "CRUD"
 
   input = jsonencode({
