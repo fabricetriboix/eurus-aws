@@ -42,6 +42,6 @@ resource "aws_grafana_workspace_service_account" "sa" {
   workspace_id = aws_grafana_workspace.this.id
 }
 
-local {
+locals {
   workspace_id = element(split("/", aws_grafana_workspace.this.arn), length(split("/", aws_grafana_workspace.this.arn)) - 1)
 }

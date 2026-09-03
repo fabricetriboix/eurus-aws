@@ -21,7 +21,7 @@ resource "aws_iam_role" "datasrc_exec_role" {
   }
 }
 
-local {
+locals {
   datasrc_build_dir = "${path.module}/build-datasrc"
   datasrc_zip_path  = "${path.module}/datasrc.zip"
 }

@@ -34,7 +34,7 @@ variable "logs_retention_days" {
   default     = 7
 }
 
-variables "data_source_account_ids" {
+variable "data_source_account_ids" {
   description = "List of account IDs that are allowed to create data sources in the Amazon Managed Grafana workspace"
   type        = list(string)
   default     = []
