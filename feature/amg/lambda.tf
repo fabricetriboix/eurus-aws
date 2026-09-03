@@ -126,8 +126,8 @@ resource "aws_lambda_function" "datasrc" {
 resource "aws_lambda_permission" "datasrc" {
   for_each = toset(var.data_source_account_ids)
 
-  statement_id   = "AllowExecutionFrom-${each.value}"
-  action         = "lambda:InvokeFunction"
-  function_name  = aws_lambda_function.datasrc.function_name
-  principal      = "arn:aws:iam::${each.value}:role/tf-role-${var.region}"
+  statement_id  = "AllowExecutionFrom-${each.value}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.datasrc.function_name
+  principal     = "arn:aws:iam::${each.value}:role/tf-role-${var.region}"
 }
