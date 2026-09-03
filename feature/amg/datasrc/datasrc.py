@@ -100,22 +100,32 @@ def lambda_handler(event, context):
 
     if action == "create":
       status, text = _grafana_request(
-        'POST',
-        f"{endpoint}/api/datasources",
-        token,
-        payload
+        'GET',
+        f"{endpoint}/api/datasources/name/{encoded_name}",
+        token
       )
-      if status != 200:
-        raise runtimeError(f"Failed to create data source `{name}`: {text}")
+      if status == 200:
+        logger.info(f"Data source `{name}` already exists, assuming `update` action")
+        action = "update"
 
-    elif action == "update":
+      else:
+        status, text = _grafana_request(
+          'POST',
+          f"{endpoint}/api/datasources",
+          token,
+          payload
+        )
+        if status != 200:
+          raise RuntimeError(f"Failed to create data source `{name}`: {text}")
+
+    if action == "update":
       status, text = _grafana_request(
         'GET',
         f"{endpoint}/api/datasources/name/{encoded_name}",
         token
       )
       if status != 200:
-        raise runtimeError(f"Failed to get data source `{name}`: {text}")
+        raise RuntimeError(f"Failed to get data source `{name}`: {text}")
 
       datasource_id = json.loads(text)['id']
       status, text = _grafana_request(
@@ -125,7 +135,7 @@ def lambda_handler(event, context):
         payload
       )
       if status != 200:
-        raise runtimeError(f"Failed to update data source `{name}`: {text}")
+        raise RuntimeError(f"Failed to update data source `{name}`: {text}")
 
     elif action == "delete":
       status, text = _grafana_request(
@@ -134,7 +144,7 @@ def lambda_handler(event, context):
         token
       )
       if status != 200:
-        raise runtimeError(f"Failed to delete data source `{name}`: {text}")
+        raise RuntimeError(f"Failed to delete data source `{name}`: {text}")
 
     else:
       raise ValueError(f"Invalid action: {action}")
@@ -142,7 +152,7 @@ def lambda_handler(event, context):
   finally:
     amg_client.delete_workspace_service_account_token(
       tokenId=token_id,
-      serviceAccountTokenId=token['serviceAccountToken']['id'],
+      serviceAccountId=amg_service_account_id,
       workspaceId=amg_workspace_id
     )
 

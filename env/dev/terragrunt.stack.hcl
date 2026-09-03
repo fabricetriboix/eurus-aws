@@ -39,14 +39,14 @@ unit "amp" {
   path = "feature-amp"
 
   values = {
-    enabled            = local.config.features.amp.enabled
-    version            = local.config.features.amp.version
-    account_type       = local.config.account_type
-    realm              = local.config.realm
-    env                = local.config.env
-    log_retention_days = try(local.config.features.flow_logs_retention_days, 10)
-    common_account_env = local.config.features.amp.common_account_env
-    common_account_id  = element(compact([
+    enabled             = local.config.features.amp.enabled
+    version             = local.config.features.amp.version
+    account_type        = local.config.account_type
+    realm               = local.config.realm
+    env                 = local.config.env
+    logs_retention_days = try(local.config.features.amp.logs_retention_days, 10)
+    common_account_env  = local.config.features.amp.common_account_env
+    common_account_id   = element(compact([
       for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
     ]), 0)
   }

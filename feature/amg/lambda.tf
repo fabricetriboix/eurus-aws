@@ -27,6 +27,7 @@ data "aws_iam_policy_document" "datasrc_exec_role_policy" {
 
     actions = [
       "grafana:CreateWorkspaceServiceAccountToken",
+      "grafana:DeleteWorkspaceServiceAccountToken",
       "grafana:DescribeWorkspace"
     ]
 
