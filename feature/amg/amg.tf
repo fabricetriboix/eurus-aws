@@ -21,15 +21,13 @@ resource "aws_iam_role" "amg" {
 }
 
 data "aws_iam_policy_document" "amg_policy" {
-  dynamic "statement" {
-    for_each = toset(var.data_source_account_ids)
+  statement {
+    sid     = "AllowAssumeRole"
+    actions = ["sts:AssumeRole"]
 
-    statement {
-
-      actions = ["sts:AssumeRole"]
-
-      resources = ["arn:aws:iam::${statement.value}:role/*"]
-    }
+    resources = [
+      for id in var.data_source_account_ids : "arn:aws:iam::${id}:role/${var.org}-${var.project}-*-${var.region}-amp-datasrc"
+    ]
   }
 }
 

@@ -22,25 +22,6 @@ The `name` field is required and must be the name of the data source.
 The `type` field is required only if `action` is `create` and must be the type of the data source.
 The `url` field is required only if `action` is `create` and must be the URL of the data source.
 The `role` field is the IAM role AMG can assume to access the data source.
-
-The Lambda function will return a JSON object with the following fields:
-
-```json
-{
-  "success": true,
-  "message": "Lambda function executed successfully"
-}
-```
-
-or
-
-```json
-{
-  "success": false,
-  "message": "The field 'action' is required"
-}
-```
-
 """
 
 import json
@@ -50,7 +31,6 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-
 import boto3
 
 logger = logging.getLogger()
@@ -59,8 +39,7 @@ logger.setLevel(logging.INFO)
 amg_workspace_id = os.environ['AMG_WORKSPACE_ID']
 amg_service_account_id = os.environ['AMG_SERVICE_ACCOUNT_ID']
 aws_region = os.environ['AWS_REGION']
-
-HTTP_TIMEOUT_SECONDS = 10
+http_timeout_seconds = 10
 
 
 def _grafana_request(method, url, token, body=None):
@@ -74,7 +53,7 @@ def _grafana_request(method, url, token, body=None):
 
   request = urllib.request.Request(url, data=data, headers=headers, method=method)
   try:
-    with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
+    with urllib.request.urlopen(request, timeout=http_timeout_seconds) as response:
       return response.status, response.read().decode('utf-8')
   except urllib.error.HTTPError as error:
     return error.code, error.read().decode('utf-8')
@@ -86,6 +65,8 @@ def lambda_handler(event, context):
   logger.info(f"datasrc started, action=`{action}`, name=`{name}`")
 
   amg_client = boto3.client('grafana', region_name=aws_region)
+
+  # Get a Grafana token for the service account
   ts = int(time.time())
   resp = amg_client.create_workspace_service_account_token(
     name=f"datasrc-lambda-{ts}",
@@ -94,83 +75,75 @@ def lambda_handler(event, context):
     workspaceId=amg_workspace_id
   )
   token = resp['serviceAccountToken']['key']
+  token_id = resp['serviceAccountToken']['id']
 
-  resp = amg_client.describe_workspace(
-    workspaceId=amg_workspace_id
-  )
-  endpoint = "https://" + resp['workspace']['endpoint']
-  encoded_name = urllib.parse.quote(name, safe='')
-  payload = {
-    'name': name,
-    'type': event['type'],
-    'access': "proxy",
-    'url': event['url'],
-    'jsonData': {
-      'httpMethod': "POST",
-      'sigV4Auth': True,
-      'sigV4AuthType': "default",
-      'sigV4Region': aws_region,
-      'assumeRoleArn': event['role']
+  try:
+    # Get the workspace endpoint
+    resp = amg_client.describe_workspace(
+      workspaceId=amg_workspace_id
+    )
+    endpoint = "https://" + resp['workspace']['endpoint']
+    encoded_name = urllib.parse.quote(name, safe='')
+    payload = {
+      'name': name,
+      'type': event['type'],
+      'access': "proxy",
+      'url': event['url'],
+      'jsonData': {
+        'httpMethod': "POST",
+        'sigV4Auth': True,
+        'sigV4AuthType': "default",
+        'sigV4Region': aws_region,
+        'assumeRoleArn': event['role']
+      }
     }
-  }
 
-  if action == "create":
-    status, text = _grafana_request(
-      'POST',
-      f"{endpoint}/api/datasources",
-      token,
-      payload
+    if action == "create":
+      status, text = _grafana_request(
+        'POST',
+        f"{endpoint}/api/datasources",
+        token,
+        payload
+      )
+      if status != 200:
+        raise runtimeError(f"Failed to create data source `{name}`: {text}")
+
+    elif action == "update":
+      status, text = _grafana_request(
+        'GET',
+        f"{endpoint}/api/datasources/name/{encoded_name}",
+        token
+      )
+      if status != 200:
+        raise runtimeError(f"Failed to get data source `{name}`: {text}")
+
+      datasource_id = json.loads(text)['id']
+      status, text = _grafana_request(
+        'PUT',
+        f"{endpoint}/api/datasources/{datasource_id}",
+        token,
+        payload
+      )
+      if status != 200:
+        raise runtimeError(f"Failed to update data source `{name}`: {text}")
+
+    elif action == "delete":
+      status, text = _grafana_request(
+        'DELETE',
+        f"{endpoint}/api/datasources/name/{encoded_name}",
+        token
+      )
+      if status != 200:
+        raise runtimeError(f"Failed to delete data source `{name}`: {text}")
+
+    else:
+      raise ValueError(f"Invalid action: {action}")
+
+  finally:
+    amg_client.delete_workspace_service_account_token(
+      tokenId=token_id,
+      serviceAccountTokenId=token['serviceAccountToken']['id'],
+      workspaceId=amg_workspace_id
     )
-    if status != 200:
-      logger.error(f"Failed to create data source `{name}`: {text}")
-      return {
-        "success": False,
-        "message": f"Failed to create data source `{name}`: {text}"
-      }
 
-  elif action == "update":
-    status, text = _grafana_request(
-      'GET',
-      f"{endpoint}/api/datasources/name/{encoded_name}",
-      token
-    )
-    if status != 200:
-      logger.error(f"Failed to get data source `{name}`: {text}")
-      return {
-        "success": False,
-        "message": f"Failed to get data source `{name}`: {text}"
-      }
-    datasource_id = json.loads(text)['id']
-    status, text = _grafana_request(
-      'PUT',
-      f"{endpoint}/api/datasources/{datasource_id}",
-      token,
-      payload
-    )
-    if status != 200:
-      logger.error(f"Failed to update data source `{name}`: {text}")
-      return {
-        "success": False,
-        "message": f"Failed to update data source `{name}`: {text}"
-      }
-
-  elif action == "delete":
-    status, text = _grafana_request(
-      'DELETE',
-      f"{endpoint}/api/datasources/name/{encoded_name}",
-      token
-    )
-    if status != 200:
-      logger.error(f"Failed to delete data source `{name}`: {text}")
-      return {
-        "success": False,
-        "message": f"Failed to delete data source `{name}`: {text}"
-      }
-
-  else:
-    raise ValueError(f"Invalid action: {action}")
-
-  return {
-      "success": True,
-      "message": f"Data source `{name}` successfully {action}d"
-  }
+  logger.info(f"Data source `{name}` successfully {action}d")
