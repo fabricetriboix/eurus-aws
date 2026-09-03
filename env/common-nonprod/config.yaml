@@ -15,7 +15,7 @@ features:
 
   amg:
     enabled: true
-    version: feature-amg-v0.4.0
+    version: fix-amp-data-src
 
   codeartifact:
     enabled: true

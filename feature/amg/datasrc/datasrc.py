@@ -7,17 +7,21 @@ The input `event` is a JSON object which should be formatted like so:
 
 ```json
 {
-  "action": "create",
+  "tf": {
+    "action": "create"
+  },
   "name": "amp-dev",
   "type": "grafana-amazonprometheus-datasource",
-  "url": "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-xxxxxxxx/"
+  "url": "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-xxxxxxxx/",
+  "role": "ARN_OF_IAM_ROLE_TO_ASSUME"
 }
 ```
 
-The `action` field is required and must be either `create` or `delete`.
+The `action` field is required and must be either `create`, `update` or `delete`.
 The `name` field is required and must be the name of the data source.
 The `type` field is required only if `action` is `create` and must be the type of the data source.
 The `url` field is required only if `action` is `create` and must be the URL of the data source.
+The `role` field is the IAM role AMG can assume to access the data source.
 
 The Lambda function will return a JSON object with the following fields:
 
@@ -53,7 +57,7 @@ aws_region = os.environ['AWS_REGION']
 
 
 def lambda_handler(event, context):
-  action = event['action']
+  action = event['tf']['action']
   name = event['name']
   logger.info(f"datasrc started, action=`{action}`, name=`{name}`")
 
@@ -71,8 +75,8 @@ def lambda_handler(event, context):
   )
   endpoint = resp['workspace']['endpoint']
 
-  if action == "create":
-    requests.post(
+  if action in ["create", "update"]:
+    resp = requests.post(
       f"{endpoint}/api/datasources",
       headers={
         'Authorization': f'Bearer {token}',
@@ -87,17 +91,34 @@ def lambda_handler(event, context):
           'httpMethod': "POST",
           'sigV4Auth': True,
           'sigV4AuthType': "default",
-          'sigV4Region': aws_region
+          'sigV4Region': aws_region,
+          'sigV4AssumeRoleArn': event['role']
         }
       }
     )
-  else:
-    requests.delete(
-      f"{endpoint}/api/datasources/{name}",
+    if resp.status_code != 200:
+      logger.error(f"Failed to create/update data source `{name}`: {resp.text}")
+      return {
+        "success": False,
+        "message": f"Failed to create/update data source `{name}`: {resp.text}"
+      }
+
+  elif action == "delete":
+    resp = requests.delete(
+      f"{endpoint}/api/datasources/name/{name}",
       headers={
         'Authorization': f'Bearer {token}',
       }
     )
+    if resp.status_code != 200:
+      logger.error(f"Failed to delete data source `{name}`: {resp.text}")
+      return {
+        "success": False,
+        "message": f"Failed to delete data source `{name}`: {resp.text}"
+      }
+
+  else:
+    raise ValueError(f"Invalid action: {action}")
 
   return {
       "success": True,

@@ -39,11 +39,15 @@ unit "amp" {
   path = "feature-amp"
 
   values = {
-    enabled      = local.config.features.amp.enabled
-    version      = local.config.features.amp.version
-    account_type = local.config.account_type
-    realm        = local.config.realm
-    env          = local.config.env
+    enabled            = local.config.features.amp.enabled
+    version            = local.config.features.amp.version
+    account_type       = local.config.account_type
+    realm              = local.config.realm
+    env                = local.config.env
+    common_account_env = local.config.features.amp.common_account_env
+    common_account_id  = element([
+      for id in split(",", get_env("COMMON_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+    ], 0)
   }
 }
 

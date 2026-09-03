@@ -17,7 +17,9 @@ features:
 
   amp:
     enabled: true
-    version: feature-amp-v0.4.1
+    version: fix-amp-data-src
+    logs_retention_days: 7
+    common_account_env: common-nonprod
 
   ecs-plf:
     enabled: true

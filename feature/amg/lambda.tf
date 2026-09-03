@@ -21,6 +21,40 @@ resource "aws_iam_role" "datasrc_exec_role" {
   }
 }
 
+data "aws_iam_policy_document" "datasrc_exec_role_policy" {
+  statement {
+    sid = "AllowAccessToAmgWorkspace"
+
+    actions = [
+      "grafana:CreateWorkspaceServiceAccountToken",
+      "grafana:DescribeWorkspace"
+    ]
+
+    resources = [aws_grafana_workspace.this.arn]
+  }
+
+  statement {
+    sid = "AllowAccessToCloudwatchLogs"
+
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+
+    resources = [aws_cloudwatch_log_group.datasrc.arn]
+  }
+}
+
+resource "aws_iam_policy" "datasrc_exec_role_policy" {
+  name   = "${var.org}-${var.project}-${var.env}-${var.region}-datasrc-exec-role-policy"
+  policy = data.aws_iam_policy_document.datasrc_exec_role_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "datasrc_exec_role_policy_attachment" {
+  role       = aws_iam_role.datasrc_exec_role.name
+  policy_arn = aws_iam_policy.datasrc_exec_role_policy.arn
+}
+
 locals {
   datasrc_build_dir = "${path.module}/build-datasrc"
   datasrc_zip_path  = "${path.module}/datasrc.zip"
@@ -58,7 +92,7 @@ data "archive_file" "datasrc" {
 
 resource "aws_cloudwatch_log_group" "datasrc" {
   name       = "/${var.org}/${var.project}/${var.env}/amg/datasrc"
-  kms_key_id = module.key[0].key_arn
+  kms_key_id = module.key.key_arn
 
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
   retention_in_days = var.logs_retention_days
@@ -76,7 +110,6 @@ resource "aws_lambda_function" "datasrc" {
   # checkov:skip=CKV_AWS_116:DLQ is not required for this synchronously invoked function
   # checkov:skip=CKV_AWS_117:This function does not need VPC access
 
-
   function_name    = "${var.org}-${var.project}-${var.env}-amg-datasrc"
   description      = "Lambda function to manage data sources in Amazon Managed Grafana"
   role             = aws_iam_role.datasrc_exec_role.arn
@@ -90,7 +123,7 @@ resource "aws_lambda_function" "datasrc" {
 
   environment {
     variables = {
-      AMG_WORKSPACE_ID       = local.workspace_id
+      AMG_WORKSPACE_ID       = aws_grafana_workspace.this.id
       AMG_SERVICE_ACCOUNT_ID = aws_grafana_workspace_service_account.sa.id
     }
   }
@@ -111,7 +144,7 @@ resource "aws_lambda_function" "datasrc" {
 resource "aws_lambda_permission" "datasrc" {
   for_each = toset(var.data_source_account_ids)
 
-  statement_id   = "AllowExecutionFromAppAccounts"
+  statement_id   = "AllowExecutionFrom-${each.value}"
   action         = "lambda:InvokeFunction"
   function_name  = aws_lambda_function.datasrc.function_name
   principal      = "arn:aws:iam::${each.value}:root"
