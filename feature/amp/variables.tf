@@ -28,8 +28,18 @@ variable "env" {
   }
 }
 
-variable "log_retention_days" {
+variable "logs_retention_days" {
   description = "Number of days to retain Amazon Managed Prometheus logs"
   type        = number
   default     = 30
+}
+
+variable "common_account_id" {
+  description = "ID of the common account associated with this account"
+  type        = string
+}
+
+variable "common_account_env" {
+  description = "Environment of the common account associated with this account"
+  type        = string
 }

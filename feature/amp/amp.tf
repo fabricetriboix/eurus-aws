@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_group" "this" {
   kms_key_id = module.key.key_arn
 
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
-  retention_in_days = var.log_retention_days
+  retention_in_days = var.logs_retention_days
 
   tags = {
     Name    = "/${var.org}/${var.project}/${var.env}/amp-logs"

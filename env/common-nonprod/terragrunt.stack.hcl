@@ -39,11 +39,15 @@ unit "amg" {
   path = "feature-amg"
 
   values = {
-    enabled      = local.config.features.amg.enabled
-    version      = local.config.features.amg.version
-    account_type = local.config.account_type
-    realm        = local.config.realm
-    env          = local.config.env
+    enabled                 = local.config.features.amg.enabled
+    version                 = local.config.features.amg.version
+    account_type            = local.config.account_type
+    realm                   = local.config.realm
+    env                     = local.config.env
+    logs_retention_days     = try(local.config.features.amg.logs_retention_days, 10)
+    data_source_account_ids = compact([
+      for id in split(",", get_env("APP_NONPROD_ACCOUNT_IDS", "")) : trimspace(id)
+    ])
   }
 }
 
@@ -75,11 +79,11 @@ unit "ecr" {
   path = "feature-ecr"
 
   values = {
-    enabled            = local.config.features.ecr.enabled
-    version            = local.config.features.ecr.version
-    account_type       = local.config.account_type
-    realm              = local.config.realm
-    env                = local.config.env
-    retention_in_days  = try(local.config.features.ecr.retention_in_days, 90)
+    enabled                 = local.config.features.ecr.enabled
+    version                 = local.config.features.ecr.version
+    account_type            = local.config.account_type
+    realm                   = local.config.realm
+    env                     = local.config.env
+    retention_in_days       = try(local.config.features.ecr.retention_in_days, 90)
   }
 }
