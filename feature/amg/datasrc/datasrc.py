@@ -47,6 +47,7 @@ import logging
 import os
 import boto3
 import requests
+import time
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -62,8 +63,9 @@ def lambda_handler(event, context):
   logger.info(f"datasrc started, action=`{action}`, name=`{name}`")
 
   amg_client = boto3.client('grafana', region_name=aws_region)
+  ts = int(time.time())
   resp = amg_client.create_workspace_service_account_token(
-    name='datasrc-lambda',
+    name=f"datasrc-lambda-{ts}",
     secondsToLive=120,
     serviceAccountId=amg_service_account_id,
     workspaceId=amg_workspace_id
@@ -73,9 +75,9 @@ def lambda_handler(event, context):
   resp = amg_client.describe_workspace(
     workspaceId=amg_workspace_id
   )
-  endpoint = resp['workspace']['endpoint']
+  endpoint = "https://" + resp['workspace']['endpoint']
 
-  if action in ["create", "update"]:
+  if action == "create":
     resp = requests.post(
       f"{endpoint}/api/datasources",
       headers={
@@ -92,7 +94,7 @@ def lambda_handler(event, context):
           'sigV4Auth': True,
           'sigV4AuthType': "default",
           'sigV4Region': aws_region,
-          'sigV4AssumeRoleArn': event['role']
+          'assumeRoleArn': event['role']
         }
       }
     )
@@ -101,6 +103,47 @@ def lambda_handler(event, context):
       return {
         "success": False,
         "message": f"Failed to create/update data source `{name}`: {resp.text}"
+      }
+
+  elif action == "update":
+    resp = requests.get(
+      f"{endpoint}/api/datasources/name/{name}",
+      headers={
+        'Authorization': f'Bearer {token}',
+      }
+    )
+    if resp.status_code != 200:
+      logger.error(f"Failed to get data source `{name}`: {resp.text}")
+      return {
+        "success": False,
+        "message": f"Failed to get data source `{name}`: {resp.text}"
+      }
+    id = resp.json()['id']
+    resp = requests.put(
+      f"{endpoint}/api/datasources/{id}",
+      headers={
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+      },
+      json={
+        'name': name,
+        'type': event['type'],
+        'access': "proxy",
+        'url': event['url'],
+        'jsonData': {
+          'httpMethod': "POST",
+          'sigV4Auth': True,
+          'sigV4AuthType': "default",
+          'sigV4Region': aws_region,
+          'assumeRoleArn': event['role']
+        }
+      }
+    )
+    if resp.status_code != 200:
+      logger.error(f"Failed to update data source `{name}`: {resp.text}")
+      return {
+        "success": False,
+        "message": f"Failed to update data source `{name}`: {resp.text}"
       }
 
   elif action == "delete":
