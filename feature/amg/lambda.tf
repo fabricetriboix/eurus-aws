@@ -69,6 +69,14 @@ resource "aws_cloudwatch_log_group" "datasrc" {
 }
 
 resource "aws_lambda_function" "datasrc" {
+  # checkov:skip=CKV_AWS_272:Signing not necessary here
+  # checkov:skip=CKV_AWS_173:Environment variables are not sensitive
+  # checkov:skip=CKV_AWS_50:X-Ray tracing is not required for this function
+  # checkov:skip=CKV_AWS_115:Reserved concurrency is not required for this function
+  # checkov:skip=CKV_AWS_116:DLQ is not required for this synchronously invoked function
+  # checkov:skip=CKV_AWS_117:This function does not need VPC access
+
+
   function_name    = "${var.org}-${var.project}-${var.env}-amg-datasrc"
   description      = "Lambda function to manage data sources in Amazon Managed Grafana"
   role             = aws_iam_role.datasrc_exec_role.arn
@@ -83,15 +91,15 @@ resource "aws_lambda_function" "datasrc" {
   environment {
     variables = {
       AMG_WORKSPACE_ID       = local.workspace_id
-      AMG_SERVICE_ACCOUNT_ID = amazon_grafana_workspace_service_account.sa.id
+      AMG_SERVICE_ACCOUNT_ID = aws_grafana_workspace_service_account.sa.id
     }
   }
 
   logging_config {
-    level            = "INFO"
-    system_log_level = "INFO"
-    log_format       = "JSON"
-    log_group        = aws_cloudwatch_log_group.datasrc.name
+    application_log_level = "INFO"
+    system_log_level      = "INFO"
+    log_format            = "JSON"
+    log_group             = aws_cloudwatch_log_group.datasrc.name
   }
 
   tags = {
