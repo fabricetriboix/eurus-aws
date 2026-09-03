@@ -146,6 +146,9 @@ def lambda_handler(event, context):
       if status != 200:
         raise RuntimeError(f"Failed to delete data source `{name}`: {text}")
 
+    elif action == "create":
+      pass  # Already handled above
+
     else:
       raise ValueError(f"Invalid action: {action}")
 
