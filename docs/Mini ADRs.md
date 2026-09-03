@@ -110,8 +110,8 @@ be responsible for:
   - Forwarding metrics and traces to the environment's ADOT collector
 
 The environment's ADOT collector will then forward the metrics to the
-realm's AMP write endpoint, and the traces to AWS X-Ray in the local
-AWS account. It will also be responsible to filter out any potentially
+AMP write endpoint, and the traces to AWS X-Ray in the local AWS
+account. It will also be responsible to filter out any potentially
 problematic metrics or traces and thus act as a gateway to prevent the
 tenants from overwhelming AMP or X-Ray.
 

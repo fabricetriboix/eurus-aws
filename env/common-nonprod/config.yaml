@@ -17,10 +17,6 @@ features:
     enabled: true
     version: feature-amg-v0.4.0
 
-  amp:
-    enabled: true
-    version: feature-amp-v0.4.1
-
   codeartifact:
     enabled: true
     version: feature-codeartifact-v0.1.2
