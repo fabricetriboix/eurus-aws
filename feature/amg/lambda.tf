@@ -102,6 +102,7 @@ resource "aws_lambda_function" "datasrc" {
   memory_size      = 256
   region           = var.region
   timeout          = 30
+  publish          = true
 
   environment {
     variables = {
@@ -123,11 +124,21 @@ resource "aws_lambda_function" "datasrc" {
   }
 }
 
+resource "aws_lambda_alias" "datasrc" {
+  name             = "live"
+  description      = "Alias used by app accounts to register Grafana data sources"
+  function_name    = aws_lambda_function.datasrc.function_name
+  function_version = aws_lambda_function.datasrc.version
+  region           = var.region
+}
+
 resource "aws_lambda_permission" "datasrc" {
   for_each = toset(var.data_source_account_ids)
 
   statement_id  = "AllowExecutionFrom-${each.value}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.datasrc.function_name
+  qualifier     = aws_lambda_alias.datasrc.name
   principal     = each.value
+  region        = var.region
 }
