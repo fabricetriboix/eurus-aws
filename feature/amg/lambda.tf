@@ -139,6 +139,6 @@ resource "aws_lambda_permission" "datasrc" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.datasrc.function_name
   qualifier     = aws_lambda_alias.datasrc.name
-  principal     = each.value
+  principal     = "arn:aws:iam::${each.value}:root"
   region        = var.region
 }
