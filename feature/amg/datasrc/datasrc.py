@@ -95,7 +95,7 @@ def lambda_handler(event, context):
         'sigV4Auth': True,
         'sigV4AuthType': "default",
         'sigV4Region': aws_region,
-        'sigV4Service': 'aps',
+        'sigv4Service': 'aps',
         'assumeRoleArn': event['role']
       }
     }
@@ -106,11 +106,12 @@ def lambda_handler(event, context):
         f"{endpoint}/api/datasources/name/{encoded_name}",
         token
       )
+
       if status == 200:
         logger.info(f"Data source `{name}` already exists, assuming `update` action")
         action = "update"
 
-      else:
+      elif status == 404:
         status, text = _grafana_request(
           'POST',
           f"{endpoint}/api/datasources",
@@ -120,6 +121,9 @@ def lambda_handler(event, context):
         if status != 200:
           raise RuntimeError(f"Failed to create data source `{name}`: {text}")
 
+      else:
+        raise RuntimeError(f"Failed to get data source `{name}`: {text} - status code: {status}")
+
     if action == "update":
       status, text = _grafana_request(
         'GET',
@@ -127,7 +131,7 @@ def lambda_handler(event, context):
         token
       )
       if status != 200:
-        raise RuntimeError(f"Failed to get data source `{name}`: {text}")
+        raise RuntimeError(f"Failed to get data source `{name}`: {text} - status code: {status}")
 
       datasource_uid = json.loads(text)['uid']
       status, text = _grafana_request(
@@ -137,7 +141,7 @@ def lambda_handler(event, context):
         payload
       )
       if status != 200:
-        raise RuntimeError(f"Failed to update data source `{name}`: {text}")
+        raise RuntimeError(f"Failed to update data source `{name}`: {text} - status code: {status}")
 
     elif action == "delete":
       status, text = _grafana_request(
@@ -145,9 +149,11 @@ def lambda_handler(event, context):
         f"{endpoint}/api/datasources/name/{encoded_name}",
         token
       )
-      if status != 200:
+      if status == 404:
         logger.info(f"Data source `{name}` does not exist, nothing to do")
         return
+      if status != 200:
+        raise RuntimeError(f"Failed to get data source `{name}`: {text} - status code: {status}")
 
       status, text = _grafana_request(
         'DELETE',
@@ -155,7 +161,7 @@ def lambda_handler(event, context):
         token
       )
       if status != 200:
-        raise RuntimeError(f"Failed to delete data source `{name}`: {text}")
+        raise RuntimeError(f"Failed to delete data source `{name}`: {text} - status code: {status}")
 
     elif action == "create":
       pass  # Already handled above

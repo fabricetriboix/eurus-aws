@@ -17,7 +17,7 @@ features:
 
   amp:
     enabled: true
-    version: fix-amp-data-src
+    version: feature-amp-v0.4.2
     logs_retention_days: 7
     common_account_env: common-nonprod
 
