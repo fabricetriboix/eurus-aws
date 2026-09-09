@@ -3,15 +3,14 @@
 Multi-tenant platform built using AWS managed services.
 
 **Important design decision**: The target for this platform are
-medium-sized to large businesses with light to medium requirements in
-terms of regulations and governance. In addition, such businesses are
+medium-sized to large businesses with medium to strong requirements in
+terms of regulations and compliance. In addition, such businesses are
 often cost-conscious and want to minimise their costs. Consequently,
-resources that can be shared between tenants will be shared. If
-increased tenant isolation is required, it is always possible to
-deploy more than one instance of the platform.
+sharing resources will have a strong weight when deciding on a
+trade-off.
 
-Please note that small businesses can also use eurus-aws, and it is
-also possible to run a single app.
+Nothing would prevent small businesses to also use `eurus-aws`, and it
+is also possible to run a single app with it.
 
 See [docs/HowToUse.md](docs/HowToUse.md) for details on how to use
 `eurus-aws`.
@@ -21,12 +20,12 @@ is waiting for CI/CD pipelines to complete. So I am trying my best to
 make sure those pipelines are fast, and that an engineer would be able
 to stare at the screen while the pipeline is executing rather than
 switching context (which is very bad for productivity). The trade-off
-is more complex pipelines.
+for this decision is more complex pipelines.
 
 ## Specifications
 
-This platform uses only AWS services. Tenant apps are run in ECS using
-Fargate.
+This platform only leverages AWS managed services as far as possible.
+Tenant apps are run in ECS using Fargate.
 
 Features:
   - One AWS account per environment
@@ -55,6 +54,8 @@ Features:
   - Secrets management done using AWS Secrets Manager
   - DNS with Route53
   - TLS with Amazon Certificate Manager
+  - Canaries for the various platform components with a single pane of
+    glass dashboard in Grafana.
 
 Out of scope:
   - Stateful workloads (AWS provides plenty of stateful services, such
