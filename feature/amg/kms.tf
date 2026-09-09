@@ -29,14 +29,13 @@ module "key" {
         "kms:GenerateDataKey*",
         "kms:Describe*",
       ]
-      resources = ["*"]
-
       principals = [
         {
           type        = "Service"
           identifiers = ["logs.${var.region}.amazonaws.com"]
         }
       ]
+      resources = ["*"]
 
       condition = [
         {
@@ -44,6 +43,68 @@ module "key" {
           variable = "kms:EncryptionContext:aws:logs:arn"
           values = [
             "arn:aws:logs:${var.region}:${local.account_id}:log-group:/${var.org}/${var.project}/${var.env}/amg/*",
+          ]
+        }
+      ]
+    },
+    {
+      sid = "AllowOpenTofuAccessKey"
+      actions = [
+        "kms:DescribeKey",
+        "kms:GenerateDataKey",
+        "kms:Decrypt"
+      ]
+      principals = [
+        {
+          type        = "AWS"
+          identifiers = ["arn:aws:iam::${local.account_id}:role/tf-role-${var.region}"]
+        }
+      ]
+      resources = ["*"]
+      condition = [
+        {
+          test     = "StringEquals"
+          variable = "kms:ViaService"
+          values   = ["grafana.${var.region}.amazonaws.com"]
+        }
+      ]
+    },
+    {
+      sid = "AllowOpenTofuCreateGrant"
+      actions = [
+        "kms:CreateGrant"
+      ]
+      principals = [
+        {
+          type        = "AWS"
+          identifiers = ["arn:aws:iam::${local.account_id}:role/tf-role-${var.region}"]
+        }
+      ]
+      resources = ["*"]
+      condition = [
+        {
+          test     = "StringEquals"
+          variable = "kms:ViaService"
+          values   = ["grafana.${var.region}.amazonaws.com"]
+        },
+        {
+          test     = "StringEquals"
+          variable = "kms:GrantConstraintType"
+          values   = ["EncryptionContextSubset"]
+        },
+        {
+          test     = "ForAllValues:StringEquals"
+          variable = "kms:GrantOperations"
+          values = [
+            "DescribeKey",
+            "CreateGrant",
+            "RetireGrant",
+            "Decrypt",
+            "Encrypt",
+            "GenerateDataKey",
+            "GenerateDataKeyWithoutPlaintext",
+            "ReEncryptFrom",
+            "ReEncryptTo"
           ]
         }
       ]

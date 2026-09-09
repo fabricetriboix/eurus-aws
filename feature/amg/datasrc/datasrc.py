@@ -27,7 +27,7 @@ The `role` field is the IAM role AMG can assume to access the data source.
 import json
 import logging
 import os
-import time
+import uuid
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -67,9 +67,8 @@ def lambda_handler(event, context):
   amg_client = boto3.client('grafana', region_name=aws_region)
 
   # Get a Grafana token for the service account
-  ts = int(time.time())
   resp = amg_client.create_workspace_service_account_token(
-    name=f"datasrc-lambda-{ts}",
+    name=f"datasrc-lambda-{uuid.uuid4()}",
     secondsToLive=120,
     serviceAccountId=amg_service_account_id,
     workspaceId=amg_workspace_id
@@ -89,11 +88,14 @@ def lambda_handler(event, context):
       'type': event['type'],
       'access': "proxy",
       'url': event['url'],
+      'basicAuth': False,
+      'isDefault': False,
       'jsonData': {
         'httpMethod': "POST",
         'sigV4Auth': True,
         'sigV4AuthType': "default",
         'sigV4Region': aws_region,
+        'sigV4Service': 'aps',
         'assumeRoleArn': event['role']
       }
     }
@@ -127,10 +129,10 @@ def lambda_handler(event, context):
       if status != 200:
         raise RuntimeError(f"Failed to get data source `{name}`: {text}")
 
-      datasource_id = json.loads(text)['id']
+      datasource_uid = json.loads(text)['uid']
       status, text = _grafana_request(
         'PUT',
-        f"{endpoint}/api/datasources/{datasource_id}",
+        f"{endpoint}/api/datasources/uid/{datasource_uid}",
         token,
         payload
       )
@@ -138,6 +140,15 @@ def lambda_handler(event, context):
         raise RuntimeError(f"Failed to update data source `{name}`: {text}")
 
     elif action == "delete":
+      status, text = _grafana_request(
+        'GET',
+        f"{endpoint}/api/datasources/name/{encoded_name}",
+        token
+      )
+      if status != 200:
+        logger.info(f"Data source `{name}` does not exist, nothing to do")
+        return
+
       status, text = _grafana_request(
         'DELETE',
         f"{endpoint}/api/datasources/name/{encoded_name}",

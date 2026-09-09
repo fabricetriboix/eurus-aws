@@ -54,6 +54,7 @@ resource "aws_lambda_invocation" "amg_datasrc" {
   function_name   = "arn:aws:lambda:${var.region}:${var.common_account_id}:function:${var.org}-${var.project}-${var.common_account_env}-amg-datasrc"
   qualifier       = "live"
   lifecycle_scope = "CRUD"
+  region          = var.region
 
   input = jsonencode({
     name = "amp-${var.env}"
