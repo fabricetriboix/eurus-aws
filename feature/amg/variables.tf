@@ -27,3 +27,19 @@ variable "env" {
     error_message = "The `env` variable must be set and must have at most 16 characters."
   }
 }
+
+variable "logs_retention_days" {
+  description = "Number of days to retain logs for the `datasrc` Lambda function"
+  type        = number
+  default     = 7
+}
+
+variable "data_source_account_ids" {
+  description = "List of account IDs that are allowed to create data sources in the Amazon Managed Grafana workspace"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.data_source_account_ids) > 0
+    error_message = "The `data_source_account_ids` variable must be set and must have at least one element."
+  }
+}
