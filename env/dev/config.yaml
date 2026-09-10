@@ -23,4 +23,4 @@ features:
 
   ecs-plf:
     enabled: true
-    version: feature-ecs-plf-v0.3.1
+    version: feature-ecs-plf-v1.0.0
