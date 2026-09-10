@@ -60,11 +60,11 @@ unit "ecs-plf" {
   path = "feature-ecs-plf"
 
   values = {
-    enabled            = local.config.features.ecs-plf.enabled
-    version            = local.config.features.ecs-plf.version
-    account_type       = local.config.account_type
-    realm              = local.config.realm
-    env                = local.config.env
-    log_retention_days = try(local.config.features.ecs-plf.log_retention_days, 7)
+    enabled             = local.config.features.ecs-plf.enabled
+    version             = local.config.features.ecs-plf.version
+    account_type        = local.config.account_type
+    realm               = local.config.realm
+    env                 = local.config.env
+    logs_retention_days = try(local.config.features.ecs-plf.logs_retention_days, 7)
   }
 }
