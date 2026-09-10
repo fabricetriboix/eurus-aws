@@ -28,7 +28,7 @@ variable "env" {
   }
 }
 
-variable "log_retention_days" {
+variable "logs_retention_days" {
   description = "Number of days to retain platform ECS cluster logs"
   type        = number
   default     = 30

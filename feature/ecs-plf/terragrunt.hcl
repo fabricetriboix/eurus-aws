@@ -8,7 +8,7 @@
 #
 # Optional values:
 #
-#     values.log_retention_days: How many days to keep the ECS cluster logs
+#     values.logs_retention_days: How many days to keep the ECS cluster logs
 #
 
 include "global" {
@@ -53,7 +53,7 @@ inputs = merge({
     region          = include.global.locals.region
     env             = values.env
   },
-  try(values.log_retention_days, null) != null ? {
-    log_retention_days = values.log_retention_days
+  try(values.logs_retention_days, null) != null ? {
+    logs_retention_days = values.logs_retention_days
   } : {}
 )
