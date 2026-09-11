@@ -15,16 +15,16 @@ features:
 
   amg:
     enabled: true
-    version: feature-amg-v0.4.3
+    version: feature-amg-v1.0.0
     logs_retention_days: 7
 
   codeartifact:
     enabled: true
-    version: feature-codeartifact-v0.1.2
+    version: feature-codeartifact-v1.0.0
     public_repositories: ["npmjs", "pypi"]
     internal_formats: ["pypi"]
 
   ecr:
     enabled: true
-    version: feature-ecr-v0.1.1
+    version: feature-ecr-v1.0.0
     retention_in_days: 90
