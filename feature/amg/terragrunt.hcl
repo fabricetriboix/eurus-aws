@@ -7,6 +7,7 @@
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
 #     values.logs_retention_days: Number of days to retain logs for the `datasrc` Lambda function
 #     values.data_source_account_ids: List of IDs of the AWS accounts that are allowed to create data sources in Amazon Grafana
+#
 
 include "global" {
   path   = find_in_parent_folders("global.hcl")
