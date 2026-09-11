@@ -2,7 +2,7 @@ locals {
   kms_alias = "vpc-flow-logs"
 
   default_tags = {
-    FeatureSource  = "feature/ecr"
+    FeatureSource  = "feature/networking"
     FeatureVersion = var.feature_version
     Organization   = var.org
     Project        = var.project
