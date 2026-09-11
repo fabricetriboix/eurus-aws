@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "assume_role_policy_for_template" {
 }
 
 resource "aws_iam_role" "role_for_template" {
-  name               = "${var.org}-${var.project}-${var.env}-ecr-template"
+  name               = "${var.org}-${var.project}-${var.env}-${var.region}-ecr-template"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_for_template.json
 }
 
