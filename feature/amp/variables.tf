@@ -37,6 +37,11 @@ variable "logs_retention_days" {
 variable "common_account_id" {
   description = "ID of the common account associated with this account"
   type        = string
+
+  validation {
+    condition     = length(var.common_account_id) == 12
+    error_message = "The `common_account_id` variable must be set and must have 12 characters."
+  }
 }
 
 variable "common_account_env" {
