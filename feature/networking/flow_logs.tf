@@ -2,7 +2,7 @@ module "key" {
   count = var.enable_flow_logs ? 1 : 0
 
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/terraform-aws-kms.git?ref=v4.1.1-1"
+  source = "git::https://github.com/fabricetriboix/terraform-aws-kms.git?ref=v4.2.1-1"
 
   description             = "Key to encrypt VPC flow logs"
   aliases                 = [local.kms_alias]
@@ -44,7 +44,7 @@ data "aws_iam_policy_document" "flow_logs_assume_role" {
 resource "aws_iam_role" "flow_log_role" {
   count = var.enable_flow_logs ? 1 : 0
 
-  name               = "${var.org}-${var.project}-${var.env}-flow-log-role"
+  name               = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-role"
   assume_role_policy = data.aws_iam_policy_document.flow_logs_assume_role.json
 
   tags = {
@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "flow_logs" {
 resource "aws_iam_policy" "flow_logs" {
   count = var.enable_flow_logs ? 1 : 0
 
-  name   = "${var.org}-${var.project}-${var.env}-flow-log-policy"
+  name   = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-policy"
   policy = data.aws_iam_policy_document.flow_logs[0].json
 
   tags = {

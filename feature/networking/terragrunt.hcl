@@ -40,7 +40,7 @@ generate "backend" {
   contents  = <<EOF
     terraform {
       backend "s3" {
-        bucket       = "${include.global.locals.org}-${include.global.locals.project}-${values.account_type}-${values.realm}-tf"
+        bucket       = "${include.global.locals.org}-${include.global.locals.project}-${values.account_type}-${values.realm}-${include.global.locals.region}-tf"
         key          = "${values.env}/${local.unit_name}/tofu.tfstate"
         region       = "${include.global.locals.region}"
         encrypt      = true
