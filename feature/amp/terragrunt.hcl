@@ -8,6 +8,7 @@
 #     values.logs_retention_days: How many days to keep AMP logs
 #     values.common_account_id: ID of the common account associated with this account
 #     values.common_account_env: Environment of the common account associated with this account
+#
 
 include "global" {
   path   = find_in_parent_folders("global.hcl")
