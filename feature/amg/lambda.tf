@@ -89,7 +89,7 @@ resource "aws_lambda_function" "datasrc" {
   # checkov:skip=CKV_AWS_173:Environment variables are not sensitive
   # checkov:skip=CKV_AWS_50:X-Ray tracing is not required for this function
   # checkov:skip=CKV_AWS_115:Reserved concurrency is not required for this function
-  # checkov:skip=CKV_AWS_116:DLQ is not required for this synchronously invoked function
+  # checkov:skip=CKV_AWS_116:DLQ will be implemented later
   # checkov:skip=CKV_AWS_117:This function does not need VPC access
 
   function_name    = "${var.org}-${var.project}-${var.env}-amg-datasrc"
