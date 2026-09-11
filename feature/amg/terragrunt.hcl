@@ -16,8 +16,8 @@ include "global" {
 locals {
   unit_name = "feature-amg"
   enabled   = try(values.enabled, false)
-  region    = include.global.local.region
-  tf_bucket = "${include.global.local.tf_bucket_prefix}-${values.account_type}-${values.realm}-${local.region}-tf"
+  region    = include.global.locals.region
+  tf_bucket = "${include.global.locals.tf_bucket_prefix}-${values.account_type}-${values.realm}-${local.region}-tf"
 }
 
 exclude {
