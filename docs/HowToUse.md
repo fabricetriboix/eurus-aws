@@ -145,7 +145,8 @@ Then run the following manually:
 
 ```sh
 $ cd bootstrap/all
-$ export AWS_REGION=eu-west-1  # or whatever is your chosen region
+$ export AWS_REGION=eu-west-1     # or whatever is your chosen region
+$ export AWS_PROFILE=mgt-account  # an AWS profile with access to the management account
 $ terragrunt init
 $ terragrunt plan
 $ terragrunt apply
@@ -206,3 +207,22 @@ $ make destroy-env-unit-common-nonprod STACK_UNIT=amg
 Please note the `++ OpenTofu CD - On-demand deployment` workflow with
 `action: destroy` destroys the **entire** environment stack, including
 networking. Use it only when you intend to remove everything.
+
+## How to teardown the entire platform
+
+In GitHub Actions, select the `++ OpenTofu CD - On-demand deployment`
+and run it for all the app accounts making sure you select the
+`destroy` action. Then do the same for all the common accounts.
+
+The final step is to undo the bootstrap. You will need to restore your
+OpenTofu state file as well as your `accounts.hcl` file, and then run
+the following commands manually:
+
+```sh
+$ cd bootstrap/all
+$ export AWS_REGION=eu-west-1     # or whatever is your chosen region
+$ export AWS_PROFILE=mgt-account  # an AWS profile with access to the management account
+$ terragrunt init
+$ terragrunt plan -destroy
+$ terragrunt destroy
+```

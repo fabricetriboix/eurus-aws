@@ -36,16 +36,6 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-# Others
-.*.swp
-todo.md
-TODO.md
-*.lock.hcl
-.terragrunt-cache
-.terragrunt-stack
-tg_generated_*.tf
-*.real
-
 # Python stuff
 venv
 .venv
@@ -55,3 +45,12 @@ datasrc.zip
 # Terragrunt
 .terragrunt-cache
 .terragrunt-stack
+
+# Miscellaneous
+.*.swp
+todo.md
+TODO.md
+*.lock.hcl
+tg_generated_*.tf
+*.real
+*.fake
