@@ -46,13 +46,11 @@ datasrc.zip
 .terragrunt-cache
 .terragrunt-stack
 
-# Others
+# Miscellaneous
 .*.swp
 todo.md
 TODO.md
 *.lock.hcl
-.terragrunt-cache
-.terragrunt-stack
 tg_generated_*.tf
 *.real
 *.fake
