@@ -48,7 +48,7 @@ resource "aws_iam_role" "flow_log_role" {
   assume_role_policy = data.aws_iam_policy_document.flow_logs_assume_role.json
 
   tags = {
-    Name = "${var.org}-${var.project}-${var.env}-flow-log-role"
+    Name = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-role"
   }
 }
 
@@ -74,7 +74,7 @@ resource "aws_iam_policy" "flow_logs" {
   policy = data.aws_iam_policy_document.flow_logs[0].json
 
   tags = {
-    Name = "${var.org}-${var.project}-${var.env}-flow-log-policy"
+    Name = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-policy"
   }
 }
 
