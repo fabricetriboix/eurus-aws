@@ -5,7 +5,7 @@ env: common-nonprod
 features:
   networking:
     enabled: true
-    version: feature-networking-v0.6.1
+    version: feature-networking-v1.0.0
     cidr: 10.101.0.0/16
     availability_zones: [eu-west-1a, eu-west-1b]
     platform_subnets: [10.101.1.0/24, 10.101.2.0/24]
@@ -15,16 +15,16 @@ features:
 
   amg:
     enabled: true
-    version: feature-amg-v0.4.3
+    version: feature-amg-v1.0.0
     logs_retention_days: 7
 
   codeartifact:
     enabled: true
-    version: feature-codeartifact-v0.1.2
+    version: feature-codeartifact-v1.0.0
     public_repositories: ["npmjs", "pypi"]
     internal_formats: ["pypi"]
 
   ecr:
     enabled: true
-    version: feature-ecr-v0.1.1
+    version: feature-ecr-v1.0.0
     retention_in_days: 90
