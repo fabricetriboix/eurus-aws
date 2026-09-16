@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       image:
-        description: "Public image to import; eg: `nginx:1.31.6"
+        description: "Public image to import; eg: `nginx:1.31.6`"
         required: true
         type: string
 
