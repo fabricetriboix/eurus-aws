@@ -26,5 +26,5 @@ features:
 
   ecr:
     enabled: true
-    version: fix-ecr-bkt
+    version: feature-ecr-v1.0.1
     retention_in_days: 90
