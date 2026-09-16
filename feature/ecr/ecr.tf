@@ -91,6 +91,8 @@ resource "aws_iam_role_policy_attachment" "policy_for_template" {
 }
 
 data "aws_ecr_lifecycle_policy_document" "retention" {
+  count = var.retention_in_days > 0 ? 1 : 0
+
   rule {
     priority    = 1
     description = "Expire images older than ${var.retention_in_days} days"
@@ -135,7 +137,7 @@ resource "aws_ecr_repository_creation_template" "template" {
   applied_for          = ["CREATE_ON_PUSH"]
   custom_role_arn      = aws_iam_role.role_for_template.arn
   image_tag_mutability = "IMMUTABLE"
-  lifecycle_policy     = var.retention_in_days > 0 ? data.aws_ecr_lifecycle_policy_document.retention.json : null
+  lifecycle_policy     = var.retention_in_days > 0 ? data.aws_ecr_lifecycle_policy_document.retention[0].json : null
   repository_policy    = data.aws_iam_policy_document.template_repository_policy.json
 
   resource_tags = merge(local.default_tags, {
