@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       image:
-        description: "Public image to import; eg: `nginx:1.31.6"
+        description: "Public image to import; eg: `nginx:1.31.6`"
         required: true
         type: string
 
@@ -68,3 +68,21 @@ jobs:
         echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV
         echo "AWS_SESSION_TOKEN=$(echo "$creds" | jq -r '.Credentials.SessionToken')" >> $GITHUB_ENV
         echo "AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
+
+    - name: Tag and push image
+      shell: bash
+      env:
+        SOURCE_IMAGE: ${{ inputs.image }}
+        ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+        REGION: ${{ vars.AWS_REGION }}
+      run: |
+        aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com"
+        # Strip registry host if present (first path component has '.', ':', or is localhost)
+        tmp="$SOURCE_IMAGE"
+        first="${tmp%%/*}"
+        if [[ "$tmp" == */* && ( "$first" == *.* || "$first" == *:* || "$first" == localhost ) ]]; then
+          tmp="${tmp#*/}"
+        fi
+        image="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/mirror/$tmp"
+        docker tag "$SOURCE_IMAGE" "$image"
+        docker push "$image"
