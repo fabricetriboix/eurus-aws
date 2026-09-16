@@ -13,7 +13,7 @@ CHECKOV_QUIET ?= 1
 MODULES := bootstrap ecs-cluster
 FEATURES := networking amg amp ecs-plf codeartifact ecr
 BOOTSTRAPS := all
-ENVS := common-nonprod dev
+ENVS := common-nonprod common-proddev
 ACTION ?= apply
 
 # Feature name only (e.g. grafana, networking, amg) — not the full stack path
