@@ -68,3 +68,16 @@ jobs:
         echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV
         echo "AWS_SESSION_TOKEN=$(echo "$creds" | jq -r '.Credentials.SessionToken')" >> $GITHUB_ENV
         echo "AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
+
+    - name: Get ECR credentials
+      shell: bash
+      run: |
+        aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com
+
+    - name: Tag and push image
+      shell: bash
+      run: |
+        image_name_and_tag=$(echo ${{ inputs.image }} | sed 's@^.*/@@')
+        image=${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/mirror/${{ image_name_and_tag }}
+        docker tag ${{ inputs.image }} "$image"
+        docker push "$image"
