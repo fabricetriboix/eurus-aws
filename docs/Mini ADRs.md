@@ -152,14 +152,13 @@ Building container images occur only in the non-prod realm and are
 stored in the non-prod ECR. Images in the non-prod ECR are
 automatically deleted after three months to save on storage and
 prevent staleness. There is a promotion process to promote images from
-the non-prod ECR to the prod ECR where it is stored indefinitely. The
-prod ECR is available to the entire platform, but the non-prod ECR is
-only available to environments in the non-prod realm.
+the non-prod ECR to the prod ECR where they are stored indefinitely.
+The prod ECR is available to the entire platform, but the non-prod ECR
+is only available to environments in the non-prod realm.
 
 Images are built and go through the following DevSecOps pipeline:
   - Image is built using Docker BuildKit
   - `hadolint` to lint Dockerfiles
-  - `trufflehog` to detect secrets hardcoded in container images
   - `trivy` to detect vulnerable packages (fail on high or critical)
   - `CycloneDX` for SBOM (software bill of material), stored in S3
 
