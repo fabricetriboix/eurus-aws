@@ -1,0 +1,24 @@
+account_type: common
+realm: prod
+env: common-prod
+
+features:
+  networking:
+    enabled: true
+    version: feature-networking-v1.0.0
+    cidr: 10.102.0.0/16
+    availability_zones: [eu-west-1a, eu-west-1b]
+    platform_subnets: [10.102.1.0/24, 10.102.2.0/24]
+
+    flow_logs:
+      enabled: false
+
+  amg:
+    enabled: true
+    version: feature-amg-v1.0.0
+    logs_retention_days: 7
+
+  ecr:
+    enabled: true
+    version: feature-ecr-v1.0.1
+    retention_in_days: 0
