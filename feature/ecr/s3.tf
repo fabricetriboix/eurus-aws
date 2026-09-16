@@ -1,5 +1,5 @@
 locals {
-  bucket_name = "${var.org}-${var.project}-${var.account_type}-${var.realm}-${var.region}-ecr"
+  bucket_name = "${var.org}-${var.project}-${var.env}-${var.region}-ecr"
 }
 
 module "ecr_bucket" {
