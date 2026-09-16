@@ -2,6 +2,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   account_id = data.aws_caller_identity.current.account_id
+  kms_alias  = "ecr"
 
   source_account_ids = toset(concat([local.account_id], var.source_account_ids))
   pull_account_ids   = toset(concat([local.account_id], var.pull_account_ids))

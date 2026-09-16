@@ -4,7 +4,7 @@ module "key" {
 
   description             = "Key to encrypt container images stored in ECR"
   region                  = var.region
-  aliases                 = ["ecr"]
+  aliases                 = [local.kms_alias]
   deletion_window_in_days = 7
   rotation_period_in_days = 90
 
@@ -58,7 +58,7 @@ module "key" {
   ]
 
   tags = {
-    Name    = "alias/ecr",
+    Name    = "alias/${local.kms_alias}",
     Purpose = "Encrypt container images stored in ECR"
   }
 }
