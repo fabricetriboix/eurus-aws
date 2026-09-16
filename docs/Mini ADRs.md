@@ -122,14 +122,15 @@ tenants from overwhelming AMP or X-Ray.
 Ideally, the build system should happen in a highly controlled
 environment, typically in a network with no internet access and
 controlled mirrors for publicly available packages (pypi, npm, maven,
-etc). Such solutions would usually involve:
+etc). Examples of options for such a system are:
   1. GitHub Enterprise Server
   2. GitLab Enterprise Edition
   3. Use AWS Code* Developer Tools in a controlled VPC
 
 Options (1) and (2) require significant expenses. Option (3) is doable
-but few engineers are knowledgeable in this area. The last option is
-to just github with public access.
+but few engineers are knowledgeable in this area. Another option is to
+just github with public access, but that would present significant
+security risks.
 
 I evaluated the speed of the AWS Code* Developer Tools, and I was
 positively surprised how fast they were. They seem to be on par with
@@ -200,11 +201,13 @@ mechanism where a pipeline can promote an image from `common-nonprod`
 to `common-prod` and thus make it available for the entire platform.
 Such a pipeline provides an audit trail of who did this.
 
-The ECR in `common-prod` keeps the images forever and the images are
-available for the entire platform. A pipeline exists to pull images
-from public sources and copy them in the `common-prod` ECR in order to
-make them available to the platform (they are otherwise unavailable to
-the build system which doesn't have access to the internet).
+The ECR in `common-prod` keeps the images without time limits (but
+does have mechanisms to destroy images if necessary, typically if
+vulnerabilities are discovered later) and the images are available for
+the entire platform. A pipeline exists to pull images from public
+sources and copy them in the `common-prod` ECR in order to make them
+available to the platform (they are otherwise unavailable to the build
+system which doesn't have access to the internet).
 
 ECR supports scanning the images for vulnerabilities, but scans only
 occur after the image has been uploaded and ECR does not have a way to
