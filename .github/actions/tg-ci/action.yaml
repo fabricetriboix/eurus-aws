@@ -14,6 +14,12 @@ inputs:
   aws-region:
     description: "AWS region where the CI is running"
     required: true
+  org:
+    description: Organisation name
+    required: true
+  project:
+    description: Project name
+    required: true
   common-nonprod-account-ids:
     description: "Comma-separated list of IDs of AWS accounts of type `common` and realm `nonprod`; eg: \"123456789012,123456789013\""
     required: false
@@ -65,13 +71,14 @@ runs:
       echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
       echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV
       echo "AWS_SESSION_TOKEN=$(echo "$creds" | jq -r '.Credentials.SessionToken')" >> $GITHUB_ENV
-      echo "AWS_REGION=${{ inputs.aws-region }}" >> $GITHUB_ENV
 
   - name: Run CI job
     shell: bash
     env:
-      TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
       AWS_REGION: ${{ inputs.aws-region }}
+      ORG: ${{ inputs.org }}
+      PROJECT: ${{ inputs.project }}
+      TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
       COMMON_NONPROD_ACCOUNT_IDS: ${{ inputs.common-nonprod-account-ids }}
       COMMON_PROD_ACCOUNT_IDS: ${{ inputs.common-prod-account-ids }}
       APP_NONPROD_ACCOUNT_IDS: ${{ inputs.app-nonprod-account-ids }}

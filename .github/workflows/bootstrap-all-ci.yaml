@@ -65,6 +65,8 @@ jobs:
       env:
         TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
         AWS_REGION: ${{ vars.AWS_REGION }}
+        ORG: ${{ vars.ORG }}
+        PROJECT: ${{ vars.PROJECT }}
       run: |
         make ci-bootstrap-all CHECKOV=0
 
