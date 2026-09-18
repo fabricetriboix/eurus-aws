@@ -44,11 +44,6 @@ inputs:
     - apply
     - destroy
 
-env:
-  AWS_REGION: ${{ inputs.aws-region }}
-  ORG: ${{ inputs.org }}
-  PROJECT: ${{ inputs.project }}
-
 runs:
   using: composite
   steps:
@@ -76,16 +71,20 @@ runs:
 
   - name: Assume role in child account
     shell: bash
+    env:
+      AWS_REGION: ${{ inputs.aws-region }}
     run: |
       creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tg-cd)
       echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
       echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV
       echo "AWS_SESSION_TOKEN=$(echo "$creds" | jq -r '.Credentials.SessionToken')" >> $GITHUB_ENV
-      echo "AWS_REGION=${{ inputs.aws-region }}" >> $GITHUB_ENV
 
   - name: Run CD job
     shell: bash
     env:
+      AWS_REGION: ${{ inputs.aws-region }}
+      ORG: ${{ inputs.org }}
+      PROJECT: ${{ inputs.project }}
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
       COMMON_NONPROD_ACCOUNT_IDS: ${{ inputs.common-nonprod-account-ids }}
       COMMON_PROD_ACCOUNT_IDS: ${{ inputs.common-prod-account-ids }}

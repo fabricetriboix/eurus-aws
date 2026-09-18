@@ -65,6 +65,8 @@ ID of the AWS account that hosts this particular environment.
 You also need to create the following repository variables:
   - `AWS_MANAGEMENT_ACCOUNT_ID`: ID of the management account
   - `AWS_REGION`: Region where the platform is deployed
+  - `ORG`: Your organisation name, all lowercase, max 16 characters
+  - `PROJECT`: Your project name, all lowercase, max 16 characters
   - `COMMON_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of
     the AWS accounts of type `common` and realm `nonprod`
   - `COMMON_PROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the
