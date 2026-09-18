@@ -68,6 +68,8 @@ runs:
 
   - name: Assume role in child account
     shell: bash
+    env:
+      AWS_REGION: ${{ inputs.aws-region }}
     run: |
       creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tg-destroy-unit)
       echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV

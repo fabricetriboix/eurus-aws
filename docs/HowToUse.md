@@ -148,6 +148,8 @@ Then run the following manually:
 ```sh
 $ cd bootstrap/all
 $ export AWS_REGION=eu-west-1     # or whatever is your chosen region
+$ export ORG=ft
+$ export PROJECT=eurus
 $ export AWS_PROFILE=mgt-account  # an AWS profile with access to the management account
 $ terragrunt init
 $ terragrunt plan
