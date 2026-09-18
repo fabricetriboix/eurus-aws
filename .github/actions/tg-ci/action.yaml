@@ -14,6 +14,12 @@ inputs:
   aws-region:
     description: "AWS region where the CI is running"
     required: true
+  org:
+    description: Organisation name
+    required: true
+  project:
+    description: Project name
+    required: true
   common-nonprod-account-ids:
     description: "Comma-separated list of IDs of AWS accounts of type `common` and realm `nonprod`; eg: \"123456789012,123456789013\""
     required: false
@@ -30,6 +36,11 @@ inputs:
     description: "Comma-separated list of IDs of AWS accounts of type `app` and realm `prod`; eg: \"123456789012,123456789013\""
     required: false
     default: ""
+
+env:
+  AWS_REGION: ${{ inputs.aws-region }}
+  ORG: ${{ inputs.org }}
+  PROJECT: ${{ inputs.project }}
 
 runs:
   using: composite
@@ -58,8 +69,6 @@ runs:
 
   - name: Assume role in child account
     shell: bash
-    env:
-      AWS_REGION: ${{ inputs.aws-region }}
     run: |
       creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tg-ci)
       echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
@@ -71,7 +80,6 @@ runs:
     shell: bash
     env:
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
-      AWS_REGION: ${{ inputs.aws-region }}
       COMMON_NONPROD_ACCOUNT_IDS: ${{ inputs.common-nonprod-account-ids }}
       COMMON_PROD_ACCOUNT_IDS: ${{ inputs.common-prod-account-ids }}
       APP_NONPROD_ACCOUNT_IDS: ${{ inputs.app-nonprod-account-ids }}
