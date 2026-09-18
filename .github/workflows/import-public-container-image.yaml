@@ -27,7 +27,10 @@ jobs:
     - name: Pull image
       shell: bash
       run: |
-        docker pull ${{ inputs.image }}
+        if ! docker pull ${{ inputs.image }}; then
+          echo "FAILURE_REASON=Failed to pull source image" >> "$GITHUB_ENV"
+          exit 1
+        fi
 
     - name: Run trivy
       uses: aquasecurity/trivy-action@v0.36.0
@@ -36,11 +39,21 @@ jobs:
         format: sarif
         output: trivy-report.sarif
 
+    - name: Record trivy failure
+      if: failure() && env.FAILURE_REASON == ''
+      shell: bash
+      run: echo "FAILURE_REASON=Failed to generate Trivy report" >> "$GITHUB_ENV"
+
     - name: Upload trivy report
       uses: github/codeql-action/upload-sarif@v4
       if: success() || failure()
       with:
         sarif_file: trivy-report.sarif
+
+    - name: Record trivy report upload failure
+      if: failure() && env.FAILURE_REASON == ''
+      shell: bash
+      run: echo "FAILURE_REASON=Failed to upload Trivy SARIF report" >> "$GITHUB_ENV"
 
     - name: Fail on HIGH or CRITICAL vulnerabilities
       uses: aquasecurity/trivy-action@v0.36.0
@@ -51,6 +64,11 @@ jobs:
         exit-code: '1'
         skip-setup-trivy: true
 
+    - name: Record vulnerability gate failure
+      if: failure() && env.FAILURE_REASON == ''
+      shell: bash
+      run: echo "FAILURE_REASON=Source image has HIGH or CRITICAL vulnerabilities" >> "$GITHUB_ENV"
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v6
       with:
@@ -58,11 +76,17 @@ jobs:
         role-session-name: github-actions
         aws-region: ${{ vars.AWS_REGION }}
 
+    - name: Record AWS credentials failure
+      if: failure() && env.FAILURE_REASON == ''
+      shell: bash
+      run: echo "FAILURE_REASON=Failed to configure AWS credentials" >> "$GITHUB_ENV"
+
     - name: Assume role in child account
       shell: bash
       env:
         AWS_REGION: ${{ vars.AWS_REGION }}
       run: |
+        trap 'echo "FAILURE_REASON=Failed to assume role in child account" >> "$GITHUB_ENV"' ERR
         creds=$(aws sts assume-role --role-arn "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/tf-role-${{ vars.AWS_REGION }}" --role-session-name import-image)
         echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
         echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV
@@ -76,6 +100,7 @@ jobs:
         ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
         REGION: ${{ vars.AWS_REGION }}
       run: |
+        trap 'echo "FAILURE_REASON=Failed to tag and push image to prod ECR" >> "$GITHUB_ENV"' ERR
         aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com"
         # Strip registry host if present (first path component has '.', ':', or is localhost)
         tmp="$SOURCE_IMAGE"
@@ -84,5 +109,54 @@ jobs:
           tmp="${tmp#*/}"
         fi
         image="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/mirror/$tmp"
+        echo "DST_IMAGE=$image" >> $GITHUB_ENV
         docker tag "$SOURCE_IMAGE" "$image"
-        docker push "$image"
+        if ! docker push "$image"; then
+          echo "FAILURE_REASON=Failed to push image to prod ECR" >> "$GITHUB_ENV"
+          exit 1
+        fi
+
+    - name: Audit trail
+      if: success() || failure()
+      shell: bash
+      env:
+        SOURCE_IMAGE: ${{ inputs.image }}
+        ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+        REGION: ${{ vars.AWS_REGION }}
+      run: |
+        actor="$GITHUB_ACTOR"
+        actor_id="$GITHUB_ACTOR_ID"
+        utc_now=$(date -u +%Y-%m-%dT%H:%M:%S)
+        src="$SOURCE_IMAGE"
+        dst="${DST_IMAGE:-}"
+        account_id="$ACCOUNT_ID"
+        region="$REGION"
+        if [[ -z "${FAILURE_REASON:-}" ]]; then
+          success=true
+          reason=""
+        else
+          success=false
+          reason="$FAILURE_REASON"
+        fi
+        jq -n \
+          --arg actor "$actor" \
+          --arg actor_id "$actor_id" \
+          --arg utc_now "$utc_now" \
+          --arg src "$src" \
+          --arg dst "$dst" \
+          --arg account_id "$account_id" \
+          --arg region "$region" \
+          --argjson success "$success" \
+          --arg reason "$reason" \
+          '{
+            actor: $actor,
+            actor_id: $actor_id,
+            utc_now: $utc_now,
+            src: $src,
+            dst: $dst,
+            account_id: $account_id,
+            region: $region,
+            success: $success,
+            reason: $reason
+          }' > payload.json
+        aws s3 cp payload.json s3://TODO-FROM-HERE
