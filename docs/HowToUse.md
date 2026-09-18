@@ -65,6 +65,8 @@ ID of the AWS account that hosts this particular environment.
 You also need to create the following repository variables:
   - `AWS_MANAGEMENT_ACCOUNT_ID`: ID of the management account
   - `AWS_REGION`: Region where the platform is deployed
+  - `ORG`: Your organisation name, all lowercase, max 16 characters
+  - `PROJECT`: Your project name, all lowercase, max 16 characters
   - `COMMON_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of
     the AWS accounts of type `common` and realm `nonprod`
   - `COMMON_PROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the
@@ -146,6 +148,8 @@ Then run the following manually:
 ```sh
 $ cd bootstrap/all
 $ export AWS_REGION=eu-west-1     # or whatever is your chosen region
+$ export ORG=ft
+$ export PROJECT=eurus
 $ export AWS_PROFILE=mgt-account  # an AWS profile with access to the management account
 $ terragrunt init
 $ terragrunt plan

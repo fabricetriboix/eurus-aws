@@ -1,6 +1,8 @@
 # When running the Makefile, you need to ensure the following
 # environment variables are set:
 #   - AWS_REGION: Region where the platform is deployed
+#   - ORG: Organisation name, all lowercase, max 16 characters
+#   - PROJECT: Project name, all lowercase, max 16 characters
 #   - COMMON_NONPROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `common` and realm `nonprod`
 #   - COMMON_PROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `common` and realm `prod`
 #   - APP_NONPROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `app` and realm `nonprod`
