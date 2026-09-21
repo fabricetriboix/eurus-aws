@@ -59,7 +59,7 @@ jobs:
           echo "FAILURE_REASON=Failed to pull source image" >> "$GITHUB_ENV"
           exit 1
         fi
-        digest=$(docker inspect --format='{{.RepoDigests}}' "$SOURCE_IMAGE")
+        digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$SOURCE_IMAGE" | cut -d'@' -f2)
         echo "DIGEST=$digest"
         echo "DIGEST=$digest" >> "$GITHUB_ENV"
 
