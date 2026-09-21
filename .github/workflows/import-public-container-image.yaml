@@ -147,7 +147,7 @@ jobs:
         region="$AWS_REGION"
         if [[ -z "${FAILURE_REASON:-}" ]]; then
           success=true
-          reason=""
+          reason="Import successful"
         else
           success=false
           reason="$FAILURE_REASON"
