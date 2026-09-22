@@ -1,0 +1,187 @@
+# Copy a publicly-available container image into the prod ECR registry
+name: ++ Import public container image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Public image to import; eg: `nginx:1.31.6`"
+        required: true
+        type: string
+
+permissions:
+  id-token: write         # This is required for requesting the JWT
+  contents: read          # This is required for actions/checkout
+  security-events: write  # For `github/codeql-action/upload-sarif` to upload SARIF results
+
+concurrency:
+  group: env-common-prod
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    environment: common-prod
+
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        role-to-assume: arn:aws:iam::${{ vars.AWS_MANAGEMENT_ACCOUNT_ID }}:role/github-actions-role
+        role-session-name: github-actions
+        aws-region: ${{ vars.AWS_REGION }}
+
+    - name: Check if AWS credentials have been set
+      if: failure()
+      shell: bash
+      run: |
+        echo "FAILURE_REASON=Failed to configure AWS credentials" >> "$GITHUB_ENV"
+        exit 1
+
+    - name: Assume role in child account
+      shell: bash
+      env:
+        AWS_REGION: ${{ vars.AWS_REGION }}
+      run: |
+        trap 'echo "FAILURE_REASON=Failed to assume role in child account" >> "$GITHUB_ENV" && exit 1' ERR
+        creds=$(aws sts assume-role --role-arn "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/tf-role-${{ vars.AWS_REGION }}" --role-session-name import-image)
+        echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_ENV"
+        echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_ENV"
+        echo "AWS_SESSION_TOKEN=$(echo "$creds" | jq -r '.Credentials.SessionToken')" >> "$GITHUB_ENV"
+        echo "AWS_CREDS_OK=yes" >> "$GITHUB_ENV"
+
+    - name: Pull image
+      shell: bash
+      env:
+        SOURCE_IMAGE: ${{ inputs.image }}
+      run: |
+        if ! docker pull "$SOURCE_IMAGE"; then
+          echo "FAILURE_REASON=Failed to pull source image" >> "$GITHUB_ENV"
+          exit 1
+        fi
+        digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$SOURCE_IMAGE" | cut -d'@' -f2)
+        echo "DIGEST=$digest"
+        echo "DIGEST=$digest" >> "$GITHUB_ENV"
+
+    - name: Run trivy
+      uses: aquasecurity/trivy-action@v0.36.0
+      with:
+        image-ref: ${{ inputs.image }}
+        format: sarif
+        output: trivy-report.sarif
+
+    - name: Record trivy failure
+      if: failure() && env.FAILURE_REASON == ''
+      shell: bash
+      run: |
+        echo "FAILURE_REASON=Failed to generate Trivy report" >> "$GITHUB_ENV"
+
+    - name: Upload trivy report
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: trivy-report.sarif
+
+    - name: Record trivy report upload failure
+      if: failure() && env.FAILURE_REASON == ''
+      shell: bash
+      run: echo "FAILURE_REASON=Failed to upload Trivy SARIF report" >> "$GITHUB_ENV"
+
+    - name: Fail on HIGH or CRITICAL vulnerabilities
+      uses: aquasecurity/trivy-action@v0.36.0
+      with:
+        image-ref: ${{ inputs.image }}
+        format: table
+        severity: HIGH,CRITICAL
+        exit-code: '1'
+        skip-setup-trivy: true
+
+    - name: Record vulnerability gate failure
+      if: failure() && env.FAILURE_REASON == ''
+      shell: bash
+      run: echo "FAILURE_REASON=Source image has HIGH or CRITICAL vulnerabilities" >> "$GITHUB_ENV"
+
+    - name: Tag and push image
+      shell: bash
+      env:
+        SOURCE_IMAGE: ${{ inputs.image }}
+        ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+        AWS_REGION: ${{ vars.AWS_REGION }}
+      run: |
+        trap 'echo "FAILURE_REASON=Failed to tag and push image to prod ECR" >> "$GITHUB_ENV" && exit 1' ERR
+        aws ecr get-login-password | docker login --username AWS --password-stdin "$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+        # Strip registry host if present (first path component has '.', ':', or is localhost)
+        tmp="$SOURCE_IMAGE"
+        first="${tmp%%/*}"
+        if [[ "$tmp" == */* && ( "$first" == *.* || "$first" == *:* || "$first" == localhost ) ]]; then
+          tmp="${tmp#*/}"
+        fi
+        image="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/mirror/$tmp"
+        echo "DST_IMAGE=$image"
+        echo "DST_IMAGE=$image" >> "$GITHUB_ENV"
+        docker tag "$SOURCE_IMAGE" "$image"
+        docker push "$image"
+
+    - name: Audit trail
+      if: success() || failure()
+      shell: bash
+      env:
+        SOURCE_IMAGE: ${{ inputs.image }}
+        ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+        AWS_REGION: ${{ vars.AWS_REGION }}
+        ORG: ${{ vars.ORG }}
+        PROJECT: ${{ vars.PROJECT }}
+        ENV: common-prod
+      run: |
+        if [ "${AWS_CREDS_OK:-no}" != "yes" ]; then
+          echo "AWS credentials not set, can't upload audit trail to S3"
+          echo "Failure reason: ${FAILURE_REASON:-unknown}"
+          exit 1
+        fi
+        actor="$GITHUB_ACTOR"
+        actor_id="$GITHUB_ACTOR_ID"
+        utc_now=$(date -u +%Y%m%dT%H%M%S)
+        src="$SOURCE_IMAGE"
+        dst="${DST_IMAGE:-}"
+        digest="${DIGEST:-}"
+        account_id="$ACCOUNT_ID"
+        region="$AWS_REGION"
+        if [[ -z "${FAILURE_REASON:-}" ]]; then
+          success=true
+          reason="Import successful"
+        else
+          success=false
+          reason="$FAILURE_REASON"
+        fi
+        filename="audit-import-${utc_now}.json"
+        run_id="$GITHUB_RUN_ID"
+        run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/$run_id"
+        jq -n \
+          --arg actor "$actor" \
+          --arg actor_id "$actor_id" \
+          --arg utc_now "$utc_now" \
+          --arg src "$src" \
+          --arg dst "$dst" \
+          --arg digest "$digest" \
+          --arg account_id "$account_id" \
+          --arg region "$region" \
+          --arg github_run_id "$run_id" \
+          --arg github_run_url "$run_url" \
+          --argjson success "$success" \
+          --arg reason "$reason" \
+          '{
+            actor: $actor,
+            actor_id: $actor_id,
+            utc_now: $utc_now,
+            src: $src,
+            dst: $dst,
+            digest: $digest,
+            account_id: $account_id,
+            region: $region,
+            github_run_id: $github_run_id,
+            github_run_url: $github_run_url,
+            success: $success,
+            reason: $reason
+          }' > "$filename"
+        bucket="${ORG}-${PROJECT}-${ENV}-${region}-ecr"
+        date_dir="${utc_now%%T*}"
+        aws s3 cp "$filename" "s3://$bucket/audit/import/$date_dir/$filename"

@@ -1,15 +1,16 @@
 locals {
-  tf_bucket_name   = "${var.org}-${var.project}-${var.account_type}-${var.realm}-tf"
+  tf_bucket_name   = "${var.org}-${var.project}-${var.account_type}-${var.realm}-${var.region}-tf"
   logs_bucket_name = "${local.tf_bucket_name}-logs"
 }
 
 module "logs_bucket" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:Ignore false positives
-  source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
+  source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.15.4-1"
 
   bucket              = local.logs_bucket_name
   region              = var.region
   allowed_kms_key_arn = module.key.key_arn
+  force_destroy       = true
 
   server_side_encryption_configuration = {
     rule = {
@@ -48,11 +49,12 @@ module "logs_bucket" {
 
 module "tf_bucket" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:Ignore false positives
-  source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.9.1-1"
+  source = "git::https://github.com/fabricetriboix/terraform-aws-s3-bucket.git?ref=v5.15.4-1"
 
   bucket              = local.tf_bucket_name
   region              = var.region
   allowed_kms_key_arn = module.key.key_arn
+  force_destroy       = true
 
   server_side_encryption_configuration = {
     rule = {

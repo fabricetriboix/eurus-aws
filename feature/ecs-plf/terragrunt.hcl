@@ -8,7 +8,7 @@
 #
 # Optional values:
 #
-#     values.log_retention_days: How many days to keep the ECS cluster logs
+#     values.logs_retention_days: How many days to keep the ECS cluster logs
 #
 
 include "global" {
@@ -19,6 +19,8 @@ include "global" {
 locals {
   unit_name = "feature-ecs-plf"
   enabled   = try(values.enabled, false)
+  region    = include.global.locals.region
+  tf_bucket = "${include.global.locals.tf_bucket_prefix}-${values.account_type}-${values.realm}-${local.region}-tf"
 }
 
 exclude {
@@ -32,9 +34,9 @@ generate "backend" {
   contents  = <<EOF
     terraform {
       backend "s3" {
-        bucket       = "${include.global.locals.org}-${include.global.locals.project}-${values.account_type}-${values.realm}-tf"
+        bucket       = "${local.tf_bucket}"
         key          = "${values.env}/${local.unit_name}/tofu.tfstate"
-        region       = "${include.global.locals.region}"
+        region       = "${local.region}"
         encrypt      = true
         use_lockfile = true
       }
@@ -50,10 +52,10 @@ inputs = merge({
     feature_version = values.version
     org             = include.global.locals.org
     project         = include.global.locals.project
-    region          = include.global.locals.region
+    region          = local.region
     env             = values.env
   },
-  try(values.log_retention_days, null) != null ? {
-    log_retention_days = values.log_retention_days
+  try(values.logs_retention_days, null) != null ? {
+    logs_retention_days = values.logs_retention_days
   } : {}
 )

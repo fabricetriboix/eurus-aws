@@ -1,15 +1,21 @@
 # When running the Makefile, you need to ensure the following
 # environment variables are set:
 #   - AWS_REGION: Region where the platform is deployed
+#   - ORG: Organisation name, all lowercase, max 16 characters
+#   - PROJECT: Project name, all lowercase, max 16 characters
+#   - COMMON_NONPROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `common` and realm `nonprod`
+#   - COMMON_PROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `common` and realm `prod`
+#   - APP_NONPROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `app` and realm `nonprod`
+#   - APP_PROD_ACCOUNT_IDS: Comma-separated list of the IDs of the AWS accounts of type `app` and realm `prod`
 
 SHELL := /bin/bash
 
 CHECKOV ?= 1
 CHECKOV_QUIET ?= 1
 MODULES := bootstrap ecs-cluster
-FEATURES := networking amg amp ecs-plf
+FEATURES := networking amg amp ecs-plf codeartifact ecr
 BOOTSTRAPS := all
-ENVS := common-nonprod dev
+ENVS := common-nonprod common-proddev
 ACTION ?= apply
 
 # Feature name only (e.g. grafana, networking, amg) — not the full stack path

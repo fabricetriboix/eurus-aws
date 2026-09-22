@@ -13,6 +13,11 @@ variable "project" {
   type        = string
 }
 
+variable "region" {
+  description = "Region where to manage the VPC"
+  type        = string
+}
+
 variable "env" {
   description = "Name of the environment this VPC will be deployed to (eg: dev, stg, prd)"
   type        = string

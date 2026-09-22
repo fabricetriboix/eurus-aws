@@ -9,9 +9,6 @@ terraform {
 
 provider "aws" {
   default_tags {
-    tags = {
-      FeatureSource  = "feature/amp"
-      FeatureVersion = var.feature_version
-    }
+    tags = local.default_tags
   }
 }

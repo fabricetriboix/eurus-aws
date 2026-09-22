@@ -24,12 +24,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Terraform Module Releaser
-        uses: techpivot/terraform-module-releaser@v1
+        uses: techpivot/terraform-module-releaser@v2
         id: release
         with:
-          major-keywords: breaking change
-          minor-keywords: feat
-          patch-keywords: fix,chore,docs
           default-first-tag: v0.1.0
           tag-directory-separator: "-"
 

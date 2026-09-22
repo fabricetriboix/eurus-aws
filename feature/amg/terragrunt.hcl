@@ -5,6 +5,9 @@
 #     values.account_type: Type of AWS account, either "common" or "app"
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
+#     values.logs_retention_days: Number of days to retain logs for the `datasrc` Lambda function
+#     values.data_source_account_ids: List of IDs of the AWS accounts that are allowed to create data sources in Amazon Grafana
+#
 
 include "global" {
   path   = find_in_parent_folders("global.hcl")
@@ -14,6 +17,8 @@ include "global" {
 locals {
   unit_name = "feature-amg"
   enabled   = try(values.enabled, false)
+  region    = include.global.locals.region
+  tf_bucket = "${include.global.locals.tf_bucket_prefix}-${values.account_type}-${values.realm}-${local.region}-tf"
 }
 
 exclude {
@@ -27,9 +32,9 @@ generate "backend" {
   contents  = <<EOF
     terraform {
       backend "s3" {
-        bucket       = "${include.global.locals.org}-${include.global.locals.project}-${values.account_type}-${values.realm}-tf"
+        bucket       = "${local.tf_bucket}"
         key          = "${values.env}/${local.unit_name}/tofu.tfstate"
-        region       = "${include.global.locals.region}"
+        region       = "${local.region}"
         encrypt      = true
         use_lockfile = true
       }
@@ -42,9 +47,11 @@ terraform {
 }
 
 inputs = {
-  feature_version = values.version
-  org             = include.global.locals.org
-  project         = include.global.locals.project
-  region          = include.global.locals.region
-  env             = values.env
+  feature_version         = values.version
+  org                     = include.global.locals.org
+  project                 = include.global.locals.project
+  region                  = local.region
+  env                     = values.env
+  logs_retention_days     = values.logs_retention_days
+  data_source_account_ids = values.data_source_account_ids
 }

@@ -2,14 +2,15 @@
 
 Your circumstances are probably such that `eurus-aws` can't be
 directly used within your organisation because it won't be compliant
-with your compliance policies, or the way things are done in your
-organisation. For example, you might use GitLab instead of GitHub, or
-the security is not tight enough, etc. This all means that you will
-likely need to take the code and adapt it to your situation.
+with your corporate policies, regulatory requirements, or the way
+things are done in your organisation generally speaking. For example,
+you might use GitLab instead of GitHub, or the security is not tight
+enough, etc. This all means that you will likely need to take the code
+and adapt it to your situation.
 
-I obviously can't cover all specific circumstances, so I will detail
-here how `eurus-aws` can be used in exactly the same manner it is used
-here.
+I obviously can't cover all specific circumstances on how to use
+`eurus-aws`, so I will detail here how it can be used in exactly the
+same manner it is deployed for this repository.
 
 **VERY IMPORTANT**: You can't just apply this repository and expect
 things to work for your organisation. You need to make the necessary
@@ -36,9 +37,10 @@ in the top-level [README](../README.md) file.
 You will need a way to authenticate whomever needs to access the
 infrastructure: DevOps engineers, SRE engineers, developers of tenant
 applications (to see metrics and logs), etc. This is of course highly
-dependent on your organisation. For this project, I am simply using
-AWS IAM Identity Center. This is how I set it up (AWS provides only
-limited APIs for IAM Identity Center, so I did all this by hand):
+dependent on your organisation, with Microsoft AD being the usual
+choice. For this project, I am simply using AWS IAM Identity Center.
+This is how I set it up (please note AWS provides only limited APIs
+for IAM Identity Center, so this is all manual operations):
   - Enable AWS IAM Identity Center in the management account
   - Instance type should be "organization instance"
   - Identity source should be "IAM Identity Center"
@@ -58,10 +60,21 @@ project:
   - bootstrap
 
 For each environment, add an `AWS_ACCOUNT_ID` variable which holds the
-ID of the AWS account that hosts this particular environment. You also
-need to create the following repository variables:
+ID of the AWS account that hosts this particular environment.
+
+You also need to create the following repository variables:
   - `AWS_MANAGEMENT_ACCOUNT_ID`: ID of the management account
   - `AWS_REGION`: Region where the platform is deployed
+  - `ORG`: Your organisation name, all lowercase, max 16 characters
+  - `PROJECT`: Your project name, all lowercase, max 16 characters
+  - `COMMON_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of
+    the AWS accounts of type `common` and realm `nonprod`
+  - `COMMON_PROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the
+    AWS accounts of type `common` and realm `prod`
+  - `APP_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the
+    AWS accounts of type `app` and realm `nonprod`
+  - `APP_PROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the AWS
+    accounts of type `app` and realm `prod`
 
 You can customise environments to your liking, for example by
 requesting certain users to approve the workflows before being
@@ -79,7 +92,8 @@ next section) creates the necessary IAM policies and roles to allow
 OpenTofu to do its job.
 
 Finally I configured the GitHub workflows to assume the management
-role created by the bootstrap unit.
+role created by the bootstrap unit. The GitHub workflows will then
+assume the roles in the destination account to run the deployment.
 
 ## Bootstrap
 
@@ -133,7 +147,10 @@ Then run the following manually:
 
 ```sh
 $ cd bootstrap/all
-$ export AWS_REGION=eu-west-1  # or whatever is your chosen region
+$ export AWS_REGION=eu-west-1     # or whatever is your chosen region
+$ export ORG=ft
+$ export PROJECT=eurus
+$ export AWS_PROFILE=mgt-account  # an AWS profile with access to the management account
 $ terragrunt init
 $ terragrunt plan
 $ terragrunt apply
@@ -147,9 +164,9 @@ for this operation, which is outside the scope of this document.
 First, you will need to decide on your network topology and your
 CIDRs. You will also need to modify the code and add any necessary
 resources to access your on-prem services (if any). This typically
-takes the form of a Transit Gateway with VPNs, but every
-infrastructure is different and it's not possible for `eurus-aws` to
-cater for every possible scenario.
+takes the form of a Transit Gateway with VPNs (or Direct Connect for
+large organisatoins), but every infrastructure is different and it's
+not possible for `eurus-aws` to cater for every possible scenario.
 
 Generally speaking, you should avoid any overlap in CIDRs. This is
 because you might want to create routes between VPCs and overlapping
@@ -163,7 +180,7 @@ of a given environment.
 Open your browser to your github monorepo and click "Actions" in the
 menu bar. Click on the "++ OpenTofu CD - On-demand deployment"
 workflow. Run a workflow for each environment one at a time, starting
-with common-nonprod, common-prod, and all the other environments.
+with common-nonprod, common-prod, and then all the other environments.
 
 ## Remove a feature from an environment
 
@@ -194,3 +211,22 @@ $ make destroy-env-unit-common-nonprod STACK_UNIT=amg
 Please note the `++ OpenTofu CD - On-demand deployment` workflow with
 `action: destroy` destroys the **entire** environment stack, including
 networking. Use it only when you intend to remove everything.
+
+## How to teardown the entire platform
+
+In GitHub Actions, select the `++ OpenTofu CD - On-demand deployment`
+and run it for all the app accounts making sure you select the
+`destroy` action. Then do the same for all the common accounts.
+
+The final step is to undo the bootstrap. You will need to restore your
+OpenTofu state file as well as your `accounts.hcl` file, and then run
+the following commands manually:
+
+```sh
+$ cd bootstrap/all
+$ export AWS_REGION=eu-west-1     # or whatever is your chosen region
+$ export AWS_PROFILE=mgt-account  # an AWS profile with access to the management account
+$ terragrunt init
+$ terragrunt plan -destroy
+$ terragrunt destroy
+```

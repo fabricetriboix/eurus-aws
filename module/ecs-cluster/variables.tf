@@ -38,10 +38,15 @@ variable "cluster_name_suffix" {
   }
 }
 
-variable "log_retention_days" {
+variable "logs_retention_days" {
   description = "The number of days to retain the logs of the ECS cluster"
   type        = number
-  default     = 30
+  default     = 365
+
+  validation {
+    condition     = var.logs_retention_days >= 1
+    error_message = "The `logs_retention_days` variable must be at least 1."
+  }
 }
 
 variable "extra_tags" {

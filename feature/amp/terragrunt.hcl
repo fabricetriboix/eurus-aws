@@ -5,10 +5,9 @@
 #     values.account_type: Type of AWS account, either "common" or "app"
 #     values.realm: Either `nonprod` or `prod`
 #     values.env: Name of the environment, eg: `dev`, `stg`, `prd`
-#
-# Optional values:
-#
-#     values.log_retention_days: How many days to keep AMP logs
+#     values.logs_retention_days: How many days to keep AMP logs
+#     values.common_account_id: ID of the common account associated with this account
+#     values.common_account_env: Environment of the common account associated with this account
 #
 
 include "global" {
@@ -19,6 +18,8 @@ include "global" {
 locals {
   unit_name = "feature-amp"
   enabled   = try(values.enabled, false)
+  region    = include.global.locals.region
+  tf_bucket = "${include.global.locals.tf_bucket_prefix}-${values.account_type}-${values.realm}-${local.region}-tf"
 }
 
 exclude {
@@ -32,9 +33,9 @@ generate "backend" {
   contents  = <<EOF
     terraform {
       backend "s3" {
-        bucket       = "${include.global.locals.org}-${include.global.locals.project}-${values.account_type}-${values.realm}-tf"
+        bucket       = "${local.tf_bucket}"
         key          = "${values.env}/${local.unit_name}/tofu.tfstate"
-        region       = "${include.global.locals.region}"
+        region       = "${local.region}"
         encrypt      = true
         use_lockfile = true
       }
@@ -46,14 +47,13 @@ terraform {
   source = "."
 }
 
-inputs = merge({
-    feature_version = values.version
-    org             = include.global.locals.org
-    project         = include.global.locals.project
-    region          = include.global.locals.region
-    env             = values.env
-  },
-  try(values.log_retention_days, null) != null ? {
-    log_retention_days = values.log_retention_days
-  } : {}
-)
+inputs = {
+  feature_version     = values.version
+  org                 = include.global.locals.org
+  project             = include.global.locals.project
+  region              = local.region
+  env                 = values.env
+  logs_retention_days = values.logs_retention_days
+  common_account_id   = values.common_account_id
+  common_account_env  = values.common_account_env
+}

@@ -14,6 +14,28 @@ inputs:
   aws-region:
     description: "AWS region where the component is deployed"
     required: true
+  org:
+    description: Organisation name
+    required: true
+  project:
+    description: Project name
+    required: true
+  common-nonprod-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts of type `common` and realm `nonprod`; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
+  common-prod-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts of type `common` and realm `prod`; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
+  app-nonprod-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts of type `app` and realm `nonprod`; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
+  app-prod-account-ids:
+    description: "Comma-separated list of IDs of AWS accounts of type `app` and realm `prod`; eg: \"123456789012,123456789013\""
+    required: false
+    default: ""
   action:
     description: "Action to run; must be either `apply` or `destroy`"
     required: true
@@ -52,17 +74,22 @@ runs:
     env:
       AWS_REGION: ${{ inputs.aws-region }}
     run: |
-      creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tg-ci)
+      creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tg-cd)
       echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
       echo "AWS_SECRET_ACCESS_KEY=$(echo "$creds" | jq -r '.Credentials.SecretAccessKey')" >> $GITHUB_ENV
       echo "AWS_SESSION_TOKEN=$(echo "$creds" | jq -r '.Credentials.SessionToken')" >> $GITHUB_ENV
-      echo "AWS_REGION=${{ inputs.aws-region }}" >> $GITHUB_ENV
 
   - name: Run CD job
     shell: bash
     env:
-      TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
       AWS_REGION: ${{ inputs.aws-region }}
+      ORG: ${{ inputs.org }}
+      PROJECT: ${{ inputs.project }}
+      TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
+      COMMON_NONPROD_ACCOUNT_IDS: ${{ inputs.common-nonprod-account-ids }}
+      COMMON_PROD_ACCOUNT_IDS: ${{ inputs.common-prod-account-ids }}
+      APP_NONPROD_ACCOUNT_IDS: ${{ inputs.app-nonprod-account-ids }}
+      APP_PROD_ACCOUNT_IDS: ${{ inputs.app-prod-account-ids }}
       TG_NON_INTERACTIVE: "true"
     run: |
       make cd-${{ inputs.component-type }}-${{ inputs.component-name }} CHECKOV=0 ACTION=${{ inputs.action }}
