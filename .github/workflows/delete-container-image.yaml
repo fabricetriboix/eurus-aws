@@ -11,8 +11,8 @@ on:
       environment:
         description: "Environment to delete the image from"
         required: true
-        type: string
-        choices:
+        type: choice
+        options:
         - common-nonprod
         - common-prod
 
