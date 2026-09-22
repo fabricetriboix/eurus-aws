@@ -71,9 +71,10 @@ jobs:
         fi
         name="${IMAGE%%:*}"
         tag="${IMAGE##*:}"
-        if ! response=$(aws ecr batch-delete-image --repository-name "$name" --image-ids imageTag="$tag"); then
-          echo "Failed to delete image from $ENV ECR"
-          echo "FAILURE_REASON=Failed to delete image from $ENV ECR" >> "$GITHUB_ENV"
+        if ! response=$(aws ecr batch-delete-image --repository-name "$name" --image-ids imageTag="$tag" 2>&1); then
+          reason=$(echo "$response" | tr -d '\r\n')
+          echo "Failed to delete image from $ENV ECR: $reason"
+          echo "FAILURE_REASON=Failed to delete image from $ENV ECR: $reason" >> "$GITHUB_ENV"
           exit 1
         fi
         if [ "$(echo "$response" | jq -r '.failures | length')" -ne 0 ]; then
