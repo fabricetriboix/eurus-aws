@@ -11,11 +11,10 @@ the SANs to be DNS names only. It only supports RSA encryption.
 
 ## Data structures
 
-Keys and certificates are stored in SSM Parameter Store as parameters
-encrypted using a dedicated KMS key. Please note that in the case of
-certificates, only metadata is stored as storing the certificate and
-chain would likely exceed the limits for SSM parameters maximum size
-of 4KB. Parameters storing key information and parameters storing
+Keys and certificates are stored in a dedicated S3 bucket
+encrypted using a dedicated KMS key. Certificates are also stored 
+
+Parameters storing key information and parameters storing
 certificates are stored in different directory structures, in order to
 allow fine-grained permissions (eg: allow access to the certificate
 but not the key). For example:
