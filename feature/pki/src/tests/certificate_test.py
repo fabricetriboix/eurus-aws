@@ -1,5 +1,6 @@
+import os
+
 import pytest
-import moto
 import boto3
 import freezegun
 from unittest import mock
@@ -9,7 +10,7 @@ from pydantic import ValidationError
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import ec, padding
 from cryptography.x509.oid import NameOID, ExtensionOID
 
 from certificate import (
@@ -21,12 +22,14 @@ from certificate import (
     Key,
     Certificate,
     create_or_renew_certificate,
-    _upsert_ssm_param,
+    _save_to_s3,
 )
 
 
 def test_good_cert_param_should_succeed(good_cert_params: CertificateParameters):
     assert good_cert_params.model_dump() == {
+        "name": "leaf",
+        "key_type": "RSA",
         "key_size": 2048,
         "validity_days": 365,
         "country_name": "US",
@@ -52,18 +55,14 @@ def test_good_cert_param_should_succeed(good_cert_params: CertificateParameters)
                 KeyUsageEnum.KEY_ENCIPHERMENT,
             ],
         },
-        "ca_key_ssm_param_name": "ca_key",
-        "ca_cert_ssm_param_name": "ca_cert",
-        "key_ssm_param_name": "key",
-        "key_tags": {"Key": "Value"},
-        "cert_ssm_param_name": "cert",
-        "cert_tags": {"Key": "Value"},
+        "ca_name": "root-ca",
     }
 
 
 def test_cert_params_with_invalid_key_size_should_fail():
     with pytest.raises(ValidationError):
         CertificateParameters(
+            name="invalid-size",
             key_size=1023,
             validity_days=365,
             country_name="US",
@@ -86,18 +85,45 @@ def test_cert_params_with_invalid_key_size_should_fail():
                 is_critical=True,
                 usages=[KeyUsageEnum.DIGITAL_SIGNATURE, KeyUsageEnum.KEY_ENCIPHERMENT, KeyUsageEnum.KEY_CERT_SIGN]
             ),
-            ca_key_ssm_param_name="ca_key",
-            ca_cert_ssm_param_name="ca_cert",
-            key_ssm_param_name="key",
-            key_tags={"Key": "Value"},
-            cert_ssm_param_name="cert",
-            cert_tags={"Key": "Value"},
         )
+
+
+def test_cert_params_with_invalid_key_type_should_fail():
+    with pytest.raises(ValidationError):
+        CertificateParameters(
+            name="invalid-type",
+            key_type="DSA",
+            key_size=2048,
+            validity_days=365,
+            common_name="example.com",
+            basic_constraints=BasicConstraints(
+                is_critical=True,
+                is_ca=False,
+            ),
+        )
+
+
+@pytest.mark.parametrize("key_size", [256, 384, 521])
+def test_ecdsa_key_sizes_should_succeed(key_size: int):
+    params = CertificateParameters(
+        name="ecdsa",
+        key_type="ECDSA",
+        key_size=key_size,
+        validity_days=365,
+        common_name="ecdsa.example.com",
+        basic_constraints=BasicConstraints(
+            is_critical=True,
+            is_ca=False,
+        ),
+    )
+    assert params.key_type == "ECDSA"
+    assert params.key_size == key_size
 
 
 def test_cert_params_without_critical_should_fail():
     with pytest.raises(ValidationError):
         CertificateParameters(
+            name="not-critical",
             key_size=2048,
             validity_days=365,
             country_name="US",
@@ -120,17 +146,12 @@ def test_cert_params_without_critical_should_fail():
                 is_critical=False,
                 usages=[KeyUsageEnum.DIGITAL_SIGNATURE, KeyUsageEnum.KEY_ENCIPHERMENT, KeyUsageEnum.KEY_CERT_SIGN]
             ),
-            ca_key_ssm_param_name="ca_key",
-            ca_cert_ssm_param_name="ca_cert",
-            key_ssm_param_name="key",
-            key_tags={"Key": "Value"},
-            cert_ssm_param_name="cert",
-            cert_tags={"Key": "Value"},
         )
 
 def test_cert_params_with_key_cert_sign_key_usage_but_not_ca_should_fail():
     with pytest.raises(ValidationError):
         CertificateParameters(
+            name="key-cert-sign",
             key_size=2048,
             validity_days=365,
             country_name="US",
@@ -153,87 +174,7 @@ def test_cert_params_with_key_cert_sign_key_usage_but_not_ca_should_fail():
                 is_critical=True,
                 usages=[KeyUsageEnum.KEY_CERT_SIGN]
             ),
-            ca_key_ssm_param_name="ca_key",
-            ca_cert_ssm_param_name="ca_cert",
-            key_ssm_param_name="key",
-            key_tags={"Key": "Value"},
-            cert_ssm_param_name="cert",
-            cert_tags={"Key": "Value"},
         )
-
-
-def test_cert_params_with_ca_key_ssm_param_name_but_not_ca_cert_ssm_param_name_should_fail():
-    with pytest.raises(ValidationError):
-        CertificateParameters(
-            key_size=2048,
-            validity_days=365,
-            country_name="US",
-            state_or_province_name="California",
-            locality_name="San Francisco",
-            organization_name="Example Inc.",
-            organizational_unit_name="IT",
-            email_address="info@example.com",
-            common_name="example.com",
-            basic_constraints=BasicConstraints(
-                is_critical=True,
-                is_ca=True,
-                path_length=3,
-            ),
-            sans=SubjectAlternativeNames(
-                is_critical=True,
-                dns_names=["example2.com", "example3.com"],
-            ),
-            key_usage=KeyUsage(
-                is_critical=True,
-                usages=[KeyUsageEnum.DIGITAL_SIGNATURE, KeyUsageEnum.KEY_ENCIPHERMENT, KeyUsageEnum.KEY_CERT_SIGN]
-            ),
-            ca_key_ssm_param_name="ca_key",
-            ca_cert_ssm_param_name=None,
-            key_ssm_param_name="key",
-            key_tags={"Key": "Value"},
-            cert_ssm_param_name="cert",
-            cert_tags={"Key": "Value"},
-        )
-
-
-def test_cert_params_with_ca_cert_ssm_param_name_but_not_ca_key_ssm_param_name_should_fail():
-    with pytest.raises(ValidationError):
-        CertificateParameters(
-            key_size=2048,
-            validity_days=365,
-            country_name="US",
-            state_or_province_name="California",
-            locality_name="San Francisco",
-            organization_name="Example Inc.",
-            organizational_unit_name="IT",
-            email_address="info@example.com",
-            common_name="example.com",
-            basic_constraints=BasicConstraints(
-                is_critical=True,
-                is_ca=True,
-                path_length=3,
-            ),
-            sans=SubjectAlternativeNames(
-                is_critical=True,
-                dns_names=["example2.com", "example3.com"],
-            ),
-            key_usage=KeyUsage(
-                is_critical=True,
-                usages=[KeyUsageEnum.DIGITAL_SIGNATURE, KeyUsageEnum.KEY_ENCIPHERMENT, KeyUsageEnum.KEY_CERT_SIGN]
-            ),
-            ca_key_ssm_param_name=None,
-            ca_cert_ssm_param_name="ca_cert",
-            key_ssm_param_name="key",
-            key_tags={"Key": "Value"},
-            cert_ssm_param_name="cert",
-            cert_tags={"Key": "Value"},
-        )
-
-
-def _create_kms_key() -> str:
-    kms_client = boto3.client('kms', region_name="eu-west-1")
-    response = kms_client.create_key(Description="Test Key")
-    return response['KeyMetadata']['KeyId']
 
 
 def _load_cert_from_acm(cert_arn: str) -> x509.Certificate:
@@ -249,42 +190,48 @@ def _load_chain_from_acm(cert_arn: str) -> str:
     return acm_client.get_certificate(CertificateArn=cert_arn)['CertificateChain']
 
 
-def _get_ssm_tags(param_name: str) -> dict[str, str]:
-    ssm_client = boto3.client('ssm', region_name="eu-west-1")
-    resp = ssm_client.list_tags_for_resource(
-        ResourceType="Parameter",
-        ResourceId=param_name,
+def _s3_client():
+    return boto3.client('s3', region_name="eu-west-1")
+
+
+def _key_object_key(name: str) -> str:
+    return f"pki/keys/{name}.key.json"
+
+
+def _cert_object_key(name: str) -> str:
+    return f"pki/certs/{name}.crt.json"
+
+
+def _read_s3_object(key: str) -> str:
+    response = _s3_client().get_object(
+        Bucket=os.environ['PKI_BUCKET_NAME'],
+        Key=key,
     )
-    return {tag['Key']: tag['Value'] for tag in resp['TagList']}
+    return response['Body'].read().decode('utf-8')
 
 
 def _name_attr(name: x509.Name, oid) -> str:
     return name.get_attributes_for_oid(oid)[0].value
 
 
-@moto.mock_aws
 def test_create_cert_with_good_params_should_succeed(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    cert = create_or_renew_certificate(good_cert_params_self_signed)
     assert cert is not None
 
 
-@moto.mock_aws
 def test_renew_cert_issued_one_month_ago_should_move_validity_window(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-
     now = datetime.now(timezone.utc)
     one_month_ago = now - timedelta(days=30)
 
     with freezegun.freeze_time(one_month_ago):
         # Everything inside this block sees `one_month_ago` as the current time
         assert datetime.now(timezone.utc) == one_month_ago
-        old_cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+        old_cert = create_or_renew_certificate(good_cert_params_self_signed)
 
     # X.509 timestamps have a one-second resolution
     assert _load_cert_from_acm(old_cert.cert_arn).not_valid_before_utc == one_month_ago.replace(microsecond=0)
 
-    new_cert = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    new_cert = create_or_renew_certificate(good_cert_params_self_signed)
     assert _load_cert_from_acm(new_cert.cert_arn).not_valid_before_utc >= now.replace(microsecond=0)
 
 
@@ -292,10 +239,8 @@ def test_renew_cert_issued_one_month_ago_should_move_validity_window(good_cert_p
 # Certificate content
 # ---------------------------------------------------------------------------
 
-@moto.mock_aws
 def test_create_cert_subject_and_issuer_for_self_signed(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    result = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    result = create_or_renew_certificate(good_cert_params_self_signed)
     cert = _load_cert_from_acm(result.cert_arn)
 
     assert _name_attr(cert.subject, NameOID.COUNTRY_NAME) == "US"
@@ -308,13 +253,11 @@ def test_create_cert_subject_and_issuer_for_self_signed(good_cert_params_self_si
     assert cert.issuer == cert.subject
 
 
-@moto.mock_aws
 def test_create_cert_validity_window_matches_params(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
     frozen = datetime(2024, 6, 15, 12, 0, 0, tzinfo=timezone.utc)
 
     with freezegun.freeze_time(frozen):
-        result = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+        result = create_or_renew_certificate(good_cert_params_self_signed)
         cert = _load_cert_from_acm(result.cert_arn)
 
     assert cert.not_valid_before_utc == frozen.replace(microsecond=0)
@@ -322,16 +265,14 @@ def test_create_cert_validity_window_matches_params(good_cert_params_self_signed
 
     short_params = good_cert_params_self_signed.model_copy(update={"validity_days": 30})
     with freezegun.freeze_time(frozen):
-        short_result = create_or_renew_certificate(short_params, kms_key_id)
+        short_result = create_or_renew_certificate(short_params)
         short_cert = _load_cert_from_acm(short_result.cert_arn)
 
     assert short_cert.not_valid_after_utc == (frozen + timedelta(days=30)).replace(microsecond=0)
 
 
-@moto.mock_aws
 def test_create_cert_extensions_match_params(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    result = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    result = create_or_renew_certificate(good_cert_params_self_signed)
     cert = _load_cert_from_acm(result.cert_arn)
 
     bc_ext = cert.extensions.get_extension_for_oid(ExtensionOID.BASIC_CONSTRAINTS)
@@ -358,24 +299,64 @@ def test_create_cert_extensions_match_params(good_cert_params_self_signed: Certi
         _ = ku_ext.value.decipher_only
 
 
-@pytest.mark.parametrize("key_size", [2048, 3072])
-@moto.mock_aws
+@pytest.mark.parametrize("key_size", [2048, 3072, 4096])
 def test_create_cert_key_size(good_cert_params_self_signed: CertificateParameters, key_size: int):
-    kms_key_id = _create_kms_key()
     params = good_cert_params_self_signed.model_copy(update={"key_size": key_size})
-    result = create_or_renew_certificate(params, kms_key_id)
+    result = create_or_renew_certificate(params)
     cert = _load_cert_from_acm(result.cert_arn)
     assert cert.public_key().key_size == key_size
 
 
-@moto.mock_aws
+@pytest.mark.parametrize("key_size,curve_name", [
+    (256, "secp256r1"),
+    (384, "secp384r1"),
+    (521, "secp521r1"),
+])
+def test_create_ecdsa_cert(
+    good_cert_params_self_signed: CertificateParameters,
+    key_size: int,
+    curve_name: str,
+):
+    params = good_cert_params_self_signed.model_copy(update={
+        "key_type": "ECDSA",
+        "key_size": key_size,
+    })
+    result = create_or_renew_certificate(params)
+    cert = _load_cert_from_acm(result.cert_arn)
+
+    assert isinstance(cert.public_key(), ec.EllipticCurvePublicKey)
+    assert cert.public_key().curve.name == curve_name
+    assert cert.public_key().key_size == key_size
+
+    stored_key = Key.model_validate_json(_read_s3_object(_key_object_key(params.name)))
+    private_key = serialization.load_pem_private_key(
+        stored_key.key_pem.encode('utf-8'),
+        password=None,
+        backend=default_backend(),
+    )
+    assert isinstance(private_key, ec.EllipticCurvePrivateKey)
+    assert private_key.curve.name == curve_name
+    assert private_key.public_key().public_numbers() == cert.public_key().public_numbers()
+
+
+def test_rsa_with_ecdsa_key_size_should_fail(good_cert_params_self_signed: CertificateParameters):
+    params = good_cert_params_self_signed.model_copy(update={"key_type": "RSA", "key_size": 256})
+    with pytest.raises(ValueError, match="Invalid key size"):
+        create_or_renew_certificate(params)
+
+
+def test_ecdsa_with_rsa_key_size_should_fail(good_cert_params_self_signed: CertificateParameters):
+    params = good_cert_params_self_signed.model_copy(update={"key_type": "ECDSA", "key_size": 2048})
+    with pytest.raises(ValueError, match="Invalid key size"):
+        create_or_renew_certificate(params)
+
+
 def test_create_leaf_cert_basic_constraints_path_length_is_none(
     root_ca_params: CertificateParameters,
     good_cert_params: CertificateParameters,
 ):
-    kms_key_id = _create_kms_key()
-    create_or_renew_certificate(root_ca_params, kms_key_id)
-    result = create_or_renew_certificate(good_cert_params, kms_key_id)
+    create_or_renew_certificate(root_ca_params)
+    result = create_or_renew_certificate(good_cert_params)
     cert = _load_cert_from_acm(result.cert_arn)
 
     bc_ext = cert.extensions.get_extension_for_oid(ExtensionOID.BASIC_CONSTRAINTS)
@@ -383,10 +364,8 @@ def test_create_leaf_cert_basic_constraints_path_length_is_none(
     assert bc_ext.value.path_length is None
 
 
-@moto.mock_aws
 def test_create_minimal_cert_params(minimal_cert_params: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    result = create_or_renew_certificate(minimal_cert_params, kms_key_id)
+    result = create_or_renew_certificate(minimal_cert_params)
     cert = _load_cert_from_acm(result.cert_arn)
 
     assert _name_attr(cert.subject, NameOID.COMMON_NAME) == "minimal.example.com"
@@ -400,85 +379,37 @@ def test_create_minimal_cert_params(minimal_cert_params: CertificateParameters):
 
 
 # ---------------------------------------------------------------------------
-# SSM storage
+# S3 storage
 # ---------------------------------------------------------------------------
 
-@moto.mock_aws
-def test_create_cert_stores_key_and_cert_in_ssm(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    result = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
-    ssm_client = boto3.client('ssm', region_name="eu-west-1")
+def test_create_cert_stores_key_and_cert_in_s3(good_cert_params_self_signed: CertificateParameters):
+    result = create_or_renew_certificate(good_cert_params_self_signed)
 
-    key_param = ssm_client.get_parameter(
-        Name=good_cert_params_self_signed.key_ssm_param_name,
-        WithDecryption=True,
-    )
-    assert key_param['Parameter']['Type'] == 'SecureString'
-
-    described = ssm_client.describe_parameters(
-        ParameterFilters=[{
-            "Key": "Name",
-            "Values": [good_cert_params_self_signed.key_ssm_param_name],
-        }]
-    )['Parameters'][0]
-    assert described['KeyId'] == kms_key_id
-
-    stored_key = Key.model_validate_json(key_param['Parameter']['Value'])
+    stored_key = Key.model_validate_json(_read_s3_object(_key_object_key(good_cert_params_self_signed.name)))
+    assert stored_key.name == good_cert_params_self_signed.name
     assert stored_key.cert_arn == result.cert_arn
-    assert stored_key.cert_ssm_param == good_cert_params_self_signed.cert_ssm_param_name
 
     private_key = serialization.load_pem_private_key(
-        stored_key.key.encode('utf-8'),
+        stored_key.key_pem.encode('utf-8'),
         password=None,
         backend=default_backend(),
     )
     cert = _load_cert_from_acm(result.cert_arn)
     assert private_key.public_key().public_numbers() == cert.public_key().public_numbers()
 
-    cert_param = ssm_client.get_parameter(
-        Name=good_cert_params_self_signed.cert_ssm_param_name,
-        WithDecryption=True,
-    )
-    stored_cert = Certificate.model_validate_json(cert_param['Parameter']['Value'])
+    stored_cert = Certificate.model_validate_json(_read_s3_object(_cert_object_key(good_cert_params_self_signed.name)))
+    assert stored_cert.name == good_cert_params_self_signed.name
     assert stored_cert.cert_arn == result.cert_arn
-    assert stored_cert.key_ssm_param == good_cert_params_self_signed.key_ssm_param_name
-    assert stored_cert.ca_cert_ssm_param is None
-    assert stored_cert.ca_key_ssm_param is None
-
-
-@moto.mock_aws
-def test_create_cert_applies_ssm_tags(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
-
-    assert _get_ssm_tags(good_cert_params_self_signed.key_ssm_param_name) == {"Key": "Value"}
-    assert _get_ssm_tags(good_cert_params_self_signed.cert_ssm_param_name) == {"Key": "Value"}
-
-
-@moto.mock_aws
-def test_renew_cert_replaces_ssm_tags(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
-
-    renewed_params = good_cert_params_self_signed.model_copy(update={
-        "key_tags": {"Env": "prod"},
-        "cert_tags": {"Env": "prod"},
-    })
-    create_or_renew_certificate(renewed_params, kms_key_id)
-
-    assert _get_ssm_tags(renewed_params.key_ssm_param_name) == {"Env": "prod"}
-    assert _get_ssm_tags(renewed_params.cert_ssm_param_name) == {"Env": "prod"}
+    assert stored_cert.ca_name is None
 
 
 # ---------------------------------------------------------------------------
 # Renewal
 # ---------------------------------------------------------------------------
 
-@moto.mock_aws
 def test_renew_cert_reuses_acm_arn(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    first = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
-    second = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    first = create_or_renew_certificate(good_cert_params_self_signed)
+    second = create_or_renew_certificate(good_cert_params_self_signed)
 
     assert first.cert_arn == second.cert_arn
 
@@ -488,32 +419,18 @@ def test_renew_cert_reuses_acm_arn(good_cert_params_self_signed: CertificatePara
     assert listed[0]['CertificateArn'] == first.cert_arn
 
 
-@moto.mock_aws
 def test_renew_cert_rotates_private_key(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    ssm_client = boto3.client('ssm', region_name="eu-west-1")
+    first = create_or_renew_certificate(good_cert_params_self_signed)
+    old_key = Key.model_validate_json(_read_s3_object(_key_object_key(good_cert_params_self_signed.name)))
 
-    first = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
-    old_key = Key.model_validate_json(
-        ssm_client.get_parameter(
-            Name=good_cert_params_self_signed.key_ssm_param_name,
-            WithDecryption=True,
-        )['Parameter']['Value']
-    )
+    second = create_or_renew_certificate(good_cert_params_self_signed)
+    new_key = Key.model_validate_json(_read_s3_object(_key_object_key(good_cert_params_self_signed.name)))
 
-    second = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
-    new_key = Key.model_validate_json(
-        ssm_client.get_parameter(
-            Name=good_cert_params_self_signed.key_ssm_param_name,
-            WithDecryption=True,
-        )['Parameter']['Value']
-    )
-
-    assert old_key.key != new_key.key
+    assert old_key.key_pem != new_key.key_pem
     assert first.cert_arn == second.cert_arn
 
     private_key = serialization.load_pem_private_key(
-        new_key.key.encode('utf-8'),
+        new_key.key_pem.encode('utf-8'),
         password=None,
         backend=default_backend(),
     )
@@ -521,24 +438,16 @@ def test_renew_cert_rotates_private_key(good_cert_params_self_signed: Certificat
     assert private_key.public_key().public_numbers() == cert.public_key().public_numbers()
 
 
-@moto.mock_aws
 def test_renew_cert_when_acm_cert_deleted_imports_new_arn(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
-    first = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    first = create_or_renew_certificate(good_cert_params_self_signed)
 
     acm_client = boto3.client('acm', region_name="eu-west-1")
     acm_client.delete_certificate(CertificateArn=first.cert_arn)
 
-    second = create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+    second = create_or_renew_certificate(good_cert_params_self_signed)
     assert second.cert_arn != first.cert_arn
 
-    ssm_client = boto3.client('ssm', region_name="eu-west-1")
-    stored_cert = Certificate.model_validate_json(
-        ssm_client.get_parameter(
-            Name=good_cert_params_self_signed.cert_ssm_param_name,
-            WithDecryption=True,
-        )['Parameter']['Value']
-    )
+    stored_cert = Certificate.model_validate_json(_read_s3_object(_cert_object_key(good_cert_params_self_signed.name)))
     assert stored_cert.cert_arn == second.cert_arn
 
 
@@ -546,21 +455,21 @@ def test_renew_cert_when_acm_cert_deleted_imports_new_arn(good_cert_params_self_
 # CA signing / chaining
 # ---------------------------------------------------------------------------
 
-@moto.mock_aws
 def test_create_ca_signed_leaf_cert(
     root_ca_params: CertificateParameters,
     good_cert_params: CertificateParameters,
 ):
-    kms_key_id = _create_kms_key()
-    ca_result = create_or_renew_certificate(root_ca_params, kms_key_id)
+    ca_result = create_or_renew_certificate(root_ca_params)
     ca_cert = _load_cert_from_acm(ca_result.cert_arn)
 
-    leaf_result = create_or_renew_certificate(good_cert_params, kms_key_id)
+    leaf_result = create_or_renew_certificate(good_cert_params)
     leaf_cert = _load_cert_from_acm(leaf_result.cert_arn)
 
     assert leaf_cert.issuer == ca_cert.subject
-    assert leaf_result.ca_cert_ssm_param == "ca_cert"
-    assert leaf_result.ca_key_ssm_param == "ca_key"
+    assert leaf_result.ca_name == root_ca_params.name
+
+    stored_leaf = Certificate.model_validate_json(_read_s3_object(_cert_object_key(good_cert_params.name)))
+    assert stored_leaf.ca_name == root_ca_params.name
 
     ca_cert.public_key().verify(
         leaf_cert.signature,
@@ -570,14 +479,34 @@ def test_create_ca_signed_leaf_cert(
     )
 
 
-@moto.mock_aws
+def test_create_ecdsa_ca_signed_leaf_cert(
+    root_ca_params: CertificateParameters,
+    good_cert_params: CertificateParameters,
+):
+    root_params = root_ca_params.model_copy(update={"key_type": "ECDSA", "key_size": 256})
+    leaf_params = good_cert_params.model_copy(update={"key_type": "ECDSA", "key_size": 256})
+
+    ca_result = create_or_renew_certificate(root_params)
+    ca_cert = _load_cert_from_acm(ca_result.cert_arn)
+
+    leaf_result = create_or_renew_certificate(leaf_params)
+    leaf_cert = _load_cert_from_acm(leaf_result.cert_arn)
+
+    assert leaf_cert.issuer == ca_cert.subject
+    assert isinstance(leaf_cert.public_key(), ec.EllipticCurvePublicKey)
+    ca_cert.public_key().verify(
+        leaf_cert.signature,
+        leaf_cert.tbs_certificate_bytes,
+        ec.ECDSA(leaf_cert.signature_hash_algorithm),
+    )
+
+
 def test_create_ca_signed_leaf_chain_contains_ca(
     root_ca_params: CertificateParameters,
     good_cert_params: CertificateParameters,
 ):
-    kms_key_id = _create_kms_key()
-    ca_result = create_or_renew_certificate(root_ca_params, kms_key_id)
-    leaf_result = create_or_renew_certificate(good_cert_params, kms_key_id)
+    ca_result = create_or_renew_certificate(root_ca_params)
+    leaf_result = create_or_renew_certificate(good_cert_params)
 
     ca_pem = boto3.client('acm', region_name="eu-west-1").get_certificate(
         CertificateArn=ca_result.cert_arn
@@ -586,21 +515,16 @@ def test_create_ca_signed_leaf_chain_contains_ca(
     assert ca_pem in chain
 
 
-@moto.mock_aws
 def test_create_root_intermediate_leaf_chain(
     root_ca_params: CertificateParameters,
     intermediate_ca_params: CertificateParameters,
     good_cert_params: CertificateParameters,
 ):
-    kms_key_id = _create_kms_key()
-    root_result = create_or_renew_certificate(root_ca_params, kms_key_id)
-    int_result = create_or_renew_certificate(intermediate_ca_params, kms_key_id)
+    root_result = create_or_renew_certificate(root_ca_params)
+    int_result = create_or_renew_certificate(intermediate_ca_params)
 
-    leaf_params = good_cert_params.model_copy(update={
-        "ca_key_ssm_param_name": "int_key",
-        "ca_cert_ssm_param_name": "int_cert",
-    })
-    leaf_result = create_or_renew_certificate(leaf_params, kms_key_id)
+    leaf_params = good_cert_params.model_copy(update={"ca_name": intermediate_ca_params.name})
+    leaf_result = create_or_renew_certificate(leaf_params)
 
     acm_client = boto3.client('acm', region_name="eu-west-1")
     root_pem = acm_client.get_certificate(CertificateArn=root_result.cert_arn)['Certificate']
@@ -610,42 +534,71 @@ def test_create_root_intermediate_leaf_chain(
     assert int_pem in chain
     assert root_pem in chain
     assert chain.index(int_pem) < chain.index(root_pem)
+    assert leaf_result.ca_name == intermediate_ca_params.name
 
 
 # ---------------------------------------------------------------------------
 # Rollback on failure
 # ---------------------------------------------------------------------------
 
-@moto.mock_aws
 def test_rollback_when_key_save_fails(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
     acm_client = boto3.client('acm', region_name="eu-west-1")
 
-    with mock.patch("certificate._upsert_ssm_param", side_effect=RuntimeError("key save failed")):
+    with mock.patch("certificate._save_to_s3", side_effect=RuntimeError("key save failed")):
         with pytest.raises(RuntimeError, match="key save failed"):
-            create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+            create_or_renew_certificate(good_cert_params_self_signed)
 
     assert acm_client.list_certificates()['CertificateSummaryList'] == []
+    with pytest.raises(_s3_client().exceptions.NoSuchKey):
+        _read_s3_object(_key_object_key(good_cert_params_self_signed.name))
+    with pytest.raises(_s3_client().exceptions.NoSuchKey):
+        _read_s3_object(_cert_object_key(good_cert_params_self_signed.name))
 
 
-@moto.mock_aws
 def test_rollback_when_cert_save_fails(good_cert_params_self_signed: CertificateParameters):
-    kms_key_id = _create_kms_key()
     acm_client = boto3.client('acm', region_name="eu-west-1")
-    ssm_client = boto3.client('ssm', region_name="eu-west-1")
 
     call_count = {"n": 0}
 
     def side_effect(*args, **kwargs):
         call_count["n"] += 1
         if call_count["n"] == 1:
-            return _upsert_ssm_param(*args, **kwargs)
+            return _save_to_s3(*args, **kwargs)
         raise RuntimeError("cert save failed")
 
-    with mock.patch("certificate._upsert_ssm_param", side_effect=side_effect):
+    with mock.patch("certificate._save_to_s3", side_effect=side_effect):
         with pytest.raises(RuntimeError, match="cert save failed"):
-            create_or_renew_certificate(good_cert_params_self_signed, kms_key_id)
+            create_or_renew_certificate(good_cert_params_self_signed)
 
     assert acm_client.list_certificates()['CertificateSummaryList'] == []
-    with pytest.raises(ssm_client.exceptions.ParameterNotFound):
-        ssm_client.get_parameter(Name=good_cert_params_self_signed.key_ssm_param_name)
+    with pytest.raises(_s3_client().exceptions.NoSuchKey):
+        _read_s3_object(_key_object_key(good_cert_params_self_signed.name))
+    with pytest.raises(_s3_client().exceptions.NoSuchKey):
+        _read_s3_object(_cert_object_key(good_cert_params_self_signed.name))
+
+
+def test_rollback_when_cert_save_fails_during_renewal(good_cert_params_self_signed: CertificateParameters):
+    first = create_or_renew_certificate(good_cert_params_self_signed)
+    original_key = Key.model_validate_json(_read_s3_object(_key_object_key(good_cert_params_self_signed.name)))
+    original_cert = _load_cert_from_acm(first.cert_arn)
+
+    call_count = {"n": 0}
+
+    def side_effect(*args, **kwargs):
+        call_count["n"] += 1
+        if call_count["n"] == 1:
+            return _save_to_s3(*args, **kwargs)
+        raise RuntimeError("cert save failed")
+
+    with mock.patch("certificate._save_to_s3", side_effect=side_effect):
+        with pytest.raises(RuntimeError, match="cert save failed"):
+            create_or_renew_certificate(good_cert_params_self_signed)
+
+    restored_key = Key.model_validate_json(_read_s3_object(_key_object_key(good_cert_params_self_signed.name)))
+    assert restored_key.key_pem == original_key.key_pem
+
+    restored_cert = _load_cert_from_acm(first.cert_arn)
+    assert restored_cert.public_key().public_numbers() == original_cert.public_key().public_numbers()
+
+    stored_cert = Certificate.model_validate_json(_read_s3_object(_cert_object_key(good_cert_params_self_signed.name)))
+    assert stored_cert.cert_arn == first.cert_arn

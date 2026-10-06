@@ -1,8 +1,12 @@
 import os
 
-# Set global environment variables
+# Set global environment variables before importing certificate, which reads AWS_REGION at import time.
 os.environ['AWS_REGION'] = "eu-west-1"
+os.environ['AWS_DEFAULT_REGION'] = "eu-west-1"
+os.environ['PKI_BUCKET_NAME'] = "test-pki"
 
+import boto3
+import moto
 import pytest
 
 from certificate import (
@@ -14,9 +18,27 @@ from certificate import (
 )
 
 
+@pytest.fixture(autouse=True)
+def pki_bucket():
+    """Provide a versioned PKI bucket. Versioning is required because saves return a version id."""
+    with moto.mock_aws():
+        s3_client = boto3.client('s3', region_name="eu-west-1")
+        s3_client.create_bucket(
+            Bucket=os.environ['PKI_BUCKET_NAME'],
+            CreateBucketConfiguration={'LocationConstraint': "eu-west-1"},
+        )
+        s3_client.put_bucket_versioning(
+            Bucket=os.environ['PKI_BUCKET_NAME'],
+            VersioningConfiguration={'Status': "Enabled"},
+        )
+        yield
+
+
 @pytest.fixture(scope="function")
 def good_cert_params() -> CertificateParameters:
     return CertificateParameters(
+        name="leaf",
+        key_type="RSA",
         key_size=2048,
         validity_days=365,
         country_name="US",
@@ -39,17 +61,14 @@ def good_cert_params() -> CertificateParameters:
             is_critical=True,
             usages=[KeyUsageEnum.DIGITAL_SIGNATURE, KeyUsageEnum.KEY_ENCIPHERMENT]
         ),
-        ca_key_ssm_param_name="ca_key",
-        ca_cert_ssm_param_name="ca_cert",
-        key_ssm_param_name="key",
-        key_tags={"Key": "Value"},
-        cert_ssm_param_name="cert",
-        cert_tags={"Key": "Value"},
+        ca_name="root-ca",
     )
 
 @pytest.fixture(scope="function")
 def good_cert_params_self_signed() -> CertificateParameters:
     return CertificateParameters(
+        name="self-signed",
+        key_type="RSA",
         key_size=2048,
         validity_days=365,
         country_name="US",
@@ -72,16 +91,14 @@ def good_cert_params_self_signed() -> CertificateParameters:
             is_critical=True,
             usages=[KeyUsageEnum.DIGITAL_SIGNATURE, KeyUsageEnum.KEY_ENCIPHERMENT, KeyUsageEnum.KEY_CERT_SIGN]
         ),
-        key_ssm_param_name="key",
-        key_tags={"Key": "Value"},
-        cert_ssm_param_name="cert",
-        cert_tags={"Key": "Value"},
     )
 
 
 @pytest.fixture(scope="function")
 def root_ca_params() -> CertificateParameters:
     return CertificateParameters(
+        name="root-ca",
+        key_type="RSA",
         key_size=2048,
         validity_days=3650,
         country_name="US",
@@ -100,16 +117,14 @@ def root_ca_params() -> CertificateParameters:
             is_critical=True,
             usages=[KeyUsageEnum.KEY_CERT_SIGN],
         ),
-        key_ssm_param_name="ca_key",
-        key_tags={"Role": "RootCA"},
-        cert_ssm_param_name="ca_cert",
-        cert_tags={"Role": "RootCA"},
     )
 
 
 @pytest.fixture(scope="function")
 def intermediate_ca_params() -> CertificateParameters:
     return CertificateParameters(
+        name="intermediate-ca",
+        key_type="RSA",
         key_size=2048,
         validity_days=1825,
         country_name="US",
@@ -128,18 +143,14 @@ def intermediate_ca_params() -> CertificateParameters:
             is_critical=True,
             usages=[KeyUsageEnum.KEY_CERT_SIGN],
         ),
-        ca_key_ssm_param_name="ca_key",
-        ca_cert_ssm_param_name="ca_cert",
-        key_ssm_param_name="int_key",
-        key_tags={"Role": "IntermediateCA"},
-        cert_ssm_param_name="int_cert",
-        cert_tags={"Role": "IntermediateCA"},
+        ca_name="root-ca",
     )
 
 
 @pytest.fixture(scope="function")
 def minimal_cert_params() -> CertificateParameters:
     return CertificateParameters(
+        name="minimal",
         key_size=2048,
         validity_days=365,
         common_name="minimal.example.com",
@@ -148,6 +159,4 @@ def minimal_cert_params() -> CertificateParameters:
             is_ca=False,
             path_length=1,
         ),
-        key_ssm_param_name="minimal_key",
-        cert_ssm_param_name="minimal_cert",
     )
