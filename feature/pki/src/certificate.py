@@ -10,7 +10,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
 import boto3
-import json
 from datetime import datetime, timezone, timedelta
 
 
