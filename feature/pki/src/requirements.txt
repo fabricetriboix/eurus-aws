@@ -1,0 +1,11 @@
+boto3 ~= 1.43
+botocore ~= 1.43
+pydantic ~= 2.13
+pydantic-settings ~= 2.13
+aws-lambda-powertools ~= 3.31
+aws-lambda-powertools[tracer] ~= 3.31
+aws-lambda-powertools[parser] ~= 3.31
+cryptography ~= 49.0
+pytest ~= 9.1
+moto[ssm,acm,kms] ~= 5.2
+freezegun ~= 1.5
