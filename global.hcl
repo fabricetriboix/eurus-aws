@@ -2,6 +2,7 @@ locals {
   region  = get_env("AWS_REGION")
   org     = get_env("ORG")
   project = get_env("PROJECT")
+  dns_base = get_env("DNS_BASE")
 
   tf_bucket_prefix = "${local.org}-${local.project}"
 

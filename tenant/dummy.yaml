@@ -1,0 +1,9 @@
+name: dummy
+
+apps:
+  app1:
+    repo: https://github.com/fabricetriboix/dummy-tenant
+    path: app1
+  app2:
+    repo: https://github.com/fabricetriboix/dummy-tenant
+    path: app2

@@ -25,7 +25,8 @@ for this decision is more complex pipelines.
 ## Specifications
 
 This platform only leverages AWS managed services as far as possible.
-Tenant apps are run in ECS using Fargate.
+Tenant apps are run in ECS using Fargate. It is desgined to scale to
+at least 50 tenants, each running at least 10 applications.
 
 Features:
   - One AWS account per environment
