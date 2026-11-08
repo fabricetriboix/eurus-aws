@@ -67,6 +67,10 @@ You also need to create the following repository variables:
   - `AWS_REGION`: Region where the platform is deployed
   - `ORG`: Your organisation name, all lowercase, max 16 characters
   - `PROJECT`: Your project name, all lowercase, max 16 characters
+  - `DNS_BASE`: The base domain name to access apps in your platform.
+    For example, if set to `mycorp.com`, an `app1` app in the `dev`
+    environment of tenant `renter` can be accessed through
+    `app1.renter.dev.mycorp.com`.
   - `COMMON_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of
     the AWS accounts of type `common` and realm `nonprod`
   - `COMMON_PROD_ACCOUNT_IDS`: Comma-separated list of the IDs of the

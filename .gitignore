@@ -54,3 +54,4 @@ TODO.md
 tg_generated_*.tf
 *.real
 *.fake
+feature/tenants/cfg/*.yaml
