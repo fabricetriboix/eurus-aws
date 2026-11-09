@@ -17,10 +17,9 @@ to increase availability.
 Each VPC has the following subnets:
   - Tenant subnets: These subnets host the tenant workloads and have
     no routing to/from outside the VPC. Ingress traffic must come from
-    other AWS services such as CloudFront, API Gateways or load
-    balancers. Egress traffic must go exclusively through NAT gateways
-    located in the egress subnets. Each tenant will have its own set
-    of tenant subnets (one such subnet per availability zone).
+    other AWS services. Egress traffic must go exclusively through NAT
+    gateways located in the egress subnets. Each tenant will have its
+    own set of tenant subnets (one such subnet per availability zone).
   - Data subnets: These subnets are used to host data stores. Only
     AWS managed data stores (such as RDS) are allowed in these
     subnets.
@@ -41,13 +40,57 @@ neighbour" problem. This is the tradeoff in order to keep cost low,
 given that the egress solution is based on NAT Gateways which aren't
 cheap.
 
-In terms of ingress, the amount of traffic will depend on the client
-apps themselves as much as the apps running inside the platform. There
-are many variables outside the control of the tenants (eg: how clients
-behave, DDoS attack, network configuration, etc.) so some variability
-in the ingress traffic is inevitable. Consequently, there will be only
-one ingress per environment (as opposed to a segregated ingress for
-each tenant).
+## Ingress
+
+### DNS
+
+Each tenant will be allocated a DNS domain in the form
+`*.TENANT.ENV.DNS_BASE`, where `TENANT` is the name of the tenant,
+`ENV` is the name of the environment and `DNS_BASE` is the DNS base
+name. For example, if `DNS_BASE` is `falcon1.ltd`, the environment is
+`dev` and the tenant is `team1`, the application `app1` can be
+accessed through `app1.team1.dev.falcon1.ltd`.
+
+One environment (typically the production one) may be configured to
+skip the environment segment of the DNS domain name. The example above
+for the production environment would then be `app1.team1.falcon1.ltd`.
+
+### Ingress architecture
+
+The ingress architecture must scale to the required number of tenants
+and apps described in the top-level [README
+file](../README.md#Specifications).
+
+API Gateway could be used as part of the ingress path, but there are
+many reasons why it is not suitable:
+  - 10MB hard limit for the payload
+  - Integration timeout is 30 seconds, and raising this quota
+    introduces trade-offs
+  - Extra costs
+  - The real value of API Gateway is API management (authentication,
+    usage plans, etc.), and moving the management of APIs is
+    considered outside the scope of the platform
+
+So API Gatway won't be included in the ingress path, and it will be up
+to the apps themselves to manage their APIs.
+
+The ingress can be kept very simple: just ALBs (Application Load
+Balancers). They support HTTPS and websockets. ALBs have a hard limit
+of 100 target groups, meaning that an ALB can only serve 100
+applications. Given that we need multiple ALBs to fulfil our scale
+requirement, the easiest to have one ALB per tenant. Sharding an ALB
+between tenants would be a nightmare to configure.
+
+We will introduce CloudFront in front of the ALBs for two reasons:
+  1. By using CloudFront, the ALBs can stay in private subnets. No
+     internet ingress is required at the VPC level.
+  2. Attack traffic is absorbed at the edges rather than the regions.
+
+The main tradeoff of using CloudFront is that [the VPC requires an
+internet
+gateway](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-vpc-origins.html),
+even though the VPC won't be open to the internet, which is a strange
+requirements from AWS...
 
 # Observability and alerting
 
@@ -217,6 +260,8 @@ this should be part of the build pipeline.
 
 # Tenant segregation and onboarding
 
+## Generalities
+
 Tenant workloads must run in a closed subnet (i.e. with no direct
 access to/from anything outside the VPC). In order to increase
 security and minimise the chances of one tenant exhausting the IP
@@ -250,3 +295,17 @@ itself being updated). These resources are:
   - Dedicated tenant subnets
   - Dedicated database subnets
   - Dedicated ECS cluster backed by Fargate
+
+## Definition of a tenant
+
+What is a tenant from the platform perspective? A tenant is a
+collection of components:
+  - A dedicated ECS cluster
+  - A set of dedicated subnets they can run their workloads in
+  - 
+
+## Configuration
+
+Tenants are defined with a single configuration file: a YAML file in
+the `tenant` folder at the top of the project. This file defines:
+  - The tenant's name

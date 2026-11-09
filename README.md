@@ -24,7 +24,7 @@ for this decision is more complex pipelines.
 
 ## Specifications
 
-This platform only leverages AWS managed services as far as possible.
+This platform leverages AWS managed services as far as possible.
 Tenant apps are run in ECS using Fargate.
 
 Features:
@@ -36,18 +36,23 @@ Features:
   - Database services provided by RDS, ElastiCache, DocumentDB, and
     other AWS managed services
   - Object-based storage provided by S3
-  - Ingress provided by CloudFront and/or API Gateway
+  - Secure build pipeline with vulnerability scanning, SBOM
+    management and automated deployments
+  - Automated promotion mechanisms for both the infrastructure layer
+    and the workload layer
+  - Ingress provided by CloudFront and ALB
   - Egress provided by NAT Gateways [ref](https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-scenarios.html#private-nat-allowed-range)
   - Observability:
       * Logging: provided by CloudWatch Logs
       * Metrics from AWS managed services: CloudWatch (no choice)
-      * Custom metrics: provided by Amazon Managed Prometheus
+      * Other metrics: Amazon Managed Prometheus
       * Distributed tracing: AWS X-Ray
       * Visualisation: Amazon Managed Grafana
       * Alerting for AWS managed services: CloudWatch Alarms
-      * Alerting for custom metrics: Amazon Managed Prometheus
-  - High availability achieved using multiple availability zones with
-    failovers for each components of the architecture
+      * Alerting for other metrics: Amazon Managed Prometheus' Alertmanager
+  - High availability achieved using multiple availability zones and
+    multiple regions with failovers for each components of the
+    architecture
   - Workload scaling provided by AWS Application Auto Scaling
   - Disaster recovery (RPO = RTO = 4 hours)
   - Costs allocated to tenants using tags
@@ -61,7 +66,6 @@ Out of scope:
   - Stateful workloads (AWS provides plenty of stateful services, such
     as RDS and S3, so it is very unlikely a generic stateful solution
     would be required)
-  - Multi-region setup
 
 Must exists prior:
   - An AWS Organization with:
