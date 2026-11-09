@@ -12,7 +12,9 @@ on:
         type: choice
         options:
         - common-nonprod
+        - common-prod
         - dev
+        - prod
       action:
         description: "Action to run; must be either `apply` or `destroy`"
         required: true
