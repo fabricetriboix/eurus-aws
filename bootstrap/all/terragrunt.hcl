@@ -23,7 +23,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "${include.global.locals.region}"
+  region = "${include.global.locals.region1}"
 
   default_tags {
     tags = {
@@ -39,7 +39,7 @@ provider "aws" {
 %{ for account_name, account in include.accounts.locals.accounts }
 provider "aws" {
   alias  = "${account_name}"
-  region = "${include.global.locals.region}"
+  region = "${include.global.locals.region1}"
 
   assume_role {
     role_arn = "arn:aws:iam::${account.id}:role/OrganizationAccountAccessRole"
@@ -76,7 +76,7 @@ module "bootstrap_${account_name}" {
 
   org                        = "${include.global.locals.org}"
   project                    = "${include.global.locals.project}"
-  region                     = "${include.global.locals.region}"
+  region                     = "${include.global.locals.region1}"
   realm                      = "${account.realm}"
   account_id                 = "${account.id}"
   account_type               = "${account.type}"
@@ -87,6 +87,6 @@ EOF
 }
 
 inputs = {
-  region   = include.global.locals.region
+  region   = include.global.locals.region1
   accounts = include.accounts.locals.accounts
 }

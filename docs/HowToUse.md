@@ -64,7 +64,8 @@ ID of the AWS account that hosts this particular environment.
 
 You also need to create the following repository variables:
   - `AWS_MANAGEMENT_ACCOUNT_ID`: ID of the management account
-  - `AWS_REGION`: Region where the platform is deployed
+  - `AWS_REGION1`: Primary region where the platform is deployed
+  - `AWS_REGION2`: Secondary region where the platform is deployed
   - `ORG`: Your organisation name, all lowercase, max 16 characters
   - `PROJECT`: Your project name, all lowercase, max 16 characters
   - `COMMON_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of
@@ -100,7 +101,7 @@ assume the roles in the destination account to run the deployment.
 The next step is to create S3 backends for the OpenTofu states. There
 will be one bucket per AWS account. This is done by the
 [bootstrap](../bootstrap) unit. In addition, the bootstrap unit will
-create IAM policies and roles to give the GitHub workflows to
+create IAM policies and roles to give the GitHub workflows the
 necessary permissions to execute Terragrunt and OpenTofu.
 
 It should be noted that, as it stands, the IAM roles deployed by the
@@ -147,7 +148,8 @@ Then run the following manually:
 
 ```sh
 $ cd bootstrap/all
-$ export AWS_REGION=eu-west-1     # or whatever is your chosen region
+$ export AWS_REGION1=eu-west-1     # or whatever is your chosen prinary region
+$ export AWS_REGION2=eu-west-2     # or whatever is your chosen secondary region
 $ export ORG=ft
 $ export PROJECT=eurus
 $ export AWS_PROFILE=mgt-account  # an AWS profile with access to the management account
@@ -165,7 +167,7 @@ First, you will need to decide on your network topology and your
 CIDRs. You will also need to modify the code and add any necessary
 resources to access your on-prem services (if any). This typically
 takes the form of a Transit Gateway with VPNs (or Direct Connect for
-large organisatoins), but every infrastructure is different and it's
+large organisations), but every infrastructure is different and it's
 not possible for `eurus-aws` to cater for every possible scenario.
 
 Generally speaking, you should avoid any overlap in CIDRs. This is
@@ -224,7 +226,8 @@ the following commands manually:
 
 ```sh
 $ cd bootstrap/all
-$ export AWS_REGION=eu-west-1     # or whatever is your chosen region
+$ export AWS_REGION1=eu-west-1    # or whatever is your chosen primary region
+$ export AWS_REGION2=eu-west-2    # or whatever is your chosen secondary region
 $ export AWS_PROFILE=mgt-account  # an AWS profile with access to the management account
 $ terragrunt init
 $ terragrunt plan -destroy
