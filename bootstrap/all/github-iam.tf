@@ -33,7 +33,7 @@ resource "aws_iam_role" "github_actions_role" {
 
   tags = {
     Name    = "github-actions-role"
-    Purpose = "Allow GitHub workflows to assume this role to deploy OpenTofu"
+    Purpose = "Allow GitHub workflows to assume this role to deploy OpenTofu configurations"
   }
 }
 
