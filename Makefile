@@ -13,7 +13,7 @@ SHELL := /bin/bash
 
 CHECKOV ?= 1
 CHECKOV_QUIET ?= 1
-MODULES := bootstrap ecs-cluster
+MODULES := bootstrap networking ecs-cluster
 FEATURES := networking amg amp ecs-plf codeartifact ecr
 BOOTSTRAPS := all
 ENVS := common-nonprod common-proddev

@@ -1,5 +1,9 @@
+locals {
+  kms_alias = "vpc-flow-logs"
+}
+
 module "key" {
-  count = var.enable_flow_logs ? 1 : 0
+  count = var.flow_logs_cfg.enabled ? 1 : 0
 
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   source = "git::https://github.com/fabricetriboix/terraform-aws-kms.git?ref=v4.2.1-1"
@@ -10,21 +14,23 @@ module "key" {
   rotation_period_in_days = 90
 
   tags = {
-    Name = "alias/${local.kms_alias}"
+    Name    = "alias/${local.kms_alias}"
+    Purpose = "Encrypt VPC flow logs"
   }
 }
 
 resource "aws_cloudwatch_log_group" "flow_logs" {
-  count = var.enable_flow_logs ? 1 : 0
+  count = var.flow_logs_cfg.enabled ? 1 : 0
 
   name       = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
   kms_key_id = module.key[0].key_arn
 
   # checkov:skip=CKV_AWS_338:Retention of less than one year is allowed
-  retention_in_days = var.flow_logs_retention_days
+  retention_in_days = var.flow_logs_cfg.retention_days
 
   tags = {
-    Name = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
+    Name    = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
+    Purpose = "Store VPC flow logs"
   }
 }
 
@@ -42,18 +48,19 @@ data "aws_iam_policy_document" "flow_logs_assume_role" {
 }
 
 resource "aws_iam_role" "flow_log_role" {
-  count = var.enable_flow_logs ? 1 : 0
+  count = var.flow_logs.enabled ? 1 : 0
 
   name               = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-role"
   assume_role_policy = data.aws_iam_policy_document.flow_logs_assume_role.json
 
   tags = {
-    Name = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-role"
+    Name    = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-role"
+    Purpose = "IAM role for VPC flow logs"
   }
 }
 
 data "aws_iam_policy_document" "flow_logs" {
-  count = var.enable_flow_logs ? 1 : 0
+  count = var.flow_logs.enabled ? 1 : 0
 
   statement {
     actions = [
@@ -68,25 +75,26 @@ data "aws_iam_policy_document" "flow_logs" {
 }
 
 resource "aws_iam_policy" "flow_logs" {
-  count = var.enable_flow_logs ? 1 : 0
+  count = var.flow_logs.enabled ? 1 : 0
 
   name   = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-policy"
   policy = data.aws_iam_policy_document.flow_logs[0].json
 
   tags = {
-    Name = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-policy"
+    Name    = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-policy"
+    Purpose = "Enable storing VPC flow logs in S3"
   }
 }
 
 resource "aws_iam_role_policy_attachment" "flow_logs" {
-  count = var.enable_flow_logs ? 1 : 0
+  count = var.flow_logs.enabled ? 1 : 0
 
   role       = aws_iam_role.flow_log_role[0].name
   policy_arn = aws_iam_policy.flow_logs[0].arn
 }
 
 resource "aws_flow_log" "this" {
-  count = var.enable_flow_logs ? 1 : 0
+  count = var.flow_logs.enabled ? 1 : 0
 
   vpc_id          = aws_vpc.this.id
   log_destination = aws_cloudwatch_log_group.flow_logs[0].arn
@@ -94,6 +102,7 @@ resource "aws_flow_log" "this" {
   iam_role_arn    = aws_iam_role.flow_log_role[0].arn
 
   tags = {
-    Name = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
+    Name    = "/${var.org}/${var.project}/${var.env}/vpc-flow-logs"
+    Purpose = "VPC flow logs"
   }
 }
