@@ -11,8 +11,11 @@ inputs:
   role-arn:
     description: "ARN of the role to assume"
     required: true
-  aws-region:
-    description: "AWS region where the component is deployed"
+  aws-AWS_REGION1:
+    description: "Primary AWS region"
+    required: true
+  aws-region2:
+    description: "Secondary AWS region"
     required: true
   org:
     description: Organisation name
@@ -72,7 +75,7 @@ runs:
   - name: Assume role in child account
     shell: bash
     env:
-      AWS_REGION: ${{ inputs.aws-region }}
+      AWS_REGION: ${{ inputs.aws-region1 }}
     run: |
       creds=$(aws sts assume-role --role-arn "${{ inputs.role-arn }}" --role-session-name tg-cd)
       echo "AWS_ACCESS_KEY_ID=$(echo "$creds" | jq -r '.Credentials.AccessKeyId')" >> $GITHUB_ENV
@@ -82,7 +85,8 @@ runs:
   - name: Run CD job
     shell: bash
     env:
-      AWS_REGION: ${{ inputs.aws-region }}
+      AWS_REGION1: ${{ inputs.aws-region1 }}
+      AWS_REGION2: ${{ inputs.aws-region2 }}
       ORG: ${{ inputs.org }}
       PROJECT: ${{ inputs.project }}
       TF_PLUGIN_CACHE_DIR: /tmp/tf-cache
