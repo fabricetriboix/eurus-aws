@@ -79,8 +79,8 @@ provider "aws" {
     tags = {
       FeatureSource  = "feature/networking"
       FeatureVersion = "${values.version}"
-      Organisation   = "${values.org}"
-      Project        = "${values.project}"
+      Organisation   = "${include.global.locals.org}"
+      Project        = "${include.global.locals.project}"
       Region         = "${include.global.locals.region1}"
       Environment    = "${values.env}"
       ManagedBy      = "OpenTofu"
@@ -96,8 +96,8 @@ provider "aws" {
     tags = {
       FeatureSource  = "feature/networking"
       FeatureVersion = "${values.version}"
-      Organisation   = "${values.org}"
-      Project        = "${values.project}"
+      Organisation   = "${include.global.locals.org}"
+      Project        = "${include.global.locals.project}"
       Region         = "${include.global.locals.region2}"
       Environment    = "${values.env}"
       ManagedBy      = "OpenTofu"
