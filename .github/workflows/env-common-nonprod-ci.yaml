@@ -33,7 +33,7 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::${{ vars.AWS_MANAGEMENT_ACCOUNT_ID }}:role/github-actions-role
         role-session-name: github-actions
-        aws-region: ${{ vars.AWS_REGION }}
+        aws-region: ${{ vars.AWS_REGION1 }}
 
     - name: Run CI
       uses: ./.github/actions/tg-ci
