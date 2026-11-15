@@ -105,7 +105,7 @@ provider "aws" {
   }
 }
 
-%{ for i, r in values.regions }
+%{ for i, r in values.region_cfgs }
 module "region${i + 1}" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=xxx"
@@ -115,8 +115,8 @@ module "region${i + 1}" {
     aws = aws.region${i + 1}
   }
 
-  org           = "${values.org}"
-  project       = "${values.project}"
+  org           = "${include.global.locals.org}"
+  project       = "${include.global.locals.project}"
   region        = i == 0 ? "${include.global.locals.region1}" : "${include.global.locals.region2}"
   env           = "${values.env}"
   cfg           = var.region_cfgs[${i}]

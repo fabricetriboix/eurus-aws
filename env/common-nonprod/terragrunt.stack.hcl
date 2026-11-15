@@ -10,11 +10,11 @@ unit "networking" {
   path = "feature-networking"
 
   values = {
-    enabled      = local.config.features.networking.enabled
-    version      = local.config.features.networking.version
-    account_type = local.config.account_type
-    realm        = local.config.realm
-    env          = local.config.env
+    enabled       = local.config.features.networking.enabled
+    version       = local.config.features.networking.version
+    account_type  = local.config.account_type
+    realm         = local.config.realm
+    env           = local.config.env
     region_cfgs   = local.config.features.networking.region_cfgs
     flow_logs_cfg = local.config.features.networking.flow_logs_cfg
   }
