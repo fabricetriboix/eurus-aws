@@ -115,12 +115,13 @@ module "region${i + 1}" {
     aws = aws.region${i + 1}
   }
 
-  org           = "${include.global.locals.org}"
-  project       = "${include.global.locals.project}"
-  region        = i == 0 ? "${include.global.locals.region1}" : "${include.global.locals.region2}"
-  env           = "${values.env}"
-  cfg           = var.region_cfgs[${i}]
-  flow_logs_cfg = var.flow_logs_cfg
+  feature_version = "${values.version}"
+  org             = "${include.global.locals.org}"
+  project         = "${include.global.locals.project}"
+  region          = i == 0 ? "${include.global.locals.region1}" : "${include.global.locals.region2}"
+  env             = "${values.env}"
+  cfg             = var.region_cfgs[${i}]
+  flow_logs_cfg   = var.flow_logs_cfg
 }
 %{ endfor }
 EOF
