@@ -19,7 +19,7 @@ variable "region_cfgs" {
 variable "flow_logs_cfg" {
   description = "Flow logs configuration"
   type = object({
-    enabled        = bool
-    retention_days = number
+    enabled        = optional(bool, false)
+    retention_days = optional(number, 30)
   })
 }
