@@ -5,13 +5,13 @@ variable "region_cfgs" {
     cidr                              = string
     secondary_cidrs                   = list(string)
     enable_dhcp_options               = bool
-    dhcp_options_domain_name          = string
-    dhcp_options_domain_name_servers  = list(string)
-    dhcp_options_ntp_servers          = list(string)
-    dhcp_options_netbios_name_servers = list(string)
-    dhcp_options_netbios_node_type    = number
+    dhcp_options_domain_name          = optional(string)
+    dhcp_options_domain_name_servers  = optional(list(string))
+    dhcp_options_ntp_servers          = optional(list(string))
+    dhcp_options_netbios_name_servers = optional(list(string))
+    dhcp_options_netbios_node_type    = optional(number)
     availability_zones                = list(string)
-    egress_subnets                    = list(string)
+    egress_subnets                    = optional(list(string))
     platform_subnets                  = list(string)
   }))
 }
