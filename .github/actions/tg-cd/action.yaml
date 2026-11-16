@@ -11,7 +11,7 @@ inputs:
   role-arn:
     description: "ARN of the role to assume"
     required: true
-  aws-AWS_REGION1:
+  aws-region1:
     description: "Primary AWS region"
     required: true
   aws-region2:
