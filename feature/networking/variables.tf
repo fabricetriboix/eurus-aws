@@ -3,8 +3,8 @@ variable "region_cfgs" {
 
   type = list(object({
     cidr                              = string
-    secondary_cidrs                   = list(string)
-    enable_dhcp_options               = bool
+    secondary_cidrs                   = optional(list(string))
+    enable_dhcp_options               = optional(bool, false)
     dhcp_options_domain_name          = optional(string)
     dhcp_options_domain_name_servers  = optional(list(string))
     dhcp_options_ntp_servers          = optional(list(string))
