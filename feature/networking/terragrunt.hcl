@@ -111,7 +111,7 @@ module "region${i + 1}" {
   #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=xxx"
   source = "git::https://github.com/fabricetriboix/eurus-aws.git//module/networking?ref=feat-networking-mr" 
 
-  providers {
+  provider {
     aws = aws.region${i + 1}
   }
 
