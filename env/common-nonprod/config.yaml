@@ -5,7 +5,7 @@ env: common-nonprod
 features:
   networking:
     enabled: true
-    version: feat-networking-mr
+    version: feature-networking-v2.0.1
     region_cfgs:
     - cidr: 10.101.0.0/16
       secondary_cidrs: [10.251.0.0/16]
