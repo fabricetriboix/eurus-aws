@@ -108,8 +108,8 @@ provider "aws" {
 %{ for i, r in values.region_cfgs }
 module "region${i + 1}" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=xxx"
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git//module/networking?ref=feat-networking-mr" 
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//?ref=module-networking-v1.0.0"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git//module/networking?ref=feat-networking-mr"
 
   providers = {
     aws = aws.region${i + 1}
