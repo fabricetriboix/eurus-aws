@@ -92,6 +92,23 @@ gateway](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/priv
 even though the VPC won't be open to the internet, which is a strange
 requirements from AWS...
 
+# Public key infrastructure
+
+Within the `eurus-aws` platform, there is a need for an internal PKI.
+Certificates are required for various internal services, such as ADOT
+collector, internal load balancers, etc.
+
+The typical solution is to use Amazon Certificate Manager Private
+Certificate Authority, but an internal PKI built with ACM is
+expensive. In order to keep the costs low, I decided to implement my
+own PKI solution. It is quite limited in the sense that it does not
+support everything (for example: SANs can only be DNS names, and there
+is no support for revoking already issued certificates). Also, only
+RSA encryption is supported.
+
+Implementation details of this solution can be found
+[here](../feature/pki/README.md).
+
 # Observability and alerting
 
 ## Generalities

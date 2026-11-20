@@ -39,6 +39,7 @@ terraform.rc
 # Python stuff
 venv
 .venv
+.pytest_cache
 __pycache__
 datasrc.zip
 
