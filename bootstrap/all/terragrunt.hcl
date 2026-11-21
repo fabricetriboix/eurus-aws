@@ -89,7 +89,6 @@ module "bootstrap_${account_name}_${region}" {
   project                    = "${include.global.locals.project}"
   region                     = "${region}"
   realm                      = "${account.realm}"
-  account_id                 = "${account.id}"
   account_type               = "${account.type}"
   account_name               = "${account_name}"
   management_github_role_arn = aws_iam_role.github_actions_role.arn

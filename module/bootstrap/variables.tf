@@ -38,16 +38,6 @@ variable "realm" {
   }
 }
 
-variable "account_id" {
-  description = "ID of the AWS account to bootstrap"
-  type        = string
-
-  validation {
-    condition     = length(var.account_id) > 1
-    error_message = "The `account_id` variable must be set."
-  }
-}
-
 variable "account_type" {
   description = "The account type of the AWS account to bootstrap (must be either `common` or `app`)"
   type        = string
