@@ -15,7 +15,12 @@ locals {
       type  = "app"
       realm = "nonprod"
     }
-    prod = {
+    stg = {
+      id    = "112233445566"
+      type  = "app"
+      realm = "nonprod"
+    }
+    prd = {
       id    = "112233445566"
       type  = "app"
       realm = "prod"
