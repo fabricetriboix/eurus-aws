@@ -1,5 +1,5 @@
 locals {
-  tf_bucket_name   = "${var.org}-${var.project}-${var.account_type}-${var.realm}-${var.region}-tf"
+  tf_bucket_name   = "${var.org}-${var.project}-${var.account_type}-${var.realm}-${var.account_name}-${var.region}-tf"
   logs_bucket_name = "${local.tf_bucket_name}-logs"
 }
 

@@ -1,10 +1,15 @@
-variable "region" {
-  description = "The region where to run the boostrap"
-  type        = string
+variable "regions" {
+  description = "List of regions (the first one is the primary region)"
+  type        = list(string)
 
   validation {
-    condition     = length(var.region) > 0
-    error_message = "The `region` variable must be set"
+    condition     = length(var.regions) > 0
+    error_message = "The `regions` variable must be set"
+  }
+
+  validation {
+    condition     = length(var.regions) == length(distinct(var.regions))
+    error_message = "The `regions` variable must contain unique regions"
   }
 }
 
