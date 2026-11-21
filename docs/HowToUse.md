@@ -37,10 +37,13 @@ in the top-level [README](../README.md) file.
 You will need a way to authenticate whomever needs to access the
 infrastructure: DevOps engineers, SRE engineers, developers of tenant
 applications (to see metrics and logs), etc. This is of course highly
-dependent on your organisation, with Microsoft AD being the usual
-choice. For this project, I am simply using AWS IAM Identity Center.
-This is how I set it up (please note AWS provides only limited APIs
-for IAM Identity Center, so this is all manual operations):
+dependent on your organisation, with Microsoft AD/Entra being the
+usual choice. For this project, I am simply using AWS IAM Identity
+Center.vI strongly recommend that you do not use AWS IAM Identity
+Center for your project as it is single-region and can't fail over
+another region. This is how I set it up (please note AWS provides only
+limited APIs for IAM Identity Center, so this is all manual
+operations):
   - Enable AWS IAM Identity Center in the management account
   - Instance type should be "organization instance"
   - Identity source should be "IAM Identity Center"
@@ -129,6 +132,11 @@ locals {
       realm = "prod"
     }
     dev = {
+      id    = "001122334455"
+      type  = "app"
+      realm = "nonprod"
+    }
+    stg = {
       id    = "001122334455"
       type  = "app"
       realm = "nonprod"
