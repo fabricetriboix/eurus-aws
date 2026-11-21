@@ -58,6 +58,16 @@ variable "account_type" {
   }
 }
 
+variable "account_name" {
+  description = "The name of the AWS account to bootstrap"
+  type        = string
+
+  validation {
+    condition     = length(var.account_name) > 1
+    error_message = "The `account_name` variable must be set."
+  }
+}
+
 variable "management_github_role_arn" {
   description = "The ARN of the GitHub role in the management account"
   type        = string
