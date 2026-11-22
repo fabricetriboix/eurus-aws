@@ -6,11 +6,9 @@ locals {
   tf_bucket_prefix = "${local.org}-${local.project}"
 
   # The name of the buckets that contains the OpenTofu state files is formed
-  # like so: "{tf_bucket_prefix}-{account_type}-{realm}-{regions[*]}-tf"
-  #
-  # There will be one such bucket per region.
+  # like so: "{tf_bucket_prefix}-{account_type}-{realm}-{env}-{region}-tf"
   #
   # Examples:
-  #   - "ft-eurus-common-nonprod-eu-west-1-tf"
-  #   - "ft-eurus-dev-prod-eu-west-2-tf
+  #   - "ft-eurus-common-nonprod-cnp-eu-west-1-tf"
+  #   - "ft-eurus-app-prod-prd-eu-west-2-tf
 }
