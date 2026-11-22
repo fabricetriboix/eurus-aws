@@ -14,7 +14,7 @@ variable "project" {
 }
 
 variable "region" {
-  description = "Region where the CodeArtifact domain will be configured"
+  description = "Region where the VPC will be configured"
   type        = string
 }
 
@@ -118,7 +118,7 @@ variable "enable_flow_logs" {
 }
 
 variable "flow_logs_retention_days" {
-  description = "Retention days for flow logs"
+  description = "How many days to keep flow logs file in S3"
   type        = number
   default     = 30
 }

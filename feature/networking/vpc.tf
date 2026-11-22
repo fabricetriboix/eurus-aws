@@ -110,7 +110,7 @@ resource "aws_route_table" "platform" {
 
   tags = {
     Name    = "${var.org}-${var.project}-${var.env}-platform-${var.availability_zones[count.index]}"
-    Purpose = "Platform subnet for AZ ${var.availability_zones[count.index]}"
+    Purpose = "Platform route table for AZ ${var.availability_zones[count.index]}"
   }
 }
 

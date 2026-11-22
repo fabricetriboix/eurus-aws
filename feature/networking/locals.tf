@@ -1,4 +1,10 @@
+data "aws_caller_identity" "current" {}
+
 locals {
+  bucket_name = "${var.org}-${var.project}-${var.env}-${var.region}-vpc-flow-logs"
+  kms_alias   = "vpc-flow-logs"
+  account_id  = data.aws_caller_identity.current.account_id
+
   default_tags = {
     FeatureSource  = "feature/networking"
     FeatureVersion = var.feature_version
