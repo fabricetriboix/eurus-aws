@@ -70,7 +70,10 @@ data "aws_iam_policy_document" "flow_logs" {
       "logs:DescribeLogStreams"
     ]
 
-    resources = [aws_cloudwatch_log_group.flow_logs[0].arn]
+    resources = [
+      aws_cloudwatch_log_group.flow_logs[0].arn,
+      "${aws_cloudwatch_log_group.flow_logs[0].arn}:*"
+    ]
   }
 }
 
@@ -82,7 +85,7 @@ resource "aws_iam_policy" "flow_logs" {
 
   tags = {
     Name    = "${var.org}-${var.project}-${var.env}-${var.region}-flow-log-policy"
-    Purpose = "Enable storing VPC flow logs in S3"
+    Purpose = "Enable storing VPC flow logs in CloudWatch"
   }
 }
 
