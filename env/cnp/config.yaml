@@ -1,11 +1,11 @@
 account_type: common
 realm: nonprod
-env: common-nonprod
+env: cnp
 
 features:
   networking:
     enabled: true
-    version: feature-networking-v2.0.1
+    version: feat-networking-mr2
     region_cfgs:
     - cidr: 10.101.0.0/16
       secondary_cidrs: [10.251.0.0/16]
@@ -17,8 +17,7 @@ features:
       availability_zones: [eu-west-2a, eu-west-2b]
       platform_subnets: [10.102.1.0/24, 10.102.2.0/24]
       egress_subnets: [10.252.9.16/28, 10.252.10.16/28]
-    flow_logs_cfg:
-      enabled: false
+    enable_flow_logs: false
 
 #  amg:
 #    enabled: true

@@ -1,22 +1,70 @@
-locals {
-  config = yamldecode(file("${get_terragrunt_dir()}/config.yaml"))
+include "global" {
+  path   = find_in_parent_folders("global.hcl")
+  expose = true
 }
 
-unit "networking" {
+locals {
+  config      = yamldecode(file("${get_terragrunt_dir()}/config.yaml"))
+  region_cfgs = local.config.features.networking.region_cfgs
+}
+
+unit "networking_region1" {
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
   # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
   source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.networking.version)) ? "" : "feature/networking"}?ref=${local.config.features.networking.version}"
 
-  path = "feature-networking"
+  path = "feature-networking1"
 
   values = {
-    enabled       = local.config.features.networking.enabled
-    version       = local.config.features.networking.version
-    account_type  = local.config.account_type
-    realm         = local.config.realm
-    env           = local.config.env
-    region_cfgs   = local.config.features.networking.region_cfgs
-    flow_logs_cfg = local.config.features.networking.flow_logs_cfg
+    enabled                           = local.config.features.networking.enabled
+    version                           = local.config.features.networking.version
+    account_type                      = local.config.account_type
+    realm                             = local.config.realm
+    env                               = local.config.env
+    region                            = include.global.locals.regions[0]
+    cidr                              = region_cfgs[0].cidr
+    secondary_cidrs                   = try(region_cfgs.secondary_cidrs, null)
+    enable_dhcp_options               = try(region_cfgs[0].enable_dhcp_options, false)
+    dhcp_options_domain_name          = try(region_cfgs[0].dhcp_options_domain_name, null)
+    dhcp_options_domain_name_servers  = try(region_cfgs[0].dhcp_options_domain_name_servers, null)
+    dhcp_options_ntp_servers          = try(region_cfgs[0].dhcp_options_ntp_servers, null)
+    dhcp_options_netbios_name_servers = try(region_cfgs[0].dhcp_options_netbios_name_servers, null)
+    dhcp_options_netbios_node_type    = try(region_cfgs[0].dhcp_options_netbios_node_type, null)
+    availability_zones                = region_cfgs[0].availability_zones
+    egress_subnets                    = try(region_cfgs[0].egress_subnets, null)
+    platform_subnets                  = try(region_cfgs[0].platform_subnets, null)
+    enable_flow_logs                  = try(region_cfgs[0].enable_flow_logs, true)
+    flow_logs_retention_days          = try(region_cfgs[0].flow_logs_retention_days, 7)
+  }
+}
+
+unit "networking_region2" {
+  # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
+  # Version tags (feature-FEATURENAME-vX.Y.Z) use git subtrees (no path); branches need the feature path.
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//${can(regex("^feature-.+-v[0-9]+\\.[0-9]+\\.[0-9]+$", local.config.features.networking.version)) ? "" : "feature/networking"}?ref=${local.config.features.networking.version}"
+
+  path = "feature-networking2"
+
+  values = {
+    enabled                           = local.config.features.networking.enabled
+    version                           = local.config.features.networking.version
+    account_type                      = local.config.account_type
+    realm                             = local.config.realm
+    env                               = local.config.env
+    region                            = include.global.locals.regions[1]
+    cidr                              = region_cfgs[1].cidr
+    secondary_cidrs                   = try(region_cfgs.secondary_cidrs, null)
+    enable_dhcp_options               = try(region_cfgs[1].enable_dhcp_options, false)
+    dhcp_options_domain_name          = try(region_cfgs[1].dhcp_options_domain_name, null)
+    dhcp_options_domain_name_servers  = try(region_cfgs[1].dhcp_options_domain_name_servers, null)
+    dhcp_options_ntp_servers          = try(region_cfgs[1].dhcp_options_ntp_servers, null)
+    dhcp_options_netbios_name_servers = try(region_cfgs[1].dhcp_options_netbios_name_servers, null)
+    dhcp_options_netbios_node_type    = try(region_cfgs[1].dhcp_options_netbios_node_type, null)
+    availability_zones                = region_cfgs[1].availability_zones
+    egress_subnets                    = try(region_cfgs[1].egress_subnets, null)
+    platform_subnets                  = try(region_cfgs[1].platform_subnets, null)
+    enable_flow_logs                  = try(region_cfgs[1].enable_flow_logs, true)
+    flow_logs_retention_days          = try(region_cfgs[1].flow_logs_retention_days, 7)
   }
 }
 
