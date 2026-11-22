@@ -46,7 +46,7 @@ variable "cidr" {
 variable "secondary_cidrs" {
   description = "Secondary CIDRs for the VPC"
   type        = list(string)
-  default     = []
+  default     = null
 }
 
 variable "enable_dhcp_options" {
@@ -64,19 +64,19 @@ variable "dhcp_options_domain_name" {
 variable "dhcp_options_domain_name_servers" {
   description = "Domain name servers for DHCP options"
   type        = list(string)
-  default     = []
+  default     = null
 }
 
 variable "dhcp_options_ntp_servers" {
   description = "NTP servers for DHCP options"
   type        = list(string)
-  default     = []
+  default     = null
 }
 
 variable "dhcp_options_netbios_name_servers" {
   description = "NETBIOS name servers for DHCP options"
   type        = list(string)
-  default     = []
+  default     = null
 }
 
 variable "dhcp_options_netbios_node_type" {
