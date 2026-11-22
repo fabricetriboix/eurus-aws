@@ -22,19 +22,19 @@ unit "networking_region1" {
     realm                             = local.config.realm
     env                               = local.config.env
     region                            = include.global.locals.regions[0]
-    cidr                              = region_cfgs[0].cidr
-    secondary_cidrs                   = try(region_cfgs.secondary_cidrs, null)
-    enable_dhcp_options               = try(region_cfgs[0].enable_dhcp_options, false)
-    dhcp_options_domain_name          = try(region_cfgs[0].dhcp_options_domain_name, null)
-    dhcp_options_domain_name_servers  = try(region_cfgs[0].dhcp_options_domain_name_servers, null)
-    dhcp_options_ntp_servers          = try(region_cfgs[0].dhcp_options_ntp_servers, null)
-    dhcp_options_netbios_name_servers = try(region_cfgs[0].dhcp_options_netbios_name_servers, null)
-    dhcp_options_netbios_node_type    = try(region_cfgs[0].dhcp_options_netbios_node_type, null)
-    availability_zones                = region_cfgs[0].availability_zones
-    egress_subnets                    = try(region_cfgs[0].egress_subnets, null)
-    platform_subnets                  = try(region_cfgs[0].platform_subnets, null)
-    enable_flow_logs                  = try(region_cfgs[0].enable_flow_logs, true)
-    flow_logs_retention_days          = try(region_cfgs[0].flow_logs_retention_days, 7)
+    cidr                              = local.region_cfgs[0].cidr
+    secondary_cidrs                   = try(local.region_cfgs[0].secondary_cidrs, null)
+    enable_dhcp_options               = try(local.region_cfgs[0].enable_dhcp_options, false)
+    dhcp_options_domain_name          = try(local.region_cfgs[0].dhcp_options_domain_name, null)
+    dhcp_options_domain_name_servers  = try(local.region_cfgs[0].dhcp_options_domain_name_servers, null)
+    dhcp_options_ntp_servers          = try(local.region_cfgs[0].dhcp_options_ntp_servers, null)
+    dhcp_options_netbios_name_servers = try(local.region_cfgs[0].dhcp_options_netbios_name_servers, null)
+    dhcp_options_netbios_node_type    = try(local.region_cfgs[0].dhcp_options_netbios_node_type, null)
+    availability_zones                = local.region_cfgs[0].availability_zones
+    egress_subnets                    = try(local.region_cfgs[0].egress_subnets, null)
+    platform_subnets                  = try(local.region_cfgs[0].platform_subnets, null)
+    enable_flow_logs                  = try(local.config.features.networking.enable_flow_logs, true)
+    flow_logs_retention_days          = try(local.config.features.networking.flow_logs_retention_days, 7)
   }
 }
 
@@ -52,19 +52,19 @@ unit "networking_region2" {
     realm                             = local.config.realm
     env                               = local.config.env
     region                            = include.global.locals.regions[1]
-    cidr                              = region_cfgs[1].cidr
-    secondary_cidrs                   = try(region_cfgs.secondary_cidrs, null)
-    enable_dhcp_options               = try(region_cfgs[1].enable_dhcp_options, false)
-    dhcp_options_domain_name          = try(region_cfgs[1].dhcp_options_domain_name, null)
-    dhcp_options_domain_name_servers  = try(region_cfgs[1].dhcp_options_domain_name_servers, null)
-    dhcp_options_ntp_servers          = try(region_cfgs[1].dhcp_options_ntp_servers, null)
-    dhcp_options_netbios_name_servers = try(region_cfgs[1].dhcp_options_netbios_name_servers, null)
-    dhcp_options_netbios_node_type    = try(region_cfgs[1].dhcp_options_netbios_node_type, null)
-    availability_zones                = region_cfgs[1].availability_zones
-    egress_subnets                    = try(region_cfgs[1].egress_subnets, null)
-    platform_subnets                  = try(region_cfgs[1].platform_subnets, null)
-    enable_flow_logs                  = try(region_cfgs[1].enable_flow_logs, true)
-    flow_logs_retention_days          = try(region_cfgs[1].flow_logs_retention_days, 7)
+    cidr                              = local.region_cfgs[1].cidr
+    secondary_cidrs                   = try(local.region_cfgs[1].secondary_cidrs, null)
+    enable_dhcp_options               = try(local.region_cfgs[1].enable_dhcp_options, false)
+    dhcp_options_domain_name          = try(local.region_cfgs[1].dhcp_options_domain_name, null)
+    dhcp_options_domain_name_servers  = try(local.region_cfgs[1].dhcp_options_domain_name_servers, null)
+    dhcp_options_ntp_servers          = try(local.region_cfgs[1].dhcp_options_ntp_servers, null)
+    dhcp_options_netbios_name_servers = try(local.region_cfgs[1].dhcp_options_netbios_name_servers, null)
+    dhcp_options_netbios_node_type    = try(local.region_cfgs[1].dhcp_options_netbios_node_type, null)
+    availability_zones                = local.region_cfgs[1].availability_zones
+    egress_subnets                    = try(local.region_cfgs[1].egress_subnets, null)
+    platform_subnets                  = try(local.region_cfgs[1].platform_subnets, null)
+    enable_flow_logs                  = try(local.config.features.networking.enable_flow_logs, true)
+    flow_logs_retention_days          = try(local.config.features.networking.flow_logs_retention_days, 7)
   }
 }
 
