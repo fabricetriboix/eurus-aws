@@ -1,11 +1,11 @@
 locals {
   accounts = {
-    common-nonprod = {
+    cnp = {
       id    = "112233445566"
       type  = "common"
       realm = "nonprod"
     }
-    common-prod = {
+    cp = {
       id    = "112233445566"
       type  = "common"
       realm = "prod"
