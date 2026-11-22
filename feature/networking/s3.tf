@@ -124,25 +124,26 @@ module "vpc_flow_logs_bucket" {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm            = "aws:kms"
-        kms_master_key_id        = "alias/${local.kms_alias}"
+        kms_master_key_id        = module.key[0].key_arn
         bucket_key_enabled       = true
         blocked_encryption_types = ["SSE-C"]
       }
     }
   }
 
-  versioning = {
-    status = "Enabled"
-  }
+  lifecycle_rule = [
+    {
+      id     = "cleanup"
+      status = "Enabled"
 
-  lifecycle_rule = {
-    id      = "cleanup"
-    prefix  = ""
-    enabled = true
-    expiration = {
-      days = var.flow_logs_retention_days
+      # Matches all objects in this bucket
+      filter = {}
+
+      expiration = {
+        days = var.flow_logs_retention_days
+      }
     }
-  }
+  ]
 
   tags = {
     Name    = local.bucket_name
