@@ -53,8 +53,8 @@ variable "account_name" {
   type        = string
 
   validation {
-    condition     = length(var.account_name) > 1
-    error_message = "The `account_name` variable must be set."
+    condition     = length(var.account_name) > 1 && length(var.account_name) <= 8
+    error_message = "The `account_name` variable must be set and must have at most 8 characters."
   }
 }
 
