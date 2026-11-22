@@ -59,11 +59,7 @@ variable "account_name" {
 }
 
 variable "management_github_role_arn" {
-  description = "The ARN of the GitHub role in the management account"
+  description = "The ARN of the GitHub role in the management account; set to `null` to skip creating an IAM role for OpenTofu"
   type        = string
-
-  validation {
-    condition     = length(var.management_github_role_arn) > 1
-    error_message = "The `management_github_role_arn` variable must be set."
-  }
+  default     = null
 }
