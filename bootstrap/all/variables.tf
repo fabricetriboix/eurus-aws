@@ -1,3 +1,13 @@
+variable "org" {
+  description = "The organisation name"
+  type        = string
+}
+
+variable "project" {
+  description = "The project name"
+  type        = string
+}
+
 variable "regions" {
   description = "List of regions (the first one is the primary region)"
   type        = list(string)

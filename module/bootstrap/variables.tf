@@ -58,12 +58,14 @@ variable "account_name" {
   }
 }
 
-variable "management_github_role_arn" {
-  description = "The ARN of the GitHub role in the management account"
-  type        = string
+variable "create_tf_role" {
+  description = "Whether to create an IAM role for OpenTofu"
+  type        = bool
+  default     = true
+}
 
-  validation {
-    condition     = length(var.management_github_role_arn) > 1
-    error_message = "The `management_github_role_arn` variable must be set."
-  }
+variable "management_github_role_arn" {
+  description = "The ARN of the GitHub role in the management account; ignored if `create_tf_role` is set to `false`"
+  type        = string
+  default     = null
 }
