@@ -33,8 +33,8 @@ provider "aws" {
       Organisation = "${include.global.locals.org}"
       Project      = "${include.global.locals.project}"
       Region       = "${include.global.locals.regions[0]}"
-      Source       = "bootstrap"
-      Tenant       = "Platform"
+      Source       = "bootstrap/all"
+      Tenant       = "plf"
       CostCenter   = "1001"
     }
   }
@@ -57,8 +57,8 @@ provider "aws" {
       Organisation = "${include.global.locals.org}"
       Project      = "${include.global.locals.project}"
       Region       = "${region}"
-      Source       = "bootstrap"
-      Tenant       = "Platform"
+      Source       = "bootstrap/all"
+      Tenant       = "plf"
       CostCenter   = "1001"
     }
   }
@@ -74,7 +74,7 @@ generate "bootstrap" {
 
   contents = <<EOF
 %{ for account_name, account in include.accounts.locals.accounts }
-%{ for region in include.global.locals.regions }
+%{ for i, region in include.global.locals.regions }
 module "bootstrap_${account_name}_${region}" {
 
   providers = {
@@ -82,7 +82,8 @@ module "bootstrap_${account_name}_${region}" {
   }
 
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v1.1.1"
+  #source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v1.1.1"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git//module/bootstrap?ref=feat-bootstrap-mr3"
 
   org                        = "${include.global.locals.org}"
   project                    = "${include.global.locals.project}"
@@ -90,6 +91,7 @@ module "bootstrap_${account_name}_${region}" {
   realm                      = "${account.realm}"
   account_type               = "${account.type}"
   account_name               = "${account_name}"
+  create_tf_role             = ${i == 0}
   management_github_role_arn = aws_iam_role.github_actions_role.arn
 }
 %{ endfor }
@@ -98,6 +100,8 @@ EOF
 }
 
 inputs = {
+  org      = include.global.locals.org
+  project  = include.global.locals.project
   regions  = include.global.locals.regions
   accounts = include.accounts.locals.accounts
 }
