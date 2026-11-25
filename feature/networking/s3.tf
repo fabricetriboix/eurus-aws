@@ -136,9 +136,6 @@ module "vpc_flow_logs_bucket" {
       id     = "cleanup"
       status = "Enabled"
 
-      # Matches all objects in this bucket
-      filter = {}
-
       expiration = {
         days = var.flow_logs_retention_days
       }

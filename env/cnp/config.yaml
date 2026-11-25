@@ -2,6 +2,14 @@ account_type: common
 realm: nonprod
 env: cnp
 
+# If one region becomes unavailable, add its index in `skip_regions`. The index
+# in question is the one from [global.hcl](../../global.hcl). For example, if
+# the primary region goes down:
+#
+#     skip_regions: [0]
+#
+skip_regions: []
+
 features:
   networking:
     enabled: true
