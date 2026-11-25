@@ -82,7 +82,7 @@ module "bootstrap_${account_name}_${region}" {
   }
 
   # checkov:skip=CKV_TF_1,CKV_TF_2:False positives
-  source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v1.1.2"
+  source = "git::https://github.com/fabricetriboix/eurus-aws.git?ref=module-bootstrap-v1.1.3"
 
   org                        = "${include.global.locals.org}"
   project                    = "${include.global.locals.project}"
