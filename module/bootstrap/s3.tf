@@ -29,11 +29,8 @@ module "logs_bucket" {
       id     = "cleanup"
       status = "Enabled"
 
-      # Matches all objects in this bucket
-      filter = {}
-
       expiration = {
-        days = 365
+        days = 90
       }
     }
   ]
@@ -67,17 +64,14 @@ module "tf_bucket" {
     }
   }
 
-  # Remove versions of the state files older than 1 year
+  # Remove versions of the state files older than 90 days
   lifecycle_rule = [
     {
       id     = "cleanup"
       status = "Enabled"
 
-      # Matches all objects in this bucket
-      filter = {}
-
       noncurrent_version_expiration = {
-        noncurrent_days = 365
+        noncurrent_days = 90
       }
     }
   ]
