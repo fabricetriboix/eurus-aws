@@ -1,16 +1,13 @@
-include "global" {
-  path   = find_in_parent_folders("global.hcl")
-  expose = true
-}
-
 locals {
   config      = yamldecode(file("${get_terragrunt_dir()}/config.yaml"))
   region_cfgs = local.config.features.networking.region_cfgs
+  global      = read_terragrunt_config(find_in_parent_folders("global.hcl"))
+  regions     = local.global.locals.regions
 }
 
 unit "networking" {
   expansion {
-    count = length(include.global.locals.regions)
+    count = length(local.regions)
   }
   enabled = !contains(local.config.skip_regions, count.index)
 
@@ -26,7 +23,7 @@ unit "networking" {
     account_type                      = local.config.account_type
     realm                             = local.config.realm
     env                               = local.config.env
-    region                            = include.global.locals.regions[count.index]
+    region                            = local.regions[count.index]
     cidr                              = local.region_cfgs[count.index].cidr
     secondary_cidrs                   = try(local.region_cfgs[count.index].secondary_cidrs, null)
     enable_dhcp_options               = try(local.region_cfgs[count.index].enable_dhcp_options, false)
