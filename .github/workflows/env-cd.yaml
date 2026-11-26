@@ -7,12 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy; eg: `common-nonprod`"
+        description: "Environment to deploy; eg: `cnp`"
         required: true
         type: choice
         options:
-        - common-nonprod
-        - common-prod
+        - cnp
+        - cp
         - dev
         - stg
         - prd
