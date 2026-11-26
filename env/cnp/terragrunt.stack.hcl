@@ -10,7 +10,7 @@ locals {
 
 unit "networking" {
   expansion {
-    count = length(local.global.locals.regions)
+    count = length(include.global.locals.regions)
   }
   enabled = !contains(local.config.skip_regions, count.index)
 
@@ -35,7 +35,6 @@ unit "networking" {
     dhcp_options_ntp_servers          = try(local.region_cfgs[count.index].dhcp_options_ntp_servers, null)
     dhcp_options_netbios_name_servers = try(local.region_cfgs[count.index].dhcp_options_netbios_name_servers, null)
     dhcp_options_netbios_node_type    = try(local.region_cfgs[count.index].dhcp_options_netbios_node_type, null)
-    availability_zones                = local.region_cfgs[count.index].availability_zones
     egress_subnets                    = try(local.region_cfgs[count.index].egress_subnets, null)
     platform_subnets                  = local.region_cfgs[count.index].platform_subnets
     enable_flow_logs                  = try(local.config.features.networking.enable_flow_logs, true)
