@@ -85,18 +85,8 @@ variable "dhcp_options_netbios_node_type" {
   default     = null
 }
 
-variable "availability_zones" {
-  description = "Availability zones for the VPC"
-  type        = list(string)
-
-  validation {
-    condition     = length(var.availability_zones) >= 2
-    error_message = "The `availability_zones` variable must be set and must have at least 2 items."
-  }
-}
-
 variable "egress_subnets" {
-  description = "Egress subnets for the VPC (optional)"
+  description = "Egress subnets for the VPC (optional, if set, must be the same length as the `platform_subnets` variable)"
   type        = list(string)
   default     = null
 }
@@ -106,8 +96,8 @@ variable "platform_subnets" {
   type        = list(string)
 
   validation {
-    condition     = length(var.platform_subnets) == length(var.availability_zones)
-    error_message = "The `platform_subnets` variable must be set and must have the same length as the `availability_zones` variable."
+    condition     = length(var.platform_subnets) > 1
+    error_message = "You must define at least 2 `platform_subnets`."
   }
 }
 

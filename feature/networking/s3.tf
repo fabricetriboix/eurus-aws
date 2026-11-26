@@ -123,11 +123,11 @@ module "vpc_flow_logs_bucket" {
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
-        sse_algorithm            = "aws:kms"
-        kms_master_key_id        = module.key[0].key_arn
-        bucket_key_enabled       = true
-        blocked_encryption_types = ["SSE-C"]
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = module.key[0].key_arn
       }
+      bucket_key_enabled       = true
+      blocked_encryption_types = ["SSE-C"]
     }
   }
 

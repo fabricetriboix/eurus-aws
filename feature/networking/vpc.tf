@@ -47,8 +47,8 @@ resource "aws_vpc_dhcp_options_association" "this" {
 
 check "egress_length_matches_az_count" {
   assert {
-    condition     = var.egress_subnets == null || (length(var.egress_subnets) == length(var.availability_zones))
-    error_message = "`egress_subnets` and `availability_zones` must have the same number of elements."
+    condition     = var.egress_subnets == null || (length(var.egress_subnets) == length(var.platform_subnets))
+    error_message = "`egress_subnets` and `platform_subnets` must have the same number of elements."
   }
 }
 
@@ -57,7 +57,7 @@ resource "aws_subnet" "egress" {
 
   vpc_id            = aws_vpc.this.id
   cidr_block        = var.egress_subnets[count.index]
-  availability_zone = var.availability_zones[count.index]
+  availability_zone = local.azs[count.index]
 
   # Subnets in a secondary CIDR must be destroyed before that association is
   # removed. Without this, OpenTofu may disassociate the block while subnets
@@ -65,8 +65,8 @@ resource "aws_subnet" "egress" {
   depends_on = [aws_vpc_ipv4_cidr_block_association.this]
 
   tags = {
-    Name    = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
-    Purpose = "Egress subnet for AZ ${var.availability_zones[count.index]}"
+    Name    = "${var.org}-${var.project}-${var.env}-egress-${local.azs[count.index]}"
+    Purpose = "Egress subnet for AZ ${local.azs[count.index]}"
   }
 }
 
@@ -76,8 +76,8 @@ resource "aws_route_table" "egress" {
   vpc_id = aws_vpc.this.id
 
   tags = {
-    Name    = "${var.org}-${var.project}-${var.env}-egress-${var.availability_zones[count.index]}"
-    Purpose = "Egress route table for AZ ${var.availability_zones[count.index]}"
+    Name    = "${var.org}-${var.project}-${var.env}-egress-${local.azs[count.index]}"
+    Purpose = "Egress route table for AZ ${local.azs[count.index]}"
   }
 }
 
@@ -95,11 +95,11 @@ resource "aws_subnet" "platform" {
 
   vpc_id            = aws_vpc.this.id
   cidr_block        = var.platform_subnets[count.index]
-  availability_zone = var.availability_zones[count.index]
+  availability_zone = local.azs[count.index]
 
   tags = {
-    Name    = "${var.org}-${var.project}-${var.env}-platform-${var.availability_zones[count.index]}"
-    Purpose = "Platform subnet for AZ ${var.availability_zones[count.index]}"
+    Name    = "${var.org}-${var.project}-${var.env}-platform-${local.azs[count.index]}"
+    Purpose = "Platform subnet for AZ ${local.azs[count.index]}"
   }
 }
 
@@ -109,8 +109,8 @@ resource "aws_route_table" "platform" {
   vpc_id = aws_vpc.this.id
 
   tags = {
-    Name    = "${var.org}-${var.project}-${var.env}-platform-${var.availability_zones[count.index]}"
-    Purpose = "Platform route table for AZ ${var.availability_zones[count.index]}"
+    Name    = "${var.org}-${var.project}-${var.env}-platform-${local.azs[count.index]}"
+    Purpose = "Platform route table for AZ ${local.azs[count.index]}"
   }
 }
 
