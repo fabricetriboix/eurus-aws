@@ -69,6 +69,11 @@ You also need to create the following repository variables:
   - `AWS_MANAGEMENT_ACCOUNT_ID`: ID of the management account
   - `AWS_REGION1`: Primary region where the platform is deployed
   - `AWS_REGION2`: Secondary region where the platform is deployed
+  - `STS_REGION`: AWS region to use to authenticate the pipeline. This
+    is optional and falls back to `AWS_REGION1` if unset. This
+    variable is used when one region goes down, so the github
+    pipelines can still authenticate (via AWS' STS service) use the
+    region that is still online.
   - `ORG`: Your organisation name, all lowercase, max 16 characters
   - `PROJECT`: Your project name, all lowercase, max 16 characters
   - `COMMON_NONPROD_ACCOUNT_IDS`: Comma-separated list of the IDs of

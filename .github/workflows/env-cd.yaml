@@ -7,14 +7,15 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy; eg: `common-nonprod`"
+        description: "Environment to deploy; eg: `cnp`"
         required: true
         type: choice
         options:
-        - common-nonprod
-        - common-prod
+        - cnp
+        - cp
         - dev
-        - prod
+        - stg
+        - prd
       action:
         description: "Action to run; must be either `apply` or `destroy`"
         required: true
@@ -44,18 +45,19 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v6
       with:
-        role-to-assume: arn:aws:iam::${{ vars.AWS_MANAGEMENT_ACCOUNT_ID }}:role/github-actions-role
+        role-to-assume: arn:aws:iam::${{ vars.AWS_MANAGEMENT_ACCOUNT_ID }}:role/github-actions-role-${{ vars.ORG }}-${{ vars.PROJECT }}
         role-session-name: github-actions
-        aws-region: ${{ vars.AWS_REGION1 }}
+        aws-region: ${{ vars.STS_REGION || vars.AWS_REGION1 }}
 
     - name: Run CD
       uses: ./.github/actions/tg-cd
       with:
         component-type: env
         component-name: ${{ inputs.environment }}
-        role-arn: "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/tf-role-${{ vars.AWS_REGION1 }}"
+        role-arn: "arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/tf-role-${{ vars.ORG }}-${{ vars.PROJECT }}"
         aws-region1: ${{ vars.AWS_REGION1 }}
         aws-region2: ${{ vars.AWS_REGION2 }}
+        sts-region: ${{ vars.STS_REGION || vars.AWS_REGION1 }}
         org: ${{ vars.ORG }}
         project: ${{ vars.PROJECT }}
         common-nonprod-account-ids: ${{ vars.COMMON_NONPROD_ACCOUNT_IDS }}

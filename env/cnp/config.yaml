@@ -1,24 +1,29 @@
 account_type: common
 realm: nonprod
-env: common-nonprod
+env: cnp
+
+# If one region becomes unavailable, add its index in `skip_regions`. The index
+# in question is the one from [global.hcl](../../global.hcl). For example, if
+# the primary region goes down:
+#
+#     skip_regions: [0]
+#
+skip_regions: []
 
 features:
   networking:
     enabled: true
-    version: feature-networking-v2.0.1
+    version: feat-networking-mr2
     region_cfgs:
     - cidr: 10.101.0.0/16
       secondary_cidrs: [10.251.0.0/16]
-      availability_zones: [eu-west-1a, eu-west-1b]
       platform_subnets: [10.101.1.0/24, 10.101.2.0/24]
       egress_subnets: [10.251.9.16/28, 10.251.10.16/28]
     - cidr: 10.102.0.0/16
       secondary_cidrs: [10.252.0.0/16]
-      availability_zones: [eu-west-2a, eu-west-2b]
       platform_subnets: [10.102.1.0/24, 10.102.2.0/24]
       egress_subnets: [10.252.9.16/28, 10.252.10.16/28]
-    flow_logs_cfg:
-      enabled: false
+    enable_flow_logs: false
 
 #  amg:
 #    enabled: true
